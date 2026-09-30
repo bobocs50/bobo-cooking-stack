@@ -1,0 +1,17 @@
+{
+  "name": "glendonize",
+  "owner": {
+    "name": "bobocs50",
+    "url": "https://github.com/bobocs50"
+  },
+  "description": "The glendonize skill as an installable Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "glendonize",
+      "source": "./",
+      "description": "Give a repo the structure parallel AI coding agents need to work in it safely.",
+      "category": "engineering",
+      "keywords": ["agents", "governance", "decision-register", "boundary-checks"]
+    }
+  ]
+}
