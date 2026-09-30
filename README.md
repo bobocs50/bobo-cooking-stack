@@ -44,17 +44,18 @@ something paid; a file that is only read cannot spend money.
 
 ## Install
 
-As a Claude Code plugin, from inside a session:
+```sh
+npx skills@latest add bobocs50/glendonize
+```
+
+Pick which coding agents to install it on. It writes the skill as an ordinary file you own
+and can edit; pull later changes with `npx skills update`.
+
+Or as a Claude Code plugin, from inside a session:
 
 ```
 /plugin marketplace add bobocs50/glendonize
 /plugin install glendonize@glendonize
-```
-
-As an editable copy, for Claude Code or other agents, with [skills.sh](https://skills.sh):
-
-```sh
-npx skills@latest add bobocs50/glendonize
 ```
 
 Or by hand, user-level on macOS / Linux:
