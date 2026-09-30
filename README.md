@@ -2,6 +2,15 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+> [!TIP]
+> **Install in one command:**
+>
+> ```sh
+> npx skills@latest add bobocs50/glendonize
+> ```
+>
+> Then run `/glendonize` in Claude Code. Other install options: [Install](#install).
+
 A Claude Code skill that gives a repository the structure several AI coding agents need to
 work in it safely: a working agreement, a numbered register of requirements, decisions and
 open questions that code cites, boundary checks that read source as text, and a gate made
