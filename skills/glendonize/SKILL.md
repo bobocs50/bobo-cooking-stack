@@ -78,6 +78,7 @@ stayed red for a week, across dozens of pushes, and nobody noticed).
 | `docs/PLATFORM_CONSTRAINTS.md` | external facts, VERIFIED or ASSERTED — Shapes E |
 | `docs/<DOMAIN>.md` × n | one per contract several parts of the code honour; pattern only, names come from the repo |
 | `docs/local/` | optional; gitignored scratch and handoffs; no tracked doc links it |
+| `.claude/orchestration/COORDINATION.md` | optional; gitignored coordinator log, read first by every session — Shapes J |
 | the gate | free commands in order — Phase 6, Shapes F |
 | `scripts/boundary_check.py` or `<code>/boundary.test.ts` | boundary checks — Shapes G |
 | `test-support/` | only when the stack has a runner |
@@ -670,10 +671,27 @@ C1 — <the user's sentence> · <date>
 When several agents build the structure, or later work inside it, four habits keep them
 apart and keep the history readable:
 
-- **A coordinator log that outlives a context reset.** A gitignored
-  `.claude/orchestration/` file holding *Now*, a worker table (branch, role, state) and
-  *decisions waiting*. The coordinator rereads it after every reset instead of rebuilding
-  the picture from chat.
+- **A coordinator log that outlives a context reset.** Install it, do not just mention it:
+  1. `.claude/orchestration/COORDINATION.md`, gitignored (it holds session state, not
+     project truth; the register stays the truth).
+  2. Seed it on the day it is created with the real state: what is in flight, and every
+     item already waiting on the user. An empty template is ignored; a seeded one is read.
+  3. `AGENTS.md` "Working loop" gains one sentence: every session reads the log first and
+     updates it before it stops.
+  4. A dated `D-` entry records why, so the next agent does not delete it as clutter.
+
+  ```markdown
+  # Coordination
+  ## Now
+  <one line: what the repo is doing today>
+  ## Workers
+  | Branch / worktree | Role | State | Last report |
+  |---|---|---|---|
+  ## Waiting on the user
+  - <decision>: <the exact question> (Q-nnn if parked)
+  ## Findings this batch
+  - F1 <file:line> <defect> - <open | fixed in <sha>>
+  ```
 - **Workers by role, not by file.** One builds toward the goal, one verifies, one stages the
   next batch. Two workers never own the same file at once.
 - **A landing rule.** A single worker's output is rebased and re-split into one-behaviour
@@ -681,6 +699,11 @@ apart and keep the history readable:
   sentence. Topic branches live minutes to hours, not days.
 - **One review round per batch.** Findings are numbered (`F1`, `F2`…) in the log; each is
   fixed in its own commit that cites it in the subject, `(F3)`.
+
+Removing a worktree inside a synced folder (OneDrive, Dropbox) can print `Permission
+denied`: the sync client still holds the directory. Git has already unregistered the
+worktree (`git worktree list` no longer shows it); delete the folder later. Report it as
+that, not as a failed removal.
 
 If the repo will be published, plan one cleanup pass before it goes public: handoffs, task
 files, dated attributions and any private ids removed in one sweep.
