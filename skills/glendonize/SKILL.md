@@ -108,20 +108,27 @@ files and `scripts`, never from `devDependencies`.
 | both | mixed | **one checker**, in the runtime the gate already has, with a `ROOTS` list | one job per side |
 | `go.mod`, `Cargo.toml`, JVM, other | unsupported | none | rules, register, parking, docs only — say so |
 
-Never replace an existing linter.
+Never replace an existing linter. Where installed tooling already holds a boundary
+(`no-restricted-imports`, an import-linter contract, a tsconfig without `dom` over a core
+dir), extend it; a text scan is for what no installed tool checks.
 
 With a runner, also measure **pairing**: the test-file convention the repo already uses
 (`x.test.ts` beside `x.ts`; `tests/test_x.py` for `pkg/x.py`), how many source files have
 a test by that convention, and the list of those that do not — that list is the ratchet's
 baseline (Phase 5). A heavily tested repo can still leave a large share of its source
 files without a sibling test when nothing enforces the pairing; report the real ratio,
-not "1:1". Without a runner there is no pairing to measure; say so.
+not "1:1". Without a runner there is no pairing to measure; say so. If tests are named by
+behaviour rather than by source stem, there is no pairing either: say so, and Phase 5
+installs no ratchet.
 
 **2. Free vs paid.** Mine candidates: prose saying costs / bills / per page / per call /
 real money / do not run; modules reading env vars matching `KEY|TOKEN|SECRET|ENDPOINT`;
 modules importing a paid SDK. The user confirms the deny-list. A repo with none gets an
-empty deny-list and a line saying so. A gate step is free only when the survey can show
-it: no network, no credential read, no paid import. In doubt, paid.
+empty deny-list and a line saying so. A step is free when the survey can show it reads no
+billing credential and makes no billable call; installing packages is free. A free step
+that reaches an external host (not localhost, not a CI service container) is flagged as a
+flakiness risk for a ruling. In doubt, paid. Each deny-listed script refuses to run without
+its key, and without it writes `skipped: <reason>` to its result — never a pass.
 
 **3. Bans.** "Do not add X", "there is no X and don't create one". Banned things are
 never proposed. Name the ban and what replaces it.
@@ -210,14 +217,14 @@ header names every paid script. Join an existing family of free check scripts by
 (e.g. `checks/check_*.py`) and inherit its sanction; the gate then runs the glob only.
 Counted exemptions without CI are advisory; say so.
 
-With a runner, add the **pairing ratchet** (Shapes G, check 8): a tracked
+With a runner and stem-named tests, add the **pairing ratchet** (Shapes G, check 8): a tracked
 `tests/untested.txt` (or `test-support/untested.txt`) lists the source files Phase 0 found
 without a test. The check fails on a source file that is in neither the list nor paired
 with a test, and on a listed file that has since gained one — the list shrinks, never
 grows, and a new module cannot land untested. Generated, vendored and type-only files are
 excluded by an explicit glob the user confirms, never by judgement. A hard 1:1 fails on day
 one and gets muted, which is why it is a ratchet.
-**Verify:** run it; it passes on day one — a red check gets muted. **Gate:** each check is a rule the user holds.
+**Verify:** run it; it passes on day one — a red check gets muted. Then plant one violation per check in a temp copy and see it go red — a check that has never failed proves nothing; never commit the plant. **Gate:** each check is a rule the user holds.
 
 ## Phase 6 — Gate
 
@@ -225,8 +232,11 @@ The gate is the list of free commands, run in order before every commit; CI only
 it. GitHub remote and the user wants CI → `.github/workflows/verify.yml` (Shapes F).
 Otherwise the repo's own runner holds the list (`npm run check`, or `scripts/gate.sh` +
 `.ps1`); no `.github/` is a valid end state (1321 has none). One job per side; only steps
-Phase 0 showed free; deny-list comment first; no `secrets:`; `timeout-minutes` +
-`concurrency`.
+Phase 0 showed free; deny-list comment first; no `secrets:`; `permissions: contents: read`;
+`timeout-minutes`; `concurrency` that cancels only pull-request runs. A test step fails when
+it runs zero tests, or when a test is skipped, pending or `.only` without a line in one
+tracked list of accepted skips, each with its reason (vitest `passWithNoTests: false`,
+`forbidOnly`): a green run that ran nothing is what the gate exists to catch.
 
 **Dependencies are derived, then proven:** walk the gate scripts' imports with `ast`,
 subtract stdlib, then `git archive HEAD | tar -x -C <tmp>`, create a fresh venv with only
@@ -244,8 +254,9 @@ naming the setup section it duplicates; record the drift as a `Q-`. Set
 rows, each with Owns / Does not own / Update when. **Gate on the rows.** Then generation —
 one agent per row (Agent tool, or `/wt`) for repos with many rows; a single pass when there
 are few. Each agent gets only: its row, the code, the register, and: *number every
-subsection; cite nothing by quotation; link siblings by filename only; put the Status block
-under the heading.* Root `README.md` links the index, never copies it. The user's own
+subsection; cite nothing by quotation; link siblings by filename only; quote no count or
+measurement without the commit or result file it came from; put the Status block under the
+heading.* Root `README.md` links the index, never copies it. The user's own
 prose stays where the Phase 0 ruling put it, is never rewritten, translated or renumbered,
 and is cited by filename alone. Existing code citations are upgraded to `docs/X.md N.N`;
 ids go into existing test/drill labels (`expect("raises empty_input (D-014)")`); no new
@@ -339,8 +350,8 @@ The test lands in the commit that lands the behaviour, beside the source file it
 in, a value out — write the test first, run it, and read the failure before writing the
 code: a test that has never failed proves nothing. Where the output comes from a model or a
 vendor, the test covers the shaping around it with a recorded fixture, and the live call is
-checked by <the paid, user-authorised run>. The untested list (`tests/untested.txt`) only
-shrinks; a new source file without a test fails the check.
+checked by <the paid, user-authorised run>. <Only where Phase 5 installed the ratchet:> The
+untested list (`tests/untested.txt`) only shrinks; a new source file without a test fails the check.
 
 A browser test only for what only a browser decides — a click really lands on page N, the
 last row is reachable at phone width — fed a recorded fixture of **invented** values with
@@ -358,7 +369,8 @@ changed, exact checks run, what was skipped, what was not touched.
 Target: `CLAUDE.md` holds `@AGENTS.md`, plus at most a repo manual that restates none of its
 rules. Branches: (i) `CLAUDE.md` has rules, no `AGENTS.md` — move the rules, leave the import;
 (ii) both have content — diff them, the user rules which sentences are rules (→ `AGENTS.md`)
-and which are manual; (iii) `AGENTS.md` untracked — flag it before anything cites it.
+and which are manual; (iii) `AGENTS.md` untracked — flag it before anything cites it. A ruling to keep it untracked
+is valid: its rules are then enforced as checks, and no tracked file cites it.
 
 ## C. `docs/README.md` and numbering
 
@@ -380,13 +392,14 @@ PLATFORM_CONSTRAINTS (E); OPERATIONS — health, checks, recovery, deploying; LO
 real systems locally, first run; REQUIREMENTS, DECISIONS, OPEN_QUESTIONS (D); `<DOMAIN>.md`
 — one per contract several parts of the code honour.
 
-Under each agent-written doc's heading — "checked", not "updated": a date is when someone
-looked, not proof nothing drifted; the user's prose carries none:
+Under each agent-written doc's heading — a commit, not a date: a typed date is a freshness
+claim nothing checks; `git rev-parse HEAD` at the moment of checking is one anybody can.
+The user's prose carries none:
 
 ```markdown
 <!--
 Status: current | register | snapshot | transcript - <when it changes, e.g. "in the same commit as src/errors.py">
-Last checked against the code: <date>
+Checked against: <sha>
 -->
 ```
 
@@ -402,6 +415,7 @@ Source: <docs/X.md N.N, or the filename alone for unnumbered prose> · Since: 20
 
 ## D-014 — <one sentence, what was decided>
 Rationale: <quoted from the source> | not recorded
+Rejected: <alternative — why, quoted> | not recorded
 Source: AGENTS.md "Gates" · Decided: 2026-09-16 · Supersedes: — · Cited by: src/errors.py
 
 ## Q-002 — <the question>
@@ -443,13 +457,16 @@ Order: checks that build state → test → typecheck → lint → build. Alphab
 Drop what the survey did not find; always keep the header comment.
 
 ```yaml
-# Everything here is free and offline. This workflow holds no secrets, so a paid call
+# Everything here is free. This workflow holds no secrets, so a paid call
 # cannot succeed even by accident. Never run here: <script> (<why: bills per page>).
 # See AGENTS.md "Gates". The pip line mirrors <setup section>; no manifest by D-nnn
 # (drift: Q-nnn); derived from imports, proven in a fresh venv from `git archive`.
 name: Verify
-on: [pull_request, push]
-concurrency: { cancel-in-progress: true, group: "verify-${{ github.ref }}" }
+on: { pull_request: {}, push: { branches: [main] } }
+permissions: { contents: read }
+concurrency:  # a cancelled main run leaves no record of whether that commit was green
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: "verify-${{ github.ref }}"
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -464,7 +481,9 @@ jobs:
 ```
 
 A Node side is a second job: `setup-node` with `cache: npm`, `npm ci`, then only the
-`lint` / `typecheck` / `test` / `build` scripts that exist. When no linter exists at all,
+`lint` / `typecheck` / `test` / `build` scripts that exist. A shell step asserts one
+condition per line (`test "$code" = 200`): in an `&&` chain `set -e` ignores every
+command but the last. When no linter exists at all,
 propose only five promise-bug rules: `no-floating-promises`, `no-misused-promises`,
 `await-thenable`, `only-throw-error`, `require-await` — a missing `await` is an error
 typecheck cannot see.
@@ -491,7 +510,7 @@ before vocabulary scans, comment-line stripping before the gate scan. The rest i
 ```python
 """Boundary checks over source text. Files are read, never imported: nothing here can pay.
 A comment may say why a rule exists; only the code is held to it."""
-import io, re, tokenize
+import io, re, subprocess, tokenize
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -535,6 +554,16 @@ def rel(p):
     return p.relative_to(ROOT).as_posix()
 
 
+def git_files(*args):
+    out = subprocess.run(["git", "ls-files", "-z", *args], cwd=ROOT,
+                         capture_output=True, text=True, check=True).stdout
+    return set(out.split("\0")) - {""}
+
+
+# A link is a claim about a clone, not this disk: ignored private notes must not resolve it
+KNOWN = git_files("--cached", "--others", "--exclude-standard")
+
+
 def expect(label, ok, detail=()):
     print(("  ok   " if ok else "  FAIL ") + label + "".join("\n         " + d for d in detail))
     return ok
@@ -556,26 +585,31 @@ def main():
         bad = [w for w in ("secrets.", *DENY_LISTED) if w in body]
         ok &= expect(f"{rel(wf)} holds no secrets and names no paid script", not bad, bad)
     # 5. every cited id, doc path and section resolves - docs cite each other, so scan .md too
-    ids = set()
+    heads = []
     for name in ("REQUIREMENTS", "DECISIONS", "OPEN_QUESTIONS"):
-        p = ROOT / "docs" / f"{name}.md"
-        if p.exists():
-            ids |= set(re.findall(r"(?m)^## (R\d+|D-\d{3}|Q-\d{3}) ", p.read_text(encoding="utf-8")))
+        if f"docs/{name}.md" in KNOWN:
+            heads += re.findall(r"(?m)^## (R\d+|D-\d{3}|Q-\d{3}) ", (ROOT / "docs" / f"{name}.md").read_text(encoding="utf-8"))
+    ids, dups = set(heads), sorted({i for i in heads if heads.count(i) > 1})
+    ok &= expect("no register id is defined twice (two branches took one id)", not dups, dups)
     dangling = []
     for p in files("<all roots>", "docs", suffixes={".py", ".ts", ".tsx", ".md"}):
+        if rel(p) not in KNOWN:
+            continue
         text = p.read_text(encoding="utf-8")
         for cited in set(re.findall(r"(?<![\w-])(R\d{1,3}|D-\d{3}|Q-\d{3})(?![\w-])", text)) - ids:
             dangling.append(f"{rel(p)}: {cited}")
         for doc, sec in set(re.findall(r"(?<![\w/])docs/([A-Z_]+\.md)(?: (\d+(?:\.\d+)*))?", text)):
-            t = ROOT / "docs" / doc
-            if not t.exists() or sec and not re.search(rf"(?m)^#+ {re.escape(sec)}\.?\s", t.read_text(encoding="utf-8")):
+            t = f"docs/{doc}"
+            if t not in KNOWN or sec and not re.search(rf"(?m)^#+ {re.escape(sec)}\.?\s", (ROOT / t).read_text(encoding="utf-8")):
                 dangling.append(f"{rel(p)}: docs/{doc} {sec}")
     ok &= expect("every cited id, doc and section resolves", not dangling, sorted(dangling))
-    # 6. AGENTS.md loads into every context: <= 8 KiB, and tracked when CLAUDE.md imports it
-    size = (ROOT / "AGENTS.md").stat().st_size
-    ok &= expect(f"AGENTS.md is {size} bytes <= 8192", size <= 8192)
+    # 6. AGENTS.md loads into every context: <= 8 KiB, and tracked when a tracked CLAUDE.md imports it
+    agents, tracked = ROOT / "AGENTS.md", git_files("--cached")
+    ok &= expect("AGENTS.md <= 8192 bytes", not agents.exists() or agents.stat().st_size <= 8192)
+    imports = "CLAUDE.md" in tracked and "@AGENTS.md" in (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+    ok &= expect("AGENTS.md tracked when CLAUDE.md imports it", not imports or "AGENTS.md" in tracked)
     # 7. (if docs/local/ is used) no tracked doc links docs/local/
-    # 8. pairing ratchet (only with a runner): every source file has a test or is on the
+    # 8. pairing ratchet (only with a runner and stem-named tests): every source file has a test or is on the
     #    untested list; a listed file that gained a test is stale. The list shrinks, never grows.
     listed = set((ROOT / "tests" / "untested.txt").read_text(encoding="utf-8").split())
     def has_test(p):

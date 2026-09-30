@@ -134,8 +134,9 @@ Phase 0 tells you which phases add something to your repo; the rest can be skipp
 - **Proceed without you.** Every phase ends at a gate you approve. Every conflict with your
   `AGENTS.md`, `CLAUDE.md` or README is put to you, and your ruling is recorded as a dated
   decision so the next agent does not argue it again.
-- **Run paid scripts.** A step joins the gate only if the survey shows it uses no network,
-  reads no credential and imports nothing paid. In doubt, it counts as paid.
+- **Run paid scripts.** A step joins the gate only if the survey shows it reads no billing
+  credential and makes no billable call. In doubt, it counts as paid. Paid scripts refuse to
+  run without their key and record `skipped`, never a pass.
 - **Replace your linter or push on its own.** Each phase is committed with its own files
   only (never `git add -A`); pushing waits until you ask.
 
