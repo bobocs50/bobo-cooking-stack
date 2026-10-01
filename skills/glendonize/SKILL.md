@@ -299,13 +299,17 @@ docstrings and test or drill labels. Section numbers, never pasted sentences: pr
 numbers do not. Decision first when the decision is the subject `(D-078, R21)`, requirement
 first when it is `(R12, D-080)`. The register is docs/REQUIREMENTS.md and docs/DECISIONS.md;
 a cited id that does not resolve fails the boundary check.
+A comment is a pointer, not evidence: read the code it sits on before relying on it. Keep
+comments that say why, citations and cost headers; do not write comments that restate what
+the code does, or that assert behaviour elsewhere ("caller guarantees non-null") — those go
+stale silently, and the second kind belongs in a test.
 
 # Reviewing a diff
 
 Defects first, style last. The defects that matter here: <the repo's own classes — e.g. a
 plausible value where a null with a reason belonged; a fallback that fills a field without
 saying so; a check reported as run that was skipped; a doc contradicting its owner in
-docs/README.md; a cited id that does not resolve>. Name file and line; say whether each
+docs/README.md; a cited id that does not resolve; a comment relied on as proof of behaviour that no test pins>. Name file and line; say whether each
 finding is a defect or a question. If nothing survives verification, say what remains
 untested, never "looks good".
 
