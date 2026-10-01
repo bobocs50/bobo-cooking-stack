@@ -735,8 +735,24 @@ apart and keep the history readable:
 - **A landing rule.** A single worker's output is rebased and re-split into one-behaviour
   commits; a parallel batch lands as a `--no-ff` merge whose message is one hand-written
   sentence. Topic branches live minutes to hours, not days.
-- **One review round per batch.** Findings are numbered (`F1`, `F2`…) in the log; each is
-  fixed in its own commit that cites it in the subject, `(F3)`.
+- **Review by concern after a batch, never per feature.** The reference (git evidence,
+  2026-10-01): 2 of its 20 largest merges had any review within an hour; review was named
+  read-only agents, one concern each (audit, verify, edges, security), run over a whole
+  workstream once it had landed, in two waves — a boundary audit the night after the first
+  big landing, security reviews of one new mechanism once it existed — plus a design review
+  *before* the risky code was written. Each pass returns a numbered list; each finding is
+  fixed in its own commit citing it in the subject, `(F3)`, **and kept as a test** (85 of
+  its test names cite a finding). The human makes the calls the list cannot. A normal
+  feature gets no review: report, gate, and QA when something reached the screen.
+- **QA only when it reached the screen or a value could move.** The reference had no
+  checklist and no test plan: it ran the real thing and wrote the number down, dated, in the
+  owner doc ("15 of 15", "12 readings each, three rounds, the same answer"); live checks
+  stayed behind env flags and out of CI; UI was rendered and looked at. Install the habit as
+  one line: *after a scored or live check, the number and the date go into the note that owns
+  the fact.* A number that lives only in chat is lost by the next session.
+- **The loop itself is a doc, or nobody runs it.** Install `docs/WORKFLOW.md` from Shape K:
+  the human's steps, the slice-list shape, what happens between "go" and the report, review
+  by concern, QA when needed, the never-list. Owner row in `docs/README.md`.
 
 Removing a worktree inside a synced folder (OneDrive, Dropbox) can print `Permission
 denied`: the sync client still holds the directory. Git has already unregistered the
@@ -745,3 +761,56 @@ that, not as a failed removal.
 
 If the repo will be published, plan one cleanup pass before it goes public: handoffs, task
 files, dated attributions and any private ids removed in one sweep.
+
+
+## K. `docs/WORKFLOW.md` — the loop at a glance
+
+Fill the angle brackets from Phase 0 (the deny-list, the spine dirs, the paid check, the
+human's name). Keep it to tables; the evidence lives in `docs/` history and in this skill.
+
+```markdown
+# Workflow
+
+Thin by default: talk, slice, build, land, one report. A small change needs little of this.
+
+## <Human>'s steps
+| Step | <Human> | Coordinator | Done when |
+|---|---|---|---|
+| Grill | problem on paper · argue till it holds | grounds it (owner doc, module, data check) · writes D-, doc, Q- | one sentence + what proves it wrong |
+| Slice | read the list · mark mine · "go" | slice list, vertical, each line with its check | every line has a check |
+| (build · land · ship) | own lines, or nothing | agents in worktrees · tests · commits · gate · push · CI | — |
+| Report | read · answer 0–2 questions | one report after the batch, `PASS/ISSUES/BLOCKED` + quoted output | nothing waiting on <Human> |
+| QA | walk it · score it y/n · write the number | — | the number is the verdict |
+
+## Grill, on paper
+Problem (as the user sees it) · Evidence · Done (a sentence a check can say *no* to) · Not.
+Observable answer → prototype, don't argue. New layer or shape → two sketches. Third fix at
+the same gate → back here, attack the premise. Nothing in D-/doc/Q- changed → skip to Slice.
+
+## Slice
+One behaviour sentence · its check · owner (`goal` / `<Human>` / `later`). Vertical: one
+thin behaviour through every layer it needs. Dependency order, riskiest unknown first;
+lines with no arrow between them run in parallel. >10 lines = two features; >40 min = split.
+
+## Between "go" and the report
+Build: one agent per slice, own worktree, 10–40 min; may fan out inside, returns one diff
+and one report. Land: periphery lands on the report and the gate; <spine dirs> get their
+diff read. Ship: <gate commands> → fast-forward main → push → `gh run watch`.
+
+## Review
+| Case | What happens |
+|---|---|
+| Normal feature | nothing — report, gate, QA |
+| <Judgment code> | thought through in Grill before; one review of the diff after |
+| After a batch / before a milestone | read-only agents by concern → F1…Fn → one fix commit + one test each → <Human> answers the few that need a call |
+
+## QA — only when it reached the screen or a value could move
+Walk it (<the 10-minute real-data walk>) · Score it (<the paid check>, y/n) · Write the
+number down, dated, in the owner doc.
+
+## Bugs · Issues · Never
+Bug: failing test → fix → pass → one commit. Issue: only big + blocked outside the code,
+Context / Options / Done when, closed by "On main now:" or a one-line ruling. Never:
+<spine without the human> · <paid runs to test code> · <data that may not leave> · past a
+missing decision · a muted red check.
+```
