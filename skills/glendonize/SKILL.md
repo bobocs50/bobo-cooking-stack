@@ -1,6 +1,6 @@
 ---
 name: glendonize
-description: Give a repo a structure modelled on glendonC's many-minions and 1321 so parallel agents can work in it safely — an AGENTS.md working agreement, a numbered R/D/Q register that code cites, PLATFORM_CONSTRAINTS with VERIFIED/ASSERTED facts, boundary checks that read source as text, a free-only gate, a test beside every source file enforced as a ratchet, and a numbered docs/ set written from an owner index. Gated phases; writes nothing on the first pass; mines what the repo already says; parks what it cannot verify. Use when the user invokes /glendonize, says "glendonize this", "make this repo agent-ready", "structure it like many-minions", or asks for a decision register, constraints doc, boundary checks or a gate.
+description: Give a repo a structure modelled on glendonC's many-minions and 1321 so agents — one or many in parallel — can work in it safely: an AGENTS.md working agreement, a numbered R/D/Q register that code cites, PLATFORM_CONSTRAINTS with VERIFIED/ASSERTED facts, boundary checks (the repo's own tooling first, text scans for the rest), a free-only gate that fails vacuous runs, paid scripts that refuse without a key, a test-pairing ratchet where tests are stem-named, and a numbered docs/ set written from an owner index. Gated phases; writes nothing on the first pass; mines what the repo already says; parks what it cannot verify. Use when the user invokes /glendonize, says "glendonize this", "make this repo agent-ready", "structure it like many-minions", or asks for a decision register, constraints doc, boundary checks or a gate.
 ---
 
 # Glendonize
@@ -162,7 +162,9 @@ second copy; every scan double-counts it); promised-but-empty files; no remote (
 degrades to a local gate script); `gh auth status` failing (parking stays local; no
 `gh run watch`).
 
-**7. Phase menu.** Phases 1–8, one line each on what they add here; which to skip.
+**7. Phase menu.** Phases 1–8, one line each on what they add here; which to skip. Ask
+whether agents will run in parallel. Solo (one agent, one human) skips Shapes J and the
+worktree fan-out in Shapes A and K, and Phase 7 runs as a single pass; everything else carries.
 
 Write `AGENT_READY.md` (Shapes I): Progress list, survey, candidates, **rulings verbatim**,
 recorded `HEAD`. **Gate:** the user rules on every conflict and approves every list.
