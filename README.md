@@ -187,7 +187,8 @@ Named after and inspired by the repo structure of glendonC
 [1321](https://github.com/glendonC/1321).
 
 `grilling` builds on the grilling skill in Matt Pocock's
-[skills](https://github.com/mattpocock/skills) (MIT).
+[skills](https://github.com/mattpocock/skills) (MIT); its learning mode is modelled on
+[nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise).
 
 ## License
 
