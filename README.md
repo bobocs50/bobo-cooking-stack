@@ -167,11 +167,27 @@ and asks whether to resume or discard. It never re-asks a ruling.
 agent-agnostic. The skill itself runs in Claude Code, because it uses its question prompts
 and subagents.
 
+## Also in this repo: grilling
+
+[`skills/grilling/SKILL.md`](skills/grilling/SKILL.md) interviews you about a plan one round
+of questions at a time, mapped as a design tree, until every decision is settled. On top of
+the plain grilling it has a learning mode: you state the problem and your own approach first,
+it teaches a missing concept on a small made-up example instead of handing you its design,
+and at the end it records what you demonstrated in `~/.claude/learning/`. Triggers on
+"grill me" or `/grilling`.
+
+```sh
+npx skills@latest add bobocs50/glendonize --skill grilling
+```
+
 ## Credits
 
 Named after and inspired by the repo structure of glendonC
 ([github.com/glendonC](https://github.com/glendonC)), e.g. his public repo
 [1321](https://github.com/glendonC/1321).
+
+`grilling` builds on the grilling skill in Matt Pocock's
+[skills](https://github.com/mattpocock/skills) (MIT).
 
 ## License
 

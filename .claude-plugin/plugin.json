@@ -9,5 +9,5 @@
   "repository": "https://github.com/bobocs50/glendonize",
   "license": "MIT",
   "keywords": ["agents", "governance", "decision-register", "boundary-checks", "ci", "agents-md"],
-  "skills": ["./skills/glendonize"]
+  "skills": ["./skills/glendonize", "./skills/grilling"]
 }
