@@ -1,13 +1,24 @@
 {
-  "name": "glendonize",
+  "name": "bobo-cooking-stack",
   "version": "1.0.0",
-  "description": "Give a repo the structure parallel AI coding agents need: an AGENTS.md working agreement, a numbered R/D/Q register that code cites, boundary checks that read source as text, and a free-only gate. Gated phases; writes nothing it cannot trace to your repo.",
+  "description": "bobocs50's skills: glendonize (an AGENTS.md working agreement, a numbered R/D/Q register that code cites, boundary checks and a free-only gate), grilling (a design-tree interview with a learning mode) and whiteboard (a hand-drawn Excalidraw board the agent reads).",
   "author": {
     "name": "bobocs50",
     "url": "https://github.com/bobocs50"
   },
-  "repository": "https://github.com/bobocs50/glendonize",
+  "repository": "https://github.com/bobocs50/bobo-cooking-stack",
   "license": "MIT",
-  "keywords": ["agents", "governance", "decision-register", "boundary-checks", "ci", "agents-md"],
-  "skills": ["./skills/glendonize", "./skills/grilling", "./skills/whiteboard"]
+  "keywords": [
+    "agents",
+    "governance",
+    "decision-register",
+    "boundary-checks",
+    "ci",
+    "agents-md"
+  ],
+  "skills": [
+    "./skills/glendonize",
+    "./skills/grilling",
+    "./skills/whiteboard"
+  ]
 }

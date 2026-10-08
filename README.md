@@ -1,9 +1,11 @@
-# glendonize
+# bobo-cooking-stack
+
+bobocs50's Claude Code skills: `glendonize` (make a repo agent-ready), `grilling` (stress-test a plan, with a learning mode) and `whiteboard` (a hand-drawn board you draw on and the agent reads). The first one gives the repo its history; the install lines below name the skill you want.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ```sh
-npx skills@latest add bobocs50/glendonize
+npx skills@latest add bobocs50/bobo-cooking-stack
 ```
 
 A Claude Code skill that gives a repository the structure several AI coding agents need to
@@ -49,7 +51,7 @@ something paid; a file that is only read cannot spend money.
 ## Install
 
 ```sh
-npx skills@latest add bobocs50/glendonize
+npx skills@latest add bobocs50/bobo-cooking-stack
 ```
 
 Pick which coding agents to install it on. It writes the skill as an ordinary file you own
@@ -58,20 +60,20 @@ and can edit; pull later changes with `npx skills update`.
 Or as a Claude Code plugin, from inside a session:
 
 ```
-/plugin marketplace add bobocs50/glendonize
-/plugin install glendonize@glendonize
+/plugin marketplace add bobocs50/bobo-cooking-stack
+/plugin install bobo-cooking-stack@bobo-cooking-stack
 ```
 
 Or by hand, user-level on macOS / Linux:
 
 ```sh
-mkdir -p ~/.claude/skills/glendonize && curl -fsSL https://raw.githubusercontent.com/bobocs50/glendonize/main/skills/glendonize/SKILL.md -o ~/.claude/skills/glendonize/SKILL.md
+mkdir -p ~/.claude/skills/glendonize && curl -fsSL https://raw.githubusercontent.com/bobocs50/bobo-cooking-stack/main/skills/glendonize/SKILL.md -o ~/.claude/skills/glendonize/SKILL.md
 ```
 
 On Windows PowerShell:
 
 ```powershell
-New-Item -ItemType Directory -Force "$HOME\.claude\skills\glendonize" | Out-Null; Invoke-WebRequest https://raw.githubusercontent.com/bobocs50/glendonize/main/skills/glendonize/SKILL.md -OutFile "$HOME\.claude\skills\glendonize\SKILL.md"
+New-Item -ItemType Directory -Force "$HOME\.claude\skills\glendonize" | Out-Null; Invoke-WebRequest https://raw.githubusercontent.com/bobocs50/bobo-cooking-stack/main/skills/glendonize/SKILL.md -OutFile "$HOME\.claude\skills\glendonize\SKILL.md"
 ```
 
 ## Run
@@ -83,7 +85,7 @@ In Claude Code:
 /glendonize path/to/repo
 ```
 
-Installed as a plugin, the command is namespaced: `/glendonize:glendonize`. Either way it
+Installed as a plugin, the command is namespaced: `/bobo-cooking-stack:glendonize`. Either way it
 also triggers on "make this repo agent-ready" or a request for a decision register,
 constraints doc, boundary checks or a gate.
 
@@ -177,7 +179,7 @@ and at the end it records what you demonstrated in `~/.claude/learning/`. Trigge
 "grill me" or `/grilling`.
 
 ```sh
-npx skills@latest add bobocs50/glendonize --skill grilling
+npx skills@latest add bobocs50/bobo-cooking-stack --skill grilling
 ```
 
 When a grilling reaches a structure decision (a new layer, step, data shape or boundary),
@@ -195,7 +197,7 @@ drew. Reopening the same `.mmd` loads your saved layout. The Mermaid stays the r
 Triggers on `/whiteboard`, "draw it" or "sketch this"; nothing to install beyond Python.
 
 ```sh
-npx skills@latest add bobocs50/glendonize --skill whiteboard
+npx skills@latest add bobocs50/bobo-cooking-stack --skill whiteboard
 ```
 
 ## Credits

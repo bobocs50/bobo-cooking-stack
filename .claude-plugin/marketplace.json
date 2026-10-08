@@ -1,17 +1,22 @@
 {
-  "name": "glendonize",
+  "name": "bobo-cooking-stack",
   "owner": {
     "name": "bobocs50",
     "url": "https://github.com/bobocs50"
   },
-  "description": "The glendonize skill as an installable Claude Code plugin.",
+  "description": "bobocs50's Claude Code skills (glendonize, grilling, whiteboard) as an installable plugin.",
   "plugins": [
     {
-      "name": "glendonize",
+      "name": "bobo-cooking-stack",
       "source": "./",
-      "description": "Give a repo the structure parallel AI coding agents need to work in it safely.",
+      "description": "glendonize, grilling and whiteboard: make a repo agent-ready, stress-test a plan, draw and be read.",
       "category": "engineering",
-      "keywords": ["agents", "governance", "decision-register", "boundary-checks"]
+      "keywords": [
+        "agents",
+        "governance",
+        "decision-register",
+        "boundary-checks"
+      ]
     }
   ]
 }
