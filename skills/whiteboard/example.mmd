@@ -1,4 +1,5 @@
 flowchart TD
-    form[Order form] -->|submit| validate[Validate input]
-    validate -->|ok| charge[Charge card]
-    charge -->|paid| email[Send receipt email]
+    form[Order form] --> validate[Validate input]
+    validate --> charge[Charge card]
+    charge -->|retry on timeout| gateway[Card gateway]
+    charge --> email[Send receipt email]
