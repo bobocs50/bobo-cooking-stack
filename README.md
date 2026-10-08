@@ -1,4 +1,4 @@
-# bobo-cooking-stack
+﻿# bobo-cooking-stack
 
 bobocs50's Claude Code skills: `glendonize` (make a repo agent-ready), `grilling` (stress-test a plan, with a learning mode) and `whiteboard` (a hand-drawn board you draw on and the agent reads). The first one gives the repo its history; the install lines below name the skill you want.
 
@@ -22,7 +22,7 @@ Agents fail in predictable ways. Each mechanism exists to stop one of them.
 
 | Failure | Mechanism | What it looks like |
 |---|---|---|
-| An agent invents a plausible reason for a rule nobody explained | Decision register; a rule with no recorded reason gets `Rationale: not recorded` | The README says "never retry uploads". The register gets `D-004 — Uploads are not retried. Rationale: not recorded`, not "to avoid duplicate charges", which nobody said |
+| An agent invents a plausible reason for a rule nobody explained | Decision register; a rule with no recorded reason gets `Rationale: not recorded` | The README says "never retry uploads". The register gets `D-004 â€” Uploads are not retried. Rationale: not recorded`, not "to avoid duplicate charges", which nobody said |
 | An agent runs a script that bills per call | Free-only gate: a confirmed deny-list, and CI that holds no secrets | `parse.py` bills per page. It is deny-listed, and with no `secrets:` in the workflow a paid call cannot succeed even by accident |
 | Code cites a rule that was renamed or never written | Citation resolvability check | A comment says `(D-017)`, or `docs/OPERATIONS.md 2.4` became 2.5. The check fails and prints `src/retry.py: D-017` |
 | Boundary rules live only in prose | Boundary checks that read source as text and never import it | "Only `client.py` may reach the network." The check fails unless the set of files calling `requests.get` / `urlopen` is exactly `["src/client.py"]` |
@@ -40,8 +40,8 @@ something paid; a file that is only read cannot spend money.
 |---|---|
 | `AGENTS.md` | The working agreement every agent reads: citation, review, parking, gates, working loop. Capped at 8 KiB |
 | `CLAUDE.md` | Imports `@AGENTS.md`; restates none of its rules |
-| `docs/REQUIREMENTS.md`, `docs/DECISIONS.md` | `R1`…, `D-001`…, each with a source; rationale quoted or `not recorded` |
-| `docs/OPEN_QUESTIONS.md` | `Q-001`…: what is known and the exact act that would settle it |
+| `docs/REQUIREMENTS.md`, `docs/DECISIONS.md` | `R1`â€¦, `D-001`â€¦, each with a source; rationale quoted or `not recorded` |
+| `docs/OPEN_QUESTIONS.md` | `Q-001`â€¦: what is known and the exact act that would settle it |
 | `docs/PLATFORM_CONSTRAINTS.md` | External facts, each VERIFIED or ASSERTED |
 | `docs/README.md` + docs | An owner index (Owns / Does not own / Update when) and the numbered docs it lists |
 | Boundary checks | `scripts/boundary_check.py`, `test_boundary.py` or a colocated `boundary.test.ts`, depending on the stack |
@@ -153,7 +153,7 @@ Phase 0 tells you which phases add something to your repo; the rest can be skipp
 
 ## FAQ
 
-**Does it change my code?** Not its behaviour. Phases 0–6 write docs, config and checks. In
+**Does it change my code?** Not its behaviour. Phases 0â€“6 write docs, config and checks. In
 Phase 7, citations your code already has are upgraded to the `docs/X.md N.N` form and ids
 are added to existing test labels. Your own prose is never rewritten or renumbered.
 
@@ -190,9 +190,9 @@ beside yours.
 
 [`skills/whiteboard/SKILL.md`](skills/whiteboard/SKILL.md) opens a Mermaid flowchart as a
 full-screen, hand-drawn, editable whiteboard in your browser: one dark board, the drawing
-toolbar, Save and Done, nothing else. `serve.py` (Python standard library, local only)
+toolbar, "Save draft" and "Send to Claude", nothing else. `serve.py` (Python standard library, local only)
 serves `board.html` (Excalidraw from a CDN) with your `.mmd` converted in the browser;
-Done writes a PNG and the scene next to the `.mmd` and exits, so the agent reads what you
+"Send to Claude" writes a PNG and the scene next to the `.mmd` and exits, so the agent reads what you
 drew. Reopening the same `.mmd` loads your saved layout. The Mermaid stays the record.
 Triggers on `/whiteboard`, "draw it" or "sketch this"; nothing to install beyond Python.
 

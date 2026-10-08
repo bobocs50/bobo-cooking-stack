@@ -4,7 +4,7 @@ description: Open a Mermaid flowchart as a full-screen, hand-drawn, editable whi
 argument-hint: "[what to draw]"
 ---
 
-A whiteboard between the user and Claude: one dark, full-screen board, the drawing toolbar, a Save and a Done button. Nothing else. The page is `board.html` next to this file (Excalidraw from a CDN), served by `serve.py` (Python standard library, local only).
+A whiteboard between the user and Claude: one dark, full-screen board, the drawing toolbar, a "Save draft" and a "Send to Claude" button. Nothing else. The page is `board.html` next to this file (Excalidraw from a CDN), served by `serve.py` (Python standard library, local only).
 
 ## The user draws first
 
@@ -25,9 +25,9 @@ The drawing is the user's thinking. So:
 ## The loop
 
 1. Write the Mermaid to `.lavish/<slug>.mmd` in the current working directory (`.lavish/` is gitignored in edat; add it elsewhere).
-2. Run `python ~/.claude/skills/whiteboard/serve.py .lavish/<slug>.mmd` as a tracked background command with a long timeout. It opens the browser on a free port and waits. The user draws; **Save** (or Ctrl+S) writes `<slug>.excalidraw` + `<slug>.png` next to the `.mmd` and keeps the page open; **Done** writes them and the server exits (code 0), which notifies this session.
+2. Run `python ~/.claude/skills/whiteboard/serve.py .lavish/<slug>.mmd` as a tracked background command with a long timeout. It opens the browser on a free port and waits. The user draws; **Save draft** (or Ctrl+S) writes `<slug>.excalidraw` + `<slug>.png` next to the `.mmd` and keeps the page open; **Send to Claude** writes them and the server exits (code 0), which notifies this session.
 3. Read `<slug>.png` (the Read tool shows images) and, when the picture is not enough, `<slug>.excalidraw` (JSON: element `text` fields hold the box labels and the user's notes). Then update the Mermaid in `<slug>.mmd` to match what the user drew: the Mermaid stays the record, never the `.excalidraw`.
 4. To reopen the same board, run `serve.py` again on the same `.mmd`: it loads the saved `.excalidraw` first, so the user's layout survives. Delete the `.excalidraw` to start from the Mermaid again.
 5. At the end, paste the final Mermaid in the conversation. In edat it goes into `notes/DIAGRAMS.md` only on the user's go.
 
-If `serve.py` exits with code 1, the user closed it before Done: ask whether to reopen. The CDN (jsdelivr, esm.sh) must be reachable; without it the page shows "load failed".
+If `serve.py` exits with code 1, the user closed it before sending: ask whether to reopen. The CDN (jsdelivr, esm.sh) must be reachable; without it the page shows "load failed".

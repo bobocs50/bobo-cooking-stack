@@ -66,7 +66,7 @@
 </head>
 <body>
 <div id="root"></div>
-<div id="bar"><button id="save" type="button">Save</button><button id="done" type="button" class="primary">Done</button></div>
+<div id="bar"><button id="save" type="button" title="Save a copy, keep drawing (Ctrl+S)">Save draft</button><button id="done" type="button" class="primary" title="Send the board to Claude and finish">Send to Claude</button></div>
 <div id="msg" role="status" aria-live="polite"></div>
 <script type="module">
 import { parseMermaidToExcalidraw } from "https://esm.sh/@excalidraw/mermaid-to-excalidraw@1.1.2";
@@ -100,7 +100,7 @@ async function initialData() {
 
 async function payload() {
   const elements = api.getSceneElements();
-  const appState = { ...api.getAppState(), exportBackground: true, theme: "dark" };
+  const appState = { ...api.getAppState(), exportBackground: true, exportWithDarkMode: true, viewBackgroundColor: "#121212", theme: "dark" };
   const files = api.getFiles();
   const blob = await Lib.exportToBlob({ elements, appState, files, mimeType: "image/png" });
   const b64 = await new Promise((res) => {
@@ -114,16 +114,16 @@ async function payload() {
 async function send(path) {
   const done = path === "/done";
   try {
-    msg("Saving…", { sticky: true });
+    msg(done ? "Sending…" : "Saving…", { sticky: true });
     const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(await payload()) });
     if (!r.ok) throw new Error(r.status);
     if (done) {
       const b = document.getElementById("done");
-      b.textContent = "Saved ✓"; b.disabled = true; bar.classList.add("done");
-      msg("Saved. You can close this tab.", { sticky: true });
+      b.textContent = "Sent ✓"; b.disabled = true; bar.classList.add("done");
+      msg("Sent to Claude. You can close this tab.", { sticky: true });
     } else {
-      msg("Saved");
+      msg("Draft saved");
     }
   } catch (e) { msg("Save failed: " + e, { sticky: true }); }
 }
