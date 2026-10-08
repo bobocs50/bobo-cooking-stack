@@ -1,0 +1,4 @@
+flowchart TD
+    form[Order form] -->|submit| validate[Validate input]
+    validate -->|ok| charge[Charge card]
+    charge -->|paid| email[Send receipt email]

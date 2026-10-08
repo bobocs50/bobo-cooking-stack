@@ -180,6 +180,24 @@ and at the end it records what you demonstrated in `~/.claude/learning/`. Trigge
 npx skills@latest add bobocs50/glendonize --skill grilling
 ```
 
+When a grilling reaches a structure decision (a new layer, step, data shape or boundary),
+you draw the first sketch and the skill grills the drawing before it draws an alternative
+beside yours.
+
+## Also in this repo: whiteboard
+
+[`skills/whiteboard/SKILL.md`](skills/whiteboard/SKILL.md) opens a Mermaid flowchart as a
+full-screen, hand-drawn, editable whiteboard in your browser: one dark board, the drawing
+toolbar, Save and Done, nothing else. `serve.py` (Python standard library, local only)
+serves `board.html` (Excalidraw from a CDN) with your `.mmd` converted in the browser;
+Done writes a PNG and the scene next to the `.mmd` and exits, so the agent reads what you
+drew. Reopening the same `.mmd` loads your saved layout. The Mermaid stays the record.
+Triggers on `/whiteboard`, "draw it" or "sketch this"; nothing to install beyond Python.
+
+```sh
+npx skills@latest add bobocs50/glendonize --skill whiteboard
+```
+
 ## Credits
 
 Named after and inspired by the repo structure of glendonC

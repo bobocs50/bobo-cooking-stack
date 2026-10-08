@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whiteboard</title>
+<style>
+  html, body, #root { margin: 0; height: 100%; background: #121212; }
+  #bar { position: fixed; top: 64px; right: 14px; z-index: 100; display: flex; gap: 6px; }
+  #bar button { font: 600 13px system-ui, sans-serif; padding: 6px 12px; border-radius: 6px;
+    border: 1px solid #555; background: #2b2b2b; color: #eee; cursor: pointer; }
+  #bar button.primary { background: #6965db; border-color: #6965db; }
+  #msg { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 100;
+    font: 14px system-ui, sans-serif; color: #eee; background: #2b2b2b; padding: 6px 12px;
+    border-radius: 6px; display: none; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script>window.EXCALIDRAW_ASSET_PATH = "https://cdn.jsdelivr.net/npm/@excalidraw/excalidraw@0.17.6/dist/";</script>
+<script src="https://cdn.jsdelivr.net/npm/@excalidraw/excalidraw@0.17.6/dist/excalidraw.production.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<div id="bar"><button id="save">Save</button><button id="done" class="primary">Done</button></div>
+<div id="msg"></div>
+<script type="module">
+import { parseMermaidToExcalidraw } from "https://esm.sh/@excalidraw/mermaid-to-excalidraw@1.1.2";
+
+const Lib = window.ExcalidrawLib;
+const msg = (t) => { const m = document.getElementById("msg"); m.textContent = t; m.style.display = "block"; };
+let api = null;
+
+async function initialData() {
+  const s = await fetch("/scene");
+  if (s.ok) {
+    const scene = await s.json();
+    return { elements: scene.elements || [], appState: { ...(scene.appState || {}), theme: "dark", collaborators: [] },
+             files: scene.files || {}, scrollToContent: true };
+  }
+  let src = await (await fetch("/mermaid")).text();
+  src = src.replace(/^\s*---[\s\S]*?\n---\s*\n/, "");
+  const { elements, files } = await parseMermaidToExcalidraw(src, { themeVariables: { fontSize: "20px" } });
+  return { elements: Lib.convertToExcalidrawElements(elements), appState: { theme: "dark" }, files: files || {},
+           scrollToContent: true };
+}
+
+async function payload() {
+  const elements = api.getSceneElements();
+  const appState = { ...api.getAppState(), exportBackground: true, theme: "dark" };
+  const files = api.getFiles();
+  const blob = await Lib.exportToBlob({ elements, appState, files, mimeType: "image/png" });
+  const b64 = await new Promise((res) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(",")[1]);
+    r.readAsDataURL(blob);
+  });
+  return { png_base64: b64, scene: Lib.serializeAsJSON(elements, api.getAppState(), files, "local") };
+}
+
+async function send(path) {
+  try {
+    msg("saving...");
+    const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(await payload()) });
+    if (!r.ok) throw new Error(r.status);
+    msg(path === "/done" ? "saved - you can close this tab" : "saved");
+    if (path === "/done") { document.getElementById("done").disabled = true; }
+  } catch (e) { msg("save failed: " + e); }
+}
+
+document.getElementById("save").onclick = () => send("/save");
+document.getElementById("done").onclick = () => send("/done");
+window.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); send("/save"); }
+});
+
+try {
+  const data = await initialData();
+  const h = React.createElement;
+  ReactDOM.createRoot(document.getElementById("root")).render(
+    h(Lib.Excalidraw, { initialData: data, theme: "dark", excalidrawAPI: (a) => { api = a; },
+      UIOptions: { canvasActions: { loadScene: false } } }));
+  window.__boardElements = data.elements.length;
+  window.__boardReady = true;
+} catch (e) { msg("load failed: " + e); console.error(e); }
+</script>
+</body>
+</html>
