@@ -5,14 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Whiteboard</title>
 <style>
-  html, body, #root { margin: 0; height: 100%; background: #121212; }
-  #bar { position: fixed; top: 64px; right: 14px; z-index: 100; display: flex; gap: 6px; }
-  #bar button { font: 600 13px system-ui, sans-serif; padding: 6px 12px; border-radius: 6px;
-    border: 1px solid #555; background: #2b2b2b; color: #eee; cursor: pointer; }
-  #bar button.primary { background: #6965db; border-color: #6965db; }
-  #msg { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 100;
-    font: 14px system-ui, sans-serif; color: #eee; background: #2b2b2b; padding: 6px 12px;
-    border-radius: 6px; display: none; }
+  :root {
+    --bg: #121212; --island: rgba(35, 35, 37, 0.92); --line: #3a3a3d; --text: #ececec;
+    --muted: #a9a9ae; --accent: #6965db; --accent-hover: #7b78e6;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  html, body, #root { margin: 0; height: 100%; background: var(--bg); }
+
+  /* the one control bar: sits under Excalidraw's own top-right island */
+  #bar {
+    position: fixed; top: 64px; right: 14px; z-index: 100;
+    display: flex; gap: 4px; padding: 4px;
+    background: var(--island); border: 1px solid var(--line); border-radius: 10px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    transition: opacity 200ms var(--ease-out);
+  }
+  #bar.done { opacity: 0.6; }
+  #bar button {
+    height: 32px; padding: 0 12px; border-radius: 7px; border: 1px solid transparent;
+    font: 500 13px/1 system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: 0.01em;
+    color: var(--text); background: transparent; cursor: pointer;
+    transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease;
+  }
+  #bar button:active { transform: scale(0.97); }
+  #bar button:disabled { cursor: default; }
+  #bar button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  #bar button.primary:disabled { background: transparent; border-color: var(--line); color: var(--muted); }
+  @media (hover: hover) and (pointer: fine) {
+    #bar button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.06); border-color: var(--line); }
+    #bar button.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+  }
+
+  /* feedback toast: enters from 8px below, leaves faster */
+  #msg {
+    position: fixed; bottom: 18px; left: 50%; z-index: 100;
+    padding: 8px 14px; border-radius: 8px;
+    font: 500 13px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text);
+    background: var(--island); border: 1px solid var(--line);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    opacity: 0; transform: translate(-50%, 8px); pointer-events: none;
+    transition: opacity 120ms ease, transform 120ms ease;
+  }
+  #msg.show { opacity: 1; transform: translate(-50%, 0); transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+
+  /* hide Excalidraw's parts this flow never uses */
+  .excalidraw .default-sidebar-trigger, .excalidraw .sidebar-trigger { display: none !important; }
+  .excalidraw .welcome-screen-center { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #bar button, #msg, #msg.show { transition: opacity 150ms ease, background-color 160ms ease; transform: translate(-50%, 0); }
+    #bar button { transform: none; }
+    #bar button:active { transform: none; }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
@@ -21,14 +66,23 @@
 </head>
 <body>
 <div id="root"></div>
-<div id="bar"><button id="save">Save</button><button id="done" class="primary">Done</button></div>
-<div id="msg"></div>
+<div id="bar"><button id="save" type="button">Save</button><button id="done" type="button" class="primary">Done</button></div>
+<div id="msg" role="status" aria-live="polite"></div>
 <script type="module">
 import { parseMermaidToExcalidraw } from "https://esm.sh/@excalidraw/mermaid-to-excalidraw@1.1.2";
 
 const Lib = window.ExcalidrawLib;
-const msg = (t) => { const m = document.getElementById("msg"); m.textContent = t; m.style.display = "block"; };
+const bar = document.getElementById("bar");
+const msgEl = document.getElementById("msg");
+let hideTimer = null;
 let api = null;
+
+function msg(text, { sticky = false } = {}) {
+  clearTimeout(hideTimer);
+  msgEl.textContent = text;
+  msgEl.classList.add("show");
+  if (!sticky) hideTimer = setTimeout(() => msgEl.classList.remove("show"), 1600);
+}
 
 async function initialData() {
   const s = await fetch("/scene");
@@ -58,14 +112,20 @@ async function payload() {
 }
 
 async function send(path) {
+  const done = path === "/done";
   try {
-    msg("saving...");
+    msg("Saving…", { sticky: true });
     const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(await payload()) });
     if (!r.ok) throw new Error(r.status);
-    msg(path === "/done" ? "saved - you can close this tab" : "saved");
-    if (path === "/done") { document.getElementById("done").disabled = true; }
-  } catch (e) { msg("save failed: " + e); }
+    if (done) {
+      const b = document.getElementById("done");
+      b.textContent = "Saved ✓"; b.disabled = true; bar.classList.add("done");
+      msg("Saved. You can close this tab.", { sticky: true });
+    } else {
+      msg("Saved");
+    }
+  } catch (e) { msg("Save failed: " + e, { sticky: true }); }
 }
 
 document.getElementById("save").onclick = () => send("/save");
@@ -78,11 +138,14 @@ try {
   const data = await initialData();
   const h = React.createElement;
   ReactDOM.createRoot(document.getElementById("root")).render(
-    h(Lib.Excalidraw, { initialData: data, theme: "dark", excalidrawAPI: (a) => { api = a; },
-      UIOptions: { canvasActions: { loadScene: false } } }));
+    h(Lib.Excalidraw, {
+      initialData: data, theme: "dark", excalidrawAPI: (a) => { api = a; },
+      UIOptions: { canvasActions: { loadScene: false, saveToActiveFile: false, export: false, saveAsImage: false,
+                                    toggleTheme: false, changeViewBackgroundColor: false, clearCanvas: false } },
+    }));
   window.__boardElements = data.elements.length;
   window.__boardReady = true;
-} catch (e) { msg("load failed: " + e); console.error(e); }
+} catch (e) { msg("Load failed: " + e, { sticky: true }); console.error(e); }
 </script>
 </body>
 </html>
