@@ -13,6 +13,7 @@ The user is a 4th-semester Information Systems student aiming for a software / A
    - `**What went wrong:**` the checks you skipped or failed, and the one habit behind it.
    - `**What you learned:**` the concrete things, in your words where you said them.
    - `**Learn next:**` the one check waiting for you this week, and what it will prove.
+   - `**How you worked with Claude:**` the week's working numbers next to last week's (correction prompts, actions you rejected, interrupts, "don't understand" prompts, prompts with a done-when, agent runs, paid-run guard blocks) read as a story in 2–4 sentences: what got smoother, what still costs you turns, and one thing to try. Noise moves these numbers too, so name a change only when it is large or repeats two weeks; never praise or blame a small wobble. (The user, 2026-10-12: the weekly review is for learning *and* for how they use Claude, what they do better than last time; `/insights` is for longer stretches.)
    - `**Context:**` one line on the workload beside it (prompts, agent runs, paid runs) and anything the machinery did wrong.
    Judge against the loop in `profile.md` ("How learning works here") only; the questions below are what to look at, not extra bullets:
    - Was a concept introduced this week with a source and an "after this you can:" line (loop step 1)? Did reading follow a wrong rating (step 4)?
@@ -20,7 +21,7 @@ The user is a 4th-semester Information Systems student aiming for a software / A
    - Was a prediction written before a paid run this week, and did the run confirm it (the run's findings in `notes/`)?
    - Which concept comes next, from "Now" in `profile.md`.
    - Prompt diffs in `main/` this week: were they shown to the user before the run (D-085)?
-   The "Background only" counts (corrections, done-when, subagents…) are context, never a target: do not praise or criticise a rise or drop in them.
+   The "Background only" counts (corrections, done-when, subagents…) feed the "How you worked with Claude" paragraph as a comparison with last week, never as a target to hit.
 4. Update `profile.md` only from evidence a check produced: a code question rated, a pre-run prediction scored against the run, a monthly test score. Never from keyword counts alone, and never from your own earlier verdicts. Date every change; move a concept between Strong / Developing / Revisit only with that evidence. Keep the user's own words.
 5. Do not propose new files, hooks, skills or rules; the user builds those when they ask for them.
 6. If the week shows a lesson about working with Claude, add a dated line to `agentic-coding.md` under "Lessons learned".
