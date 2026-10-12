@@ -1,0 +1,207 @@
+"""Weekly learning check, run by a SessionStart hook in ~/.claude/settings.json.
+
+Once every 7 days it counts how the user worked with Claude Code in the last
+7 days (all projects), appends the counts to ~/.claude/learning/weekly.md with
+"Interpretation: pending", and tells Claude to run the weekly-review skill,
+which interprets the counts and updates profile.md. While an entry is still
+pending, every session start reminds Claude again. Otherwise it prints nothing.
+
+Counts and the user's own short prompts only; tool output (which can hold
+document text) is never copied.
+
+    python weekly_stats.py --hook     as the hook: maybe write, maybe remind
+    python weekly_stats.py --force    write an entry now, whatever the date
+"""
+
+import json
+import re
+import sys
+import time
+from collections import Counter
+from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
+
+HOME = Path.home() / ".claude"
+LEARNING = HOME / "learning"
+WEEKLY = LEARNING / "weekly.md"
+LAST = LEARNING / ".last_review"
+DAYS = 7
+# Text a paid-run guard hook prints when it blocks a command, if you have one.
+PAID_GUARD_TEXT = "costs money"
+# Claude Code names a project folder after its path; this prefix is your home folder.
+HOME_PREFIX = re.sub(r"[:\\/]", "-", str(Path.home())) + "-"
+
+# Background context only, never a target: "explain" is good learning
+# behaviour, and "don't"/"stop" are ordinary instructions, so neither is counted.
+CORRECTION = re.compile(r"^\s*(no[,!. ]|nein|nope|wrong|falsch|why did|that'?s not|not what|i told you)", re.I)
+DONE_WHEN = re.compile(r"done when|definition of done|definiton of done|fertig wenn", re.I)
+# The habits in profile.md: a prompt that starts with the marker.
+PAPER = re.compile(r"^\s*paper\s*:", re.I)
+GUESS = re.compile(r"^\s*(guess|predict)\s*:", re.I)
+
+
+def last_review():
+    try:
+        return date.fromisoformat(LAST.read_text(encoding="utf-8").strip())
+    except Exception:
+        return None
+
+
+def pending():
+    return WEEKLY.exists() and "Interpretation: pending" in WEEKLY.read_text(encoding="utf-8")
+
+
+def collect(since):
+    sessions = set()
+    projects = Counter()
+    prompts = []
+    agents = Counter()
+    skills = Counter()
+    slash = Counter()
+    rejected = 0
+    denied = 0
+    interrupts = 0
+    paid_blocks = 0
+    cutoff = since.timestamp() - 86400
+    for path in (HOME / "projects").glob("*/*.jsonl"):
+        try:
+            if path.stat().st_mtime < cutoff:
+                continue
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except Exception:
+            continue
+        for line in lines:
+            try:
+                o = json.loads(line)
+            except Exception:
+                continue
+            ts = o.get("timestamp") or ""
+            try:
+                when = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            except Exception:
+                continue
+            if when < since or o.get("isSidechain"):
+                continue
+            msg = o.get("message") or {}
+            content = msg.get("content")
+            if o.get("type") == "assistant":
+                for c in content or []:
+                    if isinstance(c, dict) and c.get("type") == "tool_use":
+                        inp = c.get("input") or {}
+                        if c.get("name") in ("Agent", "Task"):
+                            agents[inp.get("subagent_type") or "general-purpose"] += 1
+                        if c.get("name") == "Skill":
+                            skills[inp.get("skill")] += 1
+                continue
+            if o.get("type") != "user":
+                continue
+            if isinstance(content, list):
+                for c in content:
+                    if not isinstance(c, dict):
+                        continue
+                    if c.get("type") == "tool_result":
+                        head = json.dumps(c.get("content"))[:400]
+                        if "denied by the Claude Code auto mode" in head:
+                            denied += 1
+                        elif "doesn't want to proceed" in head or "tool use was rejected" in head:
+                            rejected += 1
+                        if PAID_GUARD_TEXT in head:
+                            paid_blocks += 1
+                    elif c.get("type") == "text" and "[Request interrupted by user" in c.get("text", ""):
+                        interrupts += 1
+                continue
+            if not isinstance(content, str) or o.get("isMeta"):
+                continue
+            if "[Request interrupted by user" in content:
+                interrupts += 1
+                continue
+            m = re.search(r"<command-name>/?([^<]+)</command-name>", content)
+            if m:
+                slash[m.group(1).strip()] += 1
+                continue
+            if content.startswith("<") or content.startswith("Caveat:"):
+                continue
+            text = re.sub(r"<pasted_content.*?</pasted_content[^>]*>", "[pasted]", content, flags=re.S)
+            prompts.append(text)
+            sessions.add(path.stem)
+            projects[path.parent.name.replace(HOME_PREFIX, "")] += 1
+    return {
+        "sessions": len(sessions), "projects": projects, "prompts": prompts, "agents": agents,
+        "skills": skills, "slash": slash, "rejected": rejected, "denied": denied,
+        "interrupts": interrupts, "paid_blocks": paid_blocks,
+    }
+
+
+def entry(since, today, d):
+    prompts = d["prompts"]
+    lengths = sorted(len(p) for p in prompts)
+    median = lengths[len(lengths) // 2] if lengths else 0
+    corrections = [p for p in prompts if CORRECTION.search(p)]
+    done_when = sum(1 for p in prompts if DONE_WHEN.search(p))
+    paper = sum(1 for p in prompts if PAPER.search(p))
+    guess = sum(1 for p in prompts if GUESS.search(p))
+    lines = [
+        f"## Week ending {today.isoformat()}",
+        "",
+        f"Window: {since.date().isoformat()} to {today.isoformat()} (all projects).",
+        "",
+        f"- Sessions: {d['sessions']}; prompts: {len(prompts)}; median prompt length: {median} chars",
+        f"- Projects: {', '.join(f'{k} {v}' for k, v in d['projects'].most_common()) or 'none'}",
+        f"- Habits: 'paper:' pages sent: {paper}; 'guess:' / 'predict:' guesses written: {guess}",
+        "",
+        "Background only, no targets:",
+        f"- Prompts with a 'done when': {done_when}",
+        f"- Correction prompts ('no,', 'wrong', 'I told you'…): {len(corrections)}",
+        f"- Actions you rejected: {d['rejected']}; interrupts: {d['interrupts']}; auto-mode blocks: {d['denied']}; paid-run guard blocks: {d['paid_blocks']}",
+        f"- Subagents: {sum(d['agents'].values())} ({', '.join(f'{k} {v}' for k, v in d['agents'].most_common()) or 'none'})",
+        f"- Skills: {', '.join(f'{k} {v}' for k, v in d['skills'].most_common()) or 'none'}",
+        f"- Slash commands: {', '.join(f'{k} {v}' for k, v in d['slash'].most_common()) or 'none'}",
+        "",
+        "Sample corrections (first 80 chars):",
+    ]
+    for p in corrections[:8]:
+        lines.append("- " + p[:80].replace("\n", " "))
+    lines += ["", "Interpretation: pending", ""]
+    return "\n".join(lines)
+
+
+def write_entry():
+    today = date.today()
+    since = datetime.now(timezone.utc) - timedelta(days=DAYS)
+    text = entry(since, today, collect(since))
+    if not WEEKLY.exists():
+        WEEKLY.write_text("# Weekly learning log\n\nWritten by weekly_stats.py every 7 days; "
+                          "the weekly-review skill fills in each Interpretation.\n\n", encoding="utf-8")
+    with WEEKLY.open("a", encoding="utf-8") as f:
+        f.write(text + "\n")
+    LAST.write_text(today.isoformat(), encoding="utf-8")
+
+
+def hook():
+    last = last_review()
+    wrote = False
+    if last is None or (date.today() - last).days >= DAYS:
+        write_entry()
+        wrote = True
+    if not pending():
+        return
+    context = ("Weekly learning review is due: ~/.claude/learning/weekly.md has an entry with "
+               "'Interpretation: pending'. Before the user's first task, run the weekly-review skill "
+               "without asking (the user chose automatic weekly updates), keep it short, "
+               "then carry on with their request.")
+    out = {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": context}}
+    if wrote:
+        out["systemMessage"] = "Weekly learning stats written to ~/.claude/learning/weekly.md; Claude will update your profile."
+    print(json.dumps(out))
+
+
+if __name__ == "__main__":
+    started = time.time()
+    if "--force" in sys.argv:
+        write_entry()
+        print(f"entry written in {time.time() - started:.1f}s")
+    else:
+        try:
+            hook()
+        except Exception:
+            pass

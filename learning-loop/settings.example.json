@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ~/.claude/learning/weekly_stats.py --hook",
+            "timeout": 60,
+            "statusMessage": "Checking weekly learning review"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ~/.claude/learning/guess_first.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
