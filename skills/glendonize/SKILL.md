@@ -383,7 +383,8 @@ untested list (`tests/untested.txt`) only shrinks; a new source file without a t
 <Only where Phase 6 installed them:> A red test written before its fix lives in `tests/tdd/`, outside
 the gate, and names the issue it waits for; the commit that makes it green moves it into the gate.
 Every commit touching <spine dirs> carries its test, or says `no test:` and why in the subject; a
-test file never loses an assertion, or the subject says `drop test:` and why.
+test file never loses an assertion, or the subject says `drop test:` and why (`no drill:` /
+`drop drill:` where the repo calls its tests drills).
 
 A browser test only for what only a browser decides — a click really lands on page N, the
 last row is reachable at phone width — fed a recorded fixture of **invented** values with
@@ -521,11 +522,12 @@ condition per line (`test "$code" = 200`): in an `&&` chain `set -e` ignores eve
 command but the last. When no linter exists at all,
 propose only five promise-bug rules: `no-floating-promises`, `no-misused-promises`,
 `await-thenable`, `only-throw-error`, `require-await` — a missing `await` is an error
-typecheck cannot see. The Python twin is Ruff with `select = ["E4", "E7", "E9", "F", "B"]` and
-nothing stylistic, pinned (`ruff==<x.y.z>`) in the pip line because a newer release changes what it
+typecheck cannot see. The Python twin is Ruff with `select = ["E4", "E7", "E9", "F", "B"]`, no
+stylistic lint rules (`ruff format --check` beside it is a separate choice), pinned (`ruff==<x.y.z>`) in the pip line because a newer release changes what it
 flags. Any check that compares against the push base (Shapes L.1, L.2) needs `fetch-depth: 0` on
-the checkout step and `${{ github.event.before }}` passed in as the base; on a first push or a
-forced one the step falls back to `HEAD~1` and says so.
+the checkout step and `${{ github.event.before }}` passed in as the base; on a first push
+(all-zero `before`) both fall back to `HEAD~1`, on a forced push the CI step falls back and the
+ratchet skips, printing that it had nothing to compare.
 
 ## G. Boundary checks
 
@@ -862,11 +864,14 @@ several agents; each exists because one specific thing went wrong. Propose them 
 The pairing ratchet (Shapes G, check 8) only knows a test file exists. This one reads each
 test file at the push base and now, counts the assertion calls (`expect(` or the runner's
 equivalent) and fails when a file has fewer, or is gone. The base comes from an env var CI sets
-to `github.event.before`; locally it defaults to the upstream of the current branch. A deliberate
+to `github.event.before`; locally, a dirty test dir is compared with `HEAD` and a clean one with
+`HEAD~1`, since the commit is then already made. On a first push (all-zero `before`) both fall
+back to `HEAD~1`; on a forced push, when the sha is not in the clone, the ratchet prints that it
+had nothing to compare and skips. A deliberate
 removal is allowed by `drop test:` in the commit subject, which CI reads with `git log -1
 --format=%s`, or by `<REPO>_DROP_OK=1` for the local run before that commit exists. Print the
-delta per file on failure so the reader sees which check went. Why: 57 assertions were deleted
-in one commit and the gate got greener.
+delta per file on every run so the reader sees which check went. Why: 57 checks were deleted in
+one commit with nothing noticing.
 
 ### L.2 The spine change carries its test
 
@@ -874,7 +879,9 @@ One shell step in CI, before the checks:
 
 ```yaml
       - name: Every <spine dir> change carries a test
-        env: { BEFORE: ${{ github.event.before }}, HEAD_SHA: ${{ github.sha }} }
+        env:
+          BEFORE: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
         run: |
           base="$BEFORE"
           if [ -z "$base" ] || [ -z "${base//0/}" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
@@ -906,7 +913,8 @@ green before every commit".
 
 ### L.4 Cost label and derived deny-list
 
-Every script in the dir that may pay starts its docstring with one of:
+Every script in the dir that may pay carries, on its own line of the module docstring, one
+of:
 
 ```
 Cost: free - reads <cache>, makes no network call.
@@ -914,15 +922,16 @@ Cost: PAID - one LLM call per <unit>; --dry-run only prints the plan.
 ```
 
 The boundary check fails a script without the line, and builds the deny-list from the `PAID`
-lines plus a fixed floor of the scripts named in `AGENTS.md`, so the gate scan, the CI header
-comment and the hook below all read one source.
+lines plus a fixed floor of known names, in case a docstring loses its label. Only the gate scan
+reads that derived list; the CI header comment and the hook's own list below are still written
+by hand, and nothing yet checks that the three agree.
 
 ### L.5 Paid-run hook (Claude Code)
 
 `.claude/hooks/guard_paid_run.py`, registered as `PreToolUse` on `Bash|PowerShell` in the repo's
 `.claude/settings.json`: reads the tool call JSON from stdin, denies a command whose text names a
-deny-listed script unless it carries `<REPO>_PAID_OK=1`, lets everything else through, and lets
-unreadable input through too, so a broken hook cannot stop every command. The agent adds the
+deny-listed script unless it carries `<REPO>_PAID_OK=1` (an estimate-only invocation, the script
+without its `--go`, passes), lets everything else through, and lets unreadable input through too, so a broken hook cannot stop every command. The agent adds the
 marker only after the user's go for that run, never to get past a block; the rule says so in
 `CLAUDE.md`. Limit, stated in the docstring: it reads the command text, so a scratch script that
 imports the paid module is not caught. The hook gets its own test in the gate.
