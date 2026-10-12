@@ -169,11 +169,23 @@ def render():
         "Week ending <strong>" + inline(week_date or "–") + "</strong>.</p>"
     )
 
+    parts.append("<section><h2>This week, in plain words</h2>")
+    if this_week and this_week["interp"]:
+        for item in this_week["interp"]:
+            m = re.match(r"\*\*([^*]+?):?\*\*:?\s*(.*)", item, re.S)
+            if m:
+                parts.append("<h3>" + inline(m.group(1)) + "</h3><p>" + inline(m.group(2)) + "</p>")
+            else:
+                parts.append("<p>" + inline(item) + "</p>")
+    else:
+        parts.append('<p class="empty">The Monday judgement for this week is not written yet.</p>')
+    parts.append("</section>")
+
     parts.append("<section><h2>How you stand</h2>")
     parts.append(status_block(profile))
     parts.append("</section>")
 
-    parts.append("<section><h2>This week: what you did, and how it was rated</h2>")
+    parts.append("<section><h2>This week: the checks behind it</h2>")
     if this_week:
         parts.append(
             '<p class="nums">Code questions: <b>' + this_week["asked"] + "</b> asked, <b>"
@@ -182,11 +194,6 @@ def render():
             + " prompts, " + this_week["agents"] + " agent runs.</p>"
         )
     parts.append(ul(recent, "No record this week: nothing you did was checked. The loop stalled, not you."))
-    if this_week and this_week["interp"]:
-        parts.append("<h3>The Monday judgement</h3>")
-        parts.append(ul(this_week["interp"], ""))
-    elif this_week:
-        parts.append('<p class="empty">Judgement not written yet for this week.</p>')
     parts.append("</section>")
 
     parts.append("<section><h2>Not good yet</h2>")

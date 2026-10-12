@@ -8,7 +8,13 @@ The user is a 4th-semester Information Systems student aiming for a software / A
 1. Read the newest entry in `~/.claude/learning/weekly.md` that says `Interpretation: pending`. If none is pending, run `python ~/.claude/learning/weekly_stats.py --force` first.
 2. Read `~/.claude/learning/profile.md` ("How learning works here", "How the user reads code", "Monthly check", "Now"), `progress.md` ("Records", "Needs reinforcement", "Words you used"), and the previous entries in `weekly.md`.
    If the user ran `/insights` since the last weekly entry, read the newest `~/.claude/usage-data/report-*.html` (by file date; never run `/insights` yourself) as extra evidence and name its date.
-3. Write the interpretation in place of `Interpretation: pending`, 3–5 plain bullets, judged against the loop in `profile.md` ("How learning works here") only:
+3. Write the interpretation in place of `Interpretation: pending` as **five bullets with these exact bold labels, in this order**, each 2–4 plain sentences addressed to the user as "you", no file names, no D-/Q- ids, no counts without a comparison to the week before (the user, 2026-10-12: "it should show me how good I got, how I progressed, what I did not good, what I learned, what I should learn"):
+   - `**How you got better:**` what you can do now that you could not last week, with the evidence (which check, what happened). If nothing: say so in one sentence.
+   - `**What went wrong:**` the checks you skipped or failed, and the one habit behind it.
+   - `**What you learned:**` the concrete things, in your words where you said them.
+   - `**Learn next:**` the one check waiting for you this week, and what it will prove.
+   - `**Context:**` one line on the workload beside it (prompts, agent runs, paid runs) and anything the machinery did wrong.
+   Judge against the loop in `profile.md` ("How learning works here") only; the questions below are what to look at, not extra bullets:
    - Was a concept introduced this week with a source and an "after this you can:" line (loop step 1)? Did reading follow a wrong rating (step 4)?
    - The code-question line: asked, answered, with sure/unsure said. Which records were added to `progress.md` this week, and what each says the user can do now. Is a redo of the same kind of check due (~3 and ~10 days after a record)?
    - Was a prediction written before a paid run this week, and did the run confirm it (the run's findings in `notes/`)?
