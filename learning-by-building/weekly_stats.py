@@ -207,72 +207,6 @@ def write_entry():
     LAST.write_text(today.isoformat(), encoding="utf-8")
 
 
-HTML_PAGE = LEARNING / "weekly.html"
-
-
-def html_escape(t):
-    return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-
-def inline(t):
-    t = html_escape(t)
-    t = re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
-    t = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", t)
-    return t
-
-
-def render_html():
-    """weekly.md as one page, newest week first, for reading on Monday (user, 2026-10-12:
-    "do now html page for me to read"). No dependency: headings, bullets, bold, code."""
-    text = WEEKLY.read_text(encoding="utf-8") if WEEKLY.exists() else ""
-    parts = re.split(r"(?m)^## ", text)
-    entries = [p for p in parts[1:] if p.strip()]
-    entries.reverse()
-    body = []
-    for entry in entries:
-        lines = entry.splitlines()
-        body.append("<section><h2>" + inline(lines[0]) + "</h2>")
-        in_list = False
-        for line in lines[1:]:
-            if line.startswith("- "):
-                if not in_list:
-                    body.append("<ul>")
-                    in_list = True
-                body.append("<li>" + inline(line[2:]) + "</li>")
-                continue
-            if in_list:
-                body.append("</ul>")
-                in_list = False
-            if not line.strip():
-                continue
-            cls = ' class="judge"' if line.startswith("Interpretation") else ""
-            body.append("<p" + cls + ">" + inline(line) + "</p>")
-        if in_list:
-            body.append("</ul>")
-        body.append("</section>")
-    page = (
-        "<!doctype html><html lang=en><head><meta charset=utf-8>"
-        "<meta name=viewport content='width=device-width,initial-scale=1'>"
-        "<title>Weekly learning review</title><style>"
-        ":root{--bg:#fbfaf7;--fg:#1f2328;--muted:#6b7280;--line:#e5e1d8;--mark:#b45309;--code:#efece5}"
-        "@media(prefers-color-scheme:dark){:root{--bg:#17191c;--fg:#e6e3dc;--muted:#9aa0a6;--line:#2c3036;--mark:#f0a24b;--code:#24282e}}"
-        "body{margin:0;padding:24px 16px 64px;background:var(--bg);color:var(--fg);"
-        "font:16px/1.55 Georgia,'Times New Roman',serif;max-width:760px;margin-inline:auto}"
-        "h1{font-size:1.5rem;margin:0 0 4px}h1+p{color:var(--muted);margin-top:0}"
-        "section{border-top:1px solid var(--line);padding-top:16px;margin-top:24px}"
-        "h2{font-size:1.2rem;margin:0 0 8px}ul{padding-left:20px;margin:6px 0}li{margin:4px 0}"
-        "p.judge{color:var(--mark);font-weight:600;margin:16px 0 4px}"
-        "code{background:var(--code);padding:1px 4px;border-radius:3px;font-size:.9em}"
-        "</style></head><body><h1>Weekly learning review</h1>"
-        "<p>Newest week first. The counts come from your session logs; the judgement is written "
-        "by the weekly-review skill each Monday. Source: <code>~/.claude/learning/weekly.md</code>.</p>"
-        + "\n".join(body)
-        + "</body></html>"
-    )
-    HTML_PAGE.write_text(page, encoding="utf-8")
-    print("html written: " + str(HTML_PAGE))
-
-
 def apply(out_path):
     """Write what the headless review printed into weekly.md (run_weekly calls this).
     A non-interactive Claude may not edit ~/.claude files, so the skill prints the
@@ -332,7 +266,10 @@ if __name__ == "__main__":
     elif "--apply" in sys.argv:
         apply(sys.argv[sys.argv.index("--apply") + 1])
     elif "--html" in sys.argv:
-        render_html()
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import weekly_page  # the progress page, built from all three learning files
+
+        weekly_page.render()
     else:
         try:
             hook()
