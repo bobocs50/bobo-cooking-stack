@@ -4,12 +4,12 @@
     "name": "bobocs50",
     "url": "https://github.com/bobocs50"
   },
-  "description": "bobocs50's Claude Code skills (glendonize, grilling, whiteboard) as an installable plugin.",
+  "description": "bobocs50's Claude Code skills (glendonize, grilling, whiteboard, weekly-review) as an installable plugin.",
   "plugins": [
     {
       "name": "bobo-cooking-stack",
       "source": "./",
-      "description": "glendonize, grilling and whiteboard: make a repo agent-ready, stress-test a plan, draw and be read.",
+      "description": "glendonize, grilling, whiteboard and weekly-review: make a repo agent-ready, stress-test a plan, draw and be read, review what you learned this week.",
       "category": "engineering",
       "keywords": [
         "agents",

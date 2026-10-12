@@ -1,7 +1,7 @@
 {
   "name": "bobo-cooking-stack",
   "version": "1.0.0",
-  "description": "bobocs50's skills: glendonize (an AGENTS.md working agreement, a numbered R/D/Q register that code cites, boundary checks and a free-only gate), grilling (a design-tree interview with a learning mode) and whiteboard (a hand-drawn Excalidraw board the agent reads).",
+  "description": "bobocs50's skills: glendonize (an AGENTS.md working agreement, a numbered R/D/Q register that code cites, boundary checks and a free-only gate), grilling (a design-tree interview with a learning mode), whiteboard (a hand-drawn Excalidraw board the agent reads) and weekly-review (a weekly review of your learning stats that updates your learning profile from evidence).",
   "author": {
     "name": "bobocs50",
     "url": "https://github.com/bobocs50"
@@ -19,6 +19,7 @@
   "skills": [
     "./skills/glendonize",
     "./skills/grilling",
-    "./skills/whiteboard"
+    "./skills/whiteboard",
+    "./skills/weekly-review"
   ]
 }

@@ -1,61 +1,73 @@
-﻿# bobo-cooking-stack
-
-bobocs50's Claude Code skills: `glendonize` (make a repo agent-ready), `grilling` (stress-test a plan, with a learning mode) and `whiteboard` (a hand-drawn board you draw on and the agent reads). The first one gives the repo its history; the install lines below name the skill you want.
+# bobo-cooking-stack
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-```sh
-npx skills@latest add bobocs50/bobo-cooking-stack
+Claude Code skills by bobocs50 for building software with AI coding agents without losing
+track of what gets built. There are two goals:
+
+- **Keep the repo safe for agents.** Agents follow written rules, cite recorded decisions,
+  and never run a step that costs money.
+- **Keep the human learning.** You still understand and can explain the code and the design,
+  even though agents write most of it.
+
+It is for developers who use Claude Code every day, often with several agents at once, and
+who want both of those things.
+
+## The parts
+
+| Part | What it does | Read more |
+|---|---|---|
+| `glendonize` | Makes a repo agent-ready in gated phases. It adds an `AGENTS.md` working agreement, a numbered register of requirements, decisions and open questions that code cites, boundary checks that read source as text, and a gate that runs only free commands. It writes nothing on the first pass and nothing it cannot trace to a line in your repo. | [skills/glendonize/README.md](skills/glendonize/README.md) |
+| `grilling` | Interviews you about a plan, one round of questions at a time, mapped as a design tree, until every decision is settled. Its learning mode has you state the problem and your own approach first, and it teaches a missing concept on a small example instead of handing you its design. | [skills/grilling/README.md](skills/grilling/README.md) |
+| `whiteboard` | Opens a Mermaid flowchart as a full-screen, hand-drawn Excalidraw board in your browser. You draw on it and press "Send to Claude"; the agent reads the PNG and the scene and updates the Mermaid to match. | [skills/whiteboard/README.md](skills/whiteboard/README.md) |
+| `weekly-review` | Once a week, turns the counts in `~/.claude/learning/weekly.md` into 3 to 5 plain bullets on how your learning went. It updates your learning profile only from evidence a check produced, never from the counts alone. | [skills/weekly-review/README.md](skills/weekly-review/README.md) |
+| `learning-loop` | Not a skill. It is the setup that the learning parts run on: a weekly stats script, a guess-first hook, a `CLAUDE.md` snippet that makes Claude ask you one question about a risky hunk, and templates for your profile and progress files under `~/.claude/learning/`. | [learning-loop/README.md](learning-loop/README.md) |
+
+## How the parts fit together
+
+```
+your repo ──> glendonize ──> AGENTS.md, register, boundary checks, free gate
+                                   (agents can now work in it safely)
+
+a plan ─────> grilling ───> design tree, decisions settled
+                 │
+                 └─ at a structure decision ──> whiteboard
+                      (you sketch first, the skill grills the drawing,
+                       then draws its alternative beside yours)
+
+while agents build ──> learning-loop ──> weekly.md (counts)
+                                              │
+                                              └──> weekly-review ──> profile.md updated
 ```
 
-A Claude Code skill that gives a repository the structure several AI coding agents need to
-work in it safely: a working agreement, a numbered register of requirements, decisions and
-open questions that code cites, boundary checks that read source as text, and a gate made
-only of free commands. It installs them one gated phase at a time and writes nothing it
-cannot trace to a line in your repo.
+- **glendonize** structures the repo once, so agents have written rules to follow and cannot
+  spend money by accident.
+- **grilling** stress-tests a plan before it is built. When the plan reaches a structure
+  decision (a new layer, step, data shape or boundary), you draw the first sketch with
+  **whiteboard**, and the grilling works on your drawing.
+- **The learning loop and weekly-review** keep track of what you learn while agents build.
+  Grilling sessions write what you showed you understand to
+  `~/.claude/learning/progress.md`. The `CLAUDE.md` snippet makes Claude ask you about code
+  you are about to trust. Once a week, `weekly-review` reads all of it and updates your
+  profile.
 
-The whole skill is one file: [`skills/glendonize/SKILL.md`](skills/glendonize/SKILL.md).
-
-## Why
-
-Agents fail in predictable ways. Each mechanism exists to stop one of them.
-
-| Failure | Mechanism | What it looks like |
-|---|---|---|
-| An agent invents a plausible reason for a rule nobody explained | Decision register; a rule with no recorded reason gets `Rationale: not recorded` | The README says "never retry uploads". The register gets `D-004 â€” Uploads are not retried. Rationale: not recorded`, not "to avoid duplicate charges", which nobody said |
-| An agent runs a script that bills per call | Free-only gate: a confirmed deny-list, and CI that holds no secrets | `parse.py` bills per page. It is deny-listed, and with no `secrets:` in the workflow a paid call cannot succeed even by accident |
-| Code cites a rule that was renamed or never written | Citation resolvability check | A comment says `(D-017)`, or `docs/OPERATIONS.md 2.4` became 2.5. The check fails and prints `src/retry.py: D-017` |
-| Boundary rules live only in prose | Boundary checks that read source as text and never import it | "Only `client.py` may reach the network." The check fails unless the set of files calling `requests.get` / `urlopen` is exactly `["src/client.py"]` |
-| A vendor fact is repeated as if it were checked | `PLATFORM_CONSTRAINTS.md`, every entry VERIFIED (source linked) or ASSERTED | "The API allows 60 requests per minute. ASSERTED." It stays that way until someone reads the vendor page and links it |
-| A missing decision is filled with a guess | Parking: stop that branch, open a `Q-` entry, continue the rest | "Should expired tokens refresh silently?" becomes `Q-003` with what is known and who settles it; the refresh code waits |
-| A new module lands without a test | Pairing ratchet over a tracked `untested.txt` | 40 files have no test today and are listed. `src/export.py` arrives untested and unlisted, so the check fails. The list only shrinks |
-
-Why a ratchet and not "every file must have a test": a hard 1:1 rule fails on day one and
-gets muted. Why read source as text: an import can execute code, and that code might call
-something paid; a file that is only read cannot spend money.
-
-## What you get
-
-| File | What it is |
-|---|---|
-| `AGENTS.md` | The working agreement every agent reads: citation, review, parking, gates, working loop. Capped at 8 KiB |
-| `CLAUDE.md` | Imports `@AGENTS.md`; restates none of its rules |
-| `docs/REQUIREMENTS.md`, `docs/DECISIONS.md` | `R1`â€¦, `D-001`â€¦, each with a source; rationale quoted or `not recorded` |
-| `docs/OPEN_QUESTIONS.md` | `Q-001`â€¦: what is known and the exact act that would settle it |
-| `docs/PLATFORM_CONSTRAINTS.md` | External facts, each VERIFIED or ASSERTED |
-| `docs/README.md` + docs | An owner index (Owns / Does not own / Update when) and the numbered docs it lists |
-| Boundary checks | `scripts/boundary_check.py`, `test_boundary.py` or a colocated `boundary.test.ts`, depending on the stack |
-| The gate | The free commands run before every commit, as `.github/workflows/verify.yml` or a local script |
-| `tests/untested.txt` | With a test runner: the ratchet list |
+Each part also works alone. You can install `whiteboard` without `grilling`, or `glendonize`
+without any of the learning parts. Grilling's learning mode reads
+`~/.claude/learning/profile.md` and `progress.md`, and the learning loop's templates create
+those files.
 
 ## Install
 
+### Everything at once
+
+With the `skills` CLI:
+
 ```sh
 npx skills@latest add bobocs50/bobo-cooking-stack
 ```
 
-Pick which coding agents to install it on. It writes the skill as an ordinary file you own
-and can edit; pull later changes with `npx skills update`.
+You pick which coding agents to install it on. It writes each skill as an ordinary file that
+you own and can edit. Run `npx skills update` to pull later changes.
 
 Or as a Claude Code plugin, from inside a session:
 
@@ -64,151 +76,79 @@ Or as a Claude Code plugin, from inside a session:
 /plugin install bobo-cooking-stack@bobo-cooking-stack
 ```
 
-Or by hand, user-level on macOS / Linux:
+When installed as a plugin, the commands are namespaced, for example
+`/bobo-cooking-stack:glendonize`.
+
+Both ways install the four skills only. The learning loop's scripts, hooks and templates are
+copied by hand from a clone of this repo. The steps are in the
+[learning loop's install section](learning-loop/README.md#install).
+
+### One skill at a time
 
 ```sh
-mkdir -p ~/.claude/skills/glendonize && curl -fsSL https://raw.githubusercontent.com/bobocs50/bobo-cooking-stack/main/skills/glendonize/SKILL.md -o ~/.claude/skills/glendonize/SKILL.md
+npx skills@latest add bobocs50/bobo-cooking-stack --skill glendonize
+npx skills@latest add bobocs50/bobo-cooking-stack --skill grilling
+npx skills@latest add bobocs50/bobo-cooking-stack --skill whiteboard
+npx skills@latest add bobocs50/bobo-cooking-stack --skill weekly-review
 ```
 
-On Windows PowerShell:
-
-```powershell
-New-Item -ItemType Directory -Force "$HOME\.claude\skills\glendonize" | Out-Null; Invoke-WebRequest https://raw.githubusercontent.com/bobocs50/bobo-cooking-stack/main/skills/glendonize/SKILL.md -OutFile "$HOME\.claude\skills\glendonize\SKILL.md"
-```
+Each skill's README lists what else it needs. For example, `whiteboard` needs Python and a
+browser that can reach a CDN, and `weekly-review` needs the learning loop's files.
 
 ## Run
 
-In Claude Code:
-
-```
-/glendonize               # the current repo
-/glendonize path/to/repo
-```
-
-Installed as a plugin, the command is namespaced: `/bobo-cooking-stack:glendonize`. Either way it
-also triggers on "make this repo agent-ready" or a request for a decision register,
-constraints doc, boundary checks or a gate.
-
-## A first run
-
-Take `invoicer`, a small made-up Python repo with pytest, a `scripts/summarize.py` that
-calls an LLM, and a `CLAUDE.md` holding a few rules. Phase 0 writes only `AGENT_READY.md`
-(kept out of git through `.git/info/exclude`) and reports:
-
-- **Stack:** Python with pytest. 9 of 14 source files have a `tests/test_x.py`; the other 5
-  become the ratchet's baseline.
-- **Deny-list candidates, with provenance:** `scripts/summarize.py`, because
-  `README.md:41` says "costs a few cents per invoice" and line 7 reads `OPENAI_API_KEY`.
-  `invoicer/fx.py` reads `FX_API_TOKEN` and nothing says whether that is paid, so it is
-  treated as paid.
-- **Rules:** "never round before summing line items" (`CLAUDE.md:9`, reason on line 10)
-  and "amounts are stored in cents" (`README.md:58`, no reason given, so it will read
-  `Rationale: not recorded`).
-- **Parked:** `TODO(user): which rate source is authoritative?` becomes a `Q-` candidate.
-- **One conflict brief:** `CLAUDE.md` holds rules of its own; the plan moves them into
-  `AGENTS.md` and leaves `CLAUDE.md` as `@AGENTS.md`. Both sides are quoted. Your ruling?
-
-Nothing moves until every conflict has a ruling and every list is approved. Then each phase
-is committed on its own once its gate passes.
-
-## Phases
-
-| # | Phase | Adds |
-|---|---|---|
-| 0 | Survey | Stack, free vs paid steps, bans, candidates with `file:lines`, conflicts, blockers. Writes only the state file |
-| 1 | Unblock | `.claude/worktrees/` ignored; `CLAUDE.md` imports `AGENTS.md` |
-| 2 | Register | `REQUIREMENTS.md` and `DECISIONS.md` from confirmed candidates only |
-| 3 | Working agreement | `AGENTS.md`, keeping your existing text verbatim |
-| 4 | Parking and constraints | `OPEN_QUESTIONS.md`, `PLATFORM_CONSTRAINTS.md`; optionally mirrors open questions as issues |
-| 5 | Boundary checks | One per confirmed boundary, plus citation resolvability and the ratchet. Must pass on day one |
-| 6 | Gate | The free-only command list, in CI or a local script; dependencies proven in a fresh environment built from `git archive` |
-| 7 | Docs | The owner index first, then the numbered docs it lists |
-| 8 | Close | Summary and open questions; deletes the state file |
-
-Phase 0 tells you which phases add something to your repo; the rest can be skipped.
-
-## What it will not do
-
-- **Write to your repo on the first pass.** Phase 0 is a survey; its only output is the
-  local state file.
-- **Invent requirements, decisions or facts.** Every entry names the file and lines it came
-  from and is confirmed by you. What cannot be settled becomes a `Q-` entry.
-- **Proceed without you.** Every phase ends at a gate you approve. Every conflict with your
-  `AGENTS.md`, `CLAUDE.md` or README is put to you, and your ruling is recorded as a dated
-  decision so the next agent does not argue it again.
-- **Run paid scripts.** A step joins the gate only if the survey shows it reads no billing
-  credential and makes no billable call. In doubt, it counts as paid. Paid scripts refuse to
-  run without their key and record `skipped`, never a pass.
-- **Replace your linter or push on its own.** Each phase is committed with its own files
-  only (never `git add -A`); pushing waits until you ask.
-
-## Supported stacks
-
-| Stack | Support |
+| Part | Trigger |
 |---|---|
-| Python, with or without pytest | Full; the ratchet needs a test runner |
-| TypeScript, with or without vitest/jest | Full; colocated `boundary.test.ts` when a runner exists |
-| Python and TypeScript together | One checker covering both, one gate job per side |
-| Go, Rust, JVM, others | Rules, register, parking and docs only, and the skill says so |
+| `glendonize` | `/glendonize` or `/glendonize path/to/repo`, "make this repo agent-ready", or a request for a decision register, constraints doc, boundary checks or a gate |
+| `grilling` | `/grilling` or "grill me" |
+| `whiteboard` | `/whiteboard`, "draw it", "sketch this", or a grilling that reaches a structure decision |
+| `weekly-review` | Runs itself when the `SessionStart` hook says a review is due, or from a scheduled task; by hand with `/weekly-review` or "weekly review" |
 
-## FAQ
+## Repo layout
 
-**Does it change my code?** Not its behaviour. Phases 0â€“6 write docs, config and checks. In
-Phase 7, citations your code already has are upgraded to the `docs/X.md N.N` form and ids
-are added to existing test labels. Your own prose is never rewritten or renumbered.
-
-**What if I already have `AGENTS.md` or `CLAUDE.md`?** They are read in full and treated as
-raw material, never overruled. Existing text is kept verbatim. If the structure is already
-there, the skill says so and offers only the phases that add something.
-
-**Can I stop halfway?** Yes. `AGENT_READY.md` records progress, `HEAD` and your rulings word
-for word. Run `/glendonize` again: it checks what changed, names the first unfinished phase
-and asks whether to resume or discard. It never re-asks a ruling.
-
-**Does it work with Codex or other agents?** The output does: `AGENTS.md` is
-agent-agnostic. The skill itself runs in Claude Code, because it uses its question prompts
-and subagents.
-
-## Also in this repo: grilling
-
-[`skills/grilling/SKILL.md`](skills/grilling/SKILL.md) interviews you about a plan one round
-of questions at a time, mapped as a design tree, until every decision is settled. On top of
-the plain grilling it has a learning mode: you state the problem and your own approach first,
-it teaches a missing concept on a small made-up example instead of handing you its design,
-and at the end it records what you demonstrated in `~/.claude/learning/`. Triggers on
-"grill me" or `/grilling`.
-
-```sh
-npx skills@latest add bobocs50/bobo-cooking-stack --skill grilling
 ```
-
-When a grilling reaches a structure decision (a new layer, step, data shape or boundary),
-you draw the first sketch and the skill grills the drawing before it draws an alternative
-beside yours.
-
-## Also in this repo: whiteboard
-
-[`skills/whiteboard/SKILL.md`](skills/whiteboard/SKILL.md) opens a Mermaid flowchart as a
-full-screen, hand-drawn, editable whiteboard in your browser: one dark board, the drawing
-toolbar, "Save draft" and "Send to Claude", nothing else. `serve.py` (Python standard library, local only)
-serves `board.html` (Excalidraw from a CDN) with your `.mmd` converted in the browser;
-"Send to Claude" writes a PNG and the scene next to the `.mmd` and exits, so the agent reads what you
-drew. Reopening the same `.mmd` loads your saved layout. The Mermaid stays the record.
-Triggers on `/whiteboard`, "draw it" or "sketch this"; nothing to install beyond Python.
-
-```sh
-npx skills@latest add bobocs50/bobo-cooking-stack --skill whiteboard
+bobo-cooking-stack/
+├── .claude-plugin/
+│   ├── plugin.json          # plugin manifest: lists the four skills
+│   └── marketplace.json     # makes the repo a one-plugin marketplace
+├── skills/
+│   ├── glendonize/
+│   │   ├── SKILL.md
+│   │   └── README.md
+│   ├── grilling/
+│   │   ├── SKILL.md
+│   │   ├── README.md
+│   │   └── agents/openai.yaml
+│   ├── whiteboard/
+│   │   ├── SKILL.md
+│   │   ├── README.md
+│   │   ├── serve.py         # local server, Python standard library only
+│   │   ├── board.html       # the Excalidraw board
+│   │   └── example.mmd      # a sample Mermaid flowchart
+│   └── weekly-review/
+│       ├── SKILL.md
+│       └── README.md
+├── learning-loop/
+│   ├── README.md
+│   ├── weekly_stats.py      # counts the week, appends to weekly.md
+│   ├── guess_first.py       # UserPromptSubmit hook: guess before a swarm
+│   ├── run_weekly.ps1       # Windows scheduled-task runner
+│   ├── settings.example.json  # the hooks to merge into ~/.claude/settings.json
+│   ├── CLAUDE.snippet.md    # paste into a project's CLAUDE.md
+│   └── templates/           # profile.md, progress.md, agentic-coding.md
+├── LICENSE
+└── README.md
 ```
 
 ## Credits
 
-Named after and inspired by the repo structure of glendonC
-([github.com/glendonC](https://github.com/glendonC)), e.g. his public repo
-[1321](https://github.com/glendonC/1321).
-
-`grilling` builds on the grilling skill in Matt Pocock's
-[skills](https://github.com/mattpocock/skills) (MIT); its learning mode is modelled on
-[nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise).
+- `glendonize` is named after the repo structure of glendonC
+  ([github.com/glendonC](https://github.com/glendonC)), in particular his public repo
+  [1321](https://github.com/glendonC/1321), and is inspired by it.
+- `grilling` builds on the grilling skill in Matt Pocock's
+  [skills](https://github.com/mattpocock/skills) (MIT).
+- The learning mode in `grilling` and the teach-first, explain-it-back part of the learning
+  loop are modelled on [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise).
 
 ## License
 

@@ -1,13 +1,40 @@
 # learning-loop
 
-Learning to be a better engineer while AI agents write most of the code. Most of the code
-gets written for you, and you can still learn by reading, predicting and explaining it.
-This folder is the setup that makes that happen inside Claude Code: what Claude does, when
-it asks you something, and a weekly report on how you are doing.
+[← all skills](../README.md)
 
-It runs on your machine under `~/.claude/learning/`. Nothing is sent anywhere; the weekly
-report reads only counts and your own short prompts from Claude Code's local session files,
-never tool output.
+Learning to be a better engineer while AI agents write most of your code.
+
+When an agent writes the code, you skip the part where you would have learned: you never
+struggle with a bug, never trace a value, never have to explain your design. You ship faster
+and understand less. This folder is a small setup for Claude Code that puts the learning
+back, without slowing the project down:
+
+- **Concepts come when the work needs them**, with one example and a source, and you write
+  down what you understood from memory.
+- **Claude asks you one real question about the code** at the moments that matter, and
+  tracks how sure you were against how right you were.
+- **Before you hand a "why" question to agents, you guess first**, so you have something to
+  compare their answer with.
+- **Once a week, a report** tells you what you learned and what is due next, from evidence,
+  not from vibes.
+
+It runs on your machine under `~/.claude/learning/`. Nothing is sent anywhere: the weekly
+counts are read from Claude Code's local session files, and only counts and your own short
+prompts are used, never tool output (which can hold file contents).
+
+## What is in this folder
+
+| File | What it does |
+|---|---|
+| [`README.md`](README.md) | This page |
+| [`weekly_stats.py`](weekly_stats.py) | Counts the last 7 days of your Claude Code sessions and appends them to `weekly.md`. Run as a `SessionStart` hook (`--hook`) or by hand (`--force`) |
+| [`guess_first.py`](guess_first.py) | A `UserPromptSubmit` hook: when a prompt asks for agents without a `guess:`, it reminds Claude to ask you for your guess first |
+| [`run_weekly.ps1`](run_weekly.ps1) | Windows only, optional: a script for Task Scheduler that writes the counts and runs `/weekly-review` headless once a week |
+| [`settings.example.json`](settings.example.json) | The two hooks, ready to merge into `~/.claude/settings.json` |
+| [`CLAUDE.snippet.md`](CLAUDE.snippet.md) | Rules to paste into a project's `CLAUDE.md`: when Claude asks you a code question, how, and how it explains |
+| [`templates/`](templates/) | Empty starting copies of `profile.md`, `progress.md` and `agentic-coding.md` |
+
+The interpreting half is a skill: [`skills/weekly-review`](../skills/weekly-review/README.md).
 
 ## The loop, per concept
 
@@ -45,6 +72,29 @@ gap between how sure you were and how right you were is what you track.
 Paste [`CLAUDE.snippet.md`](CLAUDE.snippet.md) into a project's `CLAUDE.md` to switch
 this on there.
 
+An example. The agent just committed a change to how a missing value is handled:
+
+```python
+def pick_report(cited, found):
+    if cited:
+        return cited[0]
+    if found:
+        return found[0]          # fallback
+    return None
+```
+
+> **Claude:** This hunk decides which test report goes into the record. Input: `cited = []`,
+> `found = ["QTR-12"]`. What comes out, and does the record say it was a fallback?
+>
+> **You:** Unsure. `"QTR-12"`, from the second branch. Nothing marks it as a fallback, so a
+> reviewer can't tell it apart from a cited report.
+>
+> **Claude:** Right on both. Line 5 fills the field silently; the consequence is a value
+> that looks cited but isn't. Logged in `progress.md` as *demonstrated, unsure → right*.
+
+You answered by reading four lines, and the next time you see a fallback you will look for
+the flag.
+
 ## Struggle first
 
 Before you hand a *why* question to agents ("why does this value miss", "why did the run
@@ -71,6 +121,33 @@ Then the [`weekly-review`](../skills/weekly-review/README.md) skill reads the co
 produced (a `paper:` page marked, a guess scored against real output), never from the
 counts alone.
 
+A made-up entry after the review has run:
+
+```markdown
+## Week ending 2026-10-12
+
+Window: 2026-10-05 to 2026-10-12 (all projects).
+
+- Sessions: 31; prompts: 412; median prompt length: 58 chars
+- Projects: Repos-myapp 380, Repos-notes 32
+- Habits: 'paper:' pages sent: 1; 'guess:' / 'predict:' guesses written: 3
+
+Background only, no targets:
+- Prompts with a 'done when': 4
+- Correction prompts ('no,', 'wrong', 'I told you'…): 9
+- Actions you rejected: 6; interrupts: 5; auto-mode blocks: 0; paid-run guard blocks: 2
+- Subagents: 7 (general-purpose 4, Explore 3)
+- Skills: grilling 2, whiteboard 1
+- Slash commands: clear 6
+
+Interpretation:
+- Evals: introduced Monday, `paper:` page sent Wednesday and marked (2 gaps: what the
+  unit of scoring is, why an LLM judge was ruled out). First redo due Saturday.
+- Code questions: 4 asked; sure and right 2, unsure and right 1, sure and wrong 1 (a
+  fallback read as cited). Reading to the last `return` is still the habit to build.
+- Next concept from "Now": CI, when the first workflow is added.
+```
+
 Two ways it runs, use either or both:
 
 - **A `SessionStart` hook**: the first session of a new week writes the counts and tells
@@ -92,6 +169,14 @@ Starting copies are in [`templates/`](templates/). They stay on your machine; do
 your filled-in versions anywhere public, they describe you and your work.
 
 ## Install
+
+The skill installs with `npx`; the scripts and templates are copied from a clone of this
+repo, because they live in your home folder, not in a skill:
+
+```sh
+git clone https://github.com/bobocs50/bobo-cooking-stack.git
+cd bobo-cooking-stack
+```
 
 macOS / Linux:
 
@@ -117,6 +202,39 @@ top of `profile.md`: who you are, what you want to become, what you already know
 
 Check it works: `python ~/.claude/learning/weekly_stats.py --force` writes an entry to
 `weekly.md` now, whatever the date.
+
+## Requirements
+
+- Claude Code (the hooks and the skill run there).
+- Python 3.9 or newer on `PATH` as `python`, standard library only.
+- For `run_weekly.ps1`: Windows, and `python` and `claude` on `PATH`. On macOS or Linux, use
+  the `SessionStart` hook alone, or a cron line that runs
+  `python ~/.claude/learning/weekly_stats.py --force && claude -p "/weekly-review"`.
+
+## FAQ
+
+**Does anything leave my machine?** No. The scripts read local files and write local files.
+The review runs in your own Claude Code session like any other prompt.
+
+**What exactly is read from my sessions?** For the last 7 days: your own prompts (to count
+them, measure their length, and spot `paper:`, `guess:` and correction words), which tools,
+subagents, skills and slash commands were used, and whether a tool call was rejected or
+blocked. Tool results are only scanned in their first 400 characters for those markers and
+are never written anywhere.
+
+**Will it nag me?** The weekly review asks nothing; it writes and tells you in two lines.
+The code question comes at most about once a day, only after risky changes. The guess
+reminder fires only when you ask for agents.
+
+**Why are the counts "background only"?** Because they are easy to game and easy to
+misread: more corrections can mean you got more precise, not worse. The profile changes only
+when a check produced evidence.
+
+**How do I turn it off?** Remove the two hooks from `~/.claude/settings.json` and the
+snippet from your `CLAUDE.md`. Your files in `~/.claude/learning/` stay.
+
+**Can I share my profile?** You can, but it describes you and your work. The templates here
+are empty on purpose.
 
 ## Credits
 
