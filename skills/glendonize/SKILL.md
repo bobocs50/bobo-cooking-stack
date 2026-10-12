@@ -224,6 +224,17 @@ with a test, and on a listed file that has since gained one — the list shrinks
 grows, and a new module cannot land untested. Generated, vendored and type-only files are
 excluded by an explicit glob the user confirms, never by judgement. A hard 1:1 fails on day
 one and gets muted, which is why it is a ratchet.
+
+A test file that exists but was gutted passes the pairing ratchet, so add the **assertion-count
+ratchet** next to it (Shapes L.1): per test file, the count of assertion calls at the push base
+may not drop; a deliberate drop says `drop test:` and why in the commit subject, and an env var
+lets the local run pass before that commit exists. In one production repo 57 checks left in one
+commit with nothing noticing before this existed (2026-10). Where scripts can pay, every script in
+the paid dir declares `Cost: free - <why>` or `Cost: PAID - <why>` on its own docstring line; the
+check fails an unlabelled script, and the deny-list is derived from the `PAID` lines with a fixed
+floor of the known ones, so a new paid script cannot land unlisted. The runner that executes the
+checks blanks every credential named in `.env.example` in the child environment, one guard
+instead of one per script.
 **Verify:** run it; it passes on day one — a red check gets muted. Then plant one violation per check in a temp copy and see it go red — a check that has never failed proves nothing; never commit the plant. **Gate:** each check is a rule the user holds.
 
 ## Phase 6 — Gate
@@ -237,6 +248,19 @@ Phase 0 showed free; deny-list comment first; no `secrets:`; `permissions: conte
 it runs zero tests, or when a test is skipped, pending or `.only` without a line in one
 tracked list of accepted skips, each with its reason (vitest `passWithNoTests: false`,
 `forbidOnly`): a green run that ran nothing is what the gate exists to catch.
+
+Four more steps a production repo earned (Shapes L), each optional, each proposed with its
+reason: a CI step that fails a commit touching the spine dirs without a change under the test
+dir unless the subject says `no test:` and why (`fetch-depth: 0` and `github.event.before` give
+it a base); a **red-test home** (`tests/tdd/`) outside the gate glob, so a test-first failure can be
+committed and the greening commit renames it into the gate; a local-check dir for a green test
+that needs gitignored data, since CI has nothing to run it on; and, for Claude Code repos, a
+`PreToolUse` hook that blocks a shell command naming a deny-listed script unless it carries a
+marker the agent adds only after the user's go. A paid deny-list also earns a budget ledger doc
+row: estimate before, actual after, in the same commit as the run's findings. For Python with no
+linter, the twin of the promise rules below is Ruff with bug rules only (`E4 E7 E9 F B`), version
+pinned in CI, run by a check script; a typecheck with a per-file error baseline that only shrinks
+is the counted-exemption variant for types.
 
 **Dependencies are derived, then proven:** walk the gate scripts' imports with `ast`,
 subtract stdlib, then `git archive HEAD | tar -x -C <tmp>`, create a fresh venv with only
@@ -356,6 +380,10 @@ code: a test that has never failed proves nothing. Where the output comes from a
 vendor, the test covers the shaping around it with a recorded fixture, and the live call is
 checked by <the paid, user-authorised run>. <Only where Phase 5 installed the ratchet:> The
 untested list (`tests/untested.txt`) only shrinks; a new source file without a test fails the check.
+<Only where Phase 6 installed them:> A red test written before its fix lives in `tests/tdd/`, outside
+the gate, and names the issue it waits for; the commit that makes it green moves it into the gate.
+Every commit touching <spine dirs> carries its test, or says `no test:` and why in the subject; a
+test file never loses an assertion, or the subject says `drop test:` and why.
 
 A browser test only for what only a browser decides — a click really lands on page N, the
 last row is reachable at phone width — fed a recorded fixture of **invented** values with
@@ -374,7 +402,10 @@ Target: `CLAUDE.md` holds `@AGENTS.md`, plus at most a repo manual that restates
 rules. Branches: (i) `CLAUDE.md` has rules, no `AGENTS.md` — move the rules, leave the import;
 (ii) both have content — diff them, the user rules which sentences are rules (→ `AGENTS.md`)
 and which are manual; (iii) `AGENTS.md` untracked — flag it before anything cites it. A ruling to keep it untracked
-is valid: its rules are then enforced as checks, and no tracked file cites it.
+is valid: its rules are then enforced as checks, and no tracked file cites it. A fourth ruling
+is valid too and worth naming in Phase 0: agent-neutral rules stay in `AGENTS.md`, and rules that
+only Claude Code can obey (swarm sizing, approval words, what a hook enforces) go in `CLAUDE.md`
+under its own heading; the conflict is then a split by audience, not a duplicate.
 
 ## C. `docs/README.md` and numbering
 
@@ -490,13 +521,18 @@ condition per line (`test "$code" = 200`): in an `&&` chain `set -e` ignores eve
 command but the last. When no linter exists at all,
 propose only five promise-bug rules: `no-floating-promises`, `no-misused-promises`,
 `await-thenable`, `only-throw-error`, `require-await` — a missing `await` is an error
-typecheck cannot see.
+typecheck cannot see. The Python twin is Ruff with `select = ["E4", "E7", "E9", "F", "B"]` and
+nothing stylistic, pinned (`ruff==<x.y.z>`) in the pip line because a newer release changes what it
+flags. Any check that compares against the push base (Shapes L.1, L.2) needs `fetch-depth: 0` on
+the checkout step and `${{ github.event.before }}` passed in as the base; on a first push or a
+forced one the step falls back to `HEAD~1` and says so.
 
 ## G. Boundary checks
 
 Read source as text, never import it. Variants: FORBIDDEN prefix list, ALLOWED regex list
 (preferred), exact-allow-set, labelled-regex vocabulary scan, counted exemptions (a leak may
-shrink, never grow; an exemption used zero times is stale and fails too), and the **drift
+shrink, never grow; an exemption used zero times is stale and fails too), the **assertion-count
+ratchet** and the **cost label** (both Shapes L), and the **drift
 check**: a shape that one side owns in code and another side restates by hand because it
 cannot import it (a Python schema copied into TypeScript types; a TS list copied into SQL
 and Swift) — import or call the owner, read the
@@ -814,3 +850,92 @@ Context / Options / Done when, closed by "On main now:" or a one-line ruling. Ne
 <spine without the human> · <paid runs to test code> · <data that may not leave> · past a
 missing decision · a muted red check.
 ```
+
+## L. Mechanisms learned in production (added 2026-10-12)
+
+Each of these came from one production repo that ran the structure above for a month with
+several agents; each exists because one specific thing went wrong. Propose them in Phase 5 or
+6 with the reason, never silently.
+
+### L.1 Assertion-count ratchet
+
+The pairing ratchet (Shapes G, check 8) only knows a test file exists. This one reads each
+test file at the push base and now, counts the assertion calls (`expect(` or the runner's
+equivalent) and fails when a file has fewer, or is gone. The base comes from an env var CI sets
+to `github.event.before`; locally it defaults to the upstream of the current branch. A deliberate
+removal is allowed by `drop test:` in the commit subject, which CI reads with `git log -1
+--format=%s`, or by `<REPO>_DROP_OK=1` for the local run before that commit exists. Print the
+delta per file on failure so the reader sees which check went. Why: 57 assertions were deleted
+in one commit and the gate got greener.
+
+### L.2 The spine change carries its test
+
+One shell step in CI, before the checks:
+
+```yaml
+      - name: Every <spine dir> change carries a test
+        env: { BEFORE: ${{ github.event.before }}, HEAD_SHA: ${{ github.sha }} }
+        run: |
+          base="$BEFORE"
+          if [ -z "$base" ] || [ -z "${base//0/}" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            base="HEAD~1"
+          fi
+          changed=$(git diff --name-only "$base" "$HEAD_SHA" || true)
+          spine=$(echo "$changed" | grep -E '^<spine dir>/.*\.(py|ts)$' || true)
+          tests=$(echo "$changed" | grep -E '^<test dir>/' || true)
+          subject=$(git log -1 --format=%s "$HEAD_SHA")
+          if [ -n "$spine" ] && [ -z "$tests" ] && [[ "$subject" != *"no test:"* ]]; then
+            echo "<spine dir> changed without a <test dir> change and no 'no test:' in the subject:"
+            echo "$spine"; exit 1
+          fi
+```
+
+`no test:` is for a rename, a comment, formatting; the subject says which. The Working loop
+sentence "the test lands in the commit that lands the behaviour" was a rule nothing enforced
+until this step.
+
+### L.3 Red-test home
+
+`tests/tdd/README.md`: tests written before their fix live here, each a plain script that fails
+today on purpose and names the issue it waits for. The gate glob (`tests/test_*.py`,
+`tests/drill_*.py`) does not match this folder, so a red test can be committed without muting
+anything. The commit that makes one green renames it into the gate glob. A test that turns green
+but needs gitignored data moves to a local-check dir instead, since CI has no data for it. This
+resolves the contradiction between "write the test first and read the failure" and "the gate is
+green before every commit".
+
+### L.4 Cost label and derived deny-list
+
+Every script in the dir that may pay starts its docstring with one of:
+
+```
+Cost: free - reads <cache>, makes no network call.
+Cost: PAID - one LLM call per <unit>; --dry-run only prints the plan.
+```
+
+The boundary check fails a script without the line, and builds the deny-list from the `PAID`
+lines plus a fixed floor of the scripts named in `AGENTS.md`, so the gate scan, the CI header
+comment and the hook below all read one source.
+
+### L.5 Paid-run hook (Claude Code)
+
+`.claude/hooks/guard_paid_run.py`, registered as `PreToolUse` on `Bash|PowerShell` in the repo's
+`.claude/settings.json`: reads the tool call JSON from stdin, denies a command whose text names a
+deny-listed script unless it carries `<REPO>_PAID_OK=1`, lets everything else through, and lets
+unreadable input through too, so a broken hook cannot stop every command. The agent adds the
+marker only after the user's go for that run, never to get past a block; the rule says so in
+`CLAUDE.md`. Limit, stated in the docstring: it reads the command text, so a scratch script that
+imports the paid module is not caught. The hook gets its own test in the gate.
+
+### L.6 Budget ledger
+
+A fixed docs row when a deny-list exists: before each paid run, the script's own estimate and
+the balance after it; after, the actual from the script's output, in the same commit as the
+run's findings. Estimates ran about 2x low when many pages were sent, so the row says that.
+
+### L.7 Typecheck baseline
+
+`tests/pyright_baseline.txt` (or the tsc equivalent): errors per file on the day the checker was
+added. The check fails a file with more errors than listed, and a file with fewer until its line
+is lowered: counted exemptions applied to types, so a code base with old errors still gets a
+checker today.

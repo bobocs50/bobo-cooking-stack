@@ -15,6 +15,7 @@ It is modelled on glendonC's many-minions and his public repo [1321](https://git
 | Code cites a rule that was renamed or never written | Citation resolvability check |
 | A missing decision is filled with a guess | Parking: stop that branch, open a `Q-` entry, continue the rest |
 | A new module lands without a test | Pairing ratchet over a tracked `untested.txt` that only shrinks |
+| A test is gutted, a spine change ships untested, a paid script lands unlisted | Section L of `SKILL.md`: assertion-count ratchet, test-per-spine-commit CI step, red-test home, `Cost:` label, paid-run hook |
 
 ## How it works
 
