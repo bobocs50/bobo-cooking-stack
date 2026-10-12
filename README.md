@@ -20,8 +20,7 @@ who want both of those things.
 | `glendonize` | Makes a repo agent-ready in gated phases. It adds an `AGENTS.md` working agreement, a numbered register of requirements, decisions and open questions that code cites, boundary checks that read source as text, and a gate that runs only free commands. It writes nothing on the first pass and nothing it cannot trace to a line in your repo. | [skills/glendonize/README.md](skills/glendonize/README.md) |
 | `grilling` | Interviews you about a plan, one round of questions at a time, mapped as a design tree, until every decision is settled. Its learning mode has you state the problem and your own approach first, and it teaches a missing concept on a small example instead of handing you its design. | [skills/grilling/README.md](skills/grilling/README.md) |
 | `whiteboard` | Opens a Mermaid flowchart as a full-screen, hand-drawn Excalidraw board in your browser. You draw on it and press "Send to Claude"; the agent reads the PNG and the scene and updates the Mermaid to match. | [skills/whiteboard/README.md](skills/whiteboard/README.md) |
-| `weekly-review` | Once a week, turns the counts in `~/.claude/learning/weekly.md` into 3 to 5 plain bullets on how your learning went. It updates your learning profile only from evidence a check produced, never from the counts alone. | [skills/weekly-review/README.md](skills/weekly-review/README.md) |
-| `learning-loop` | Not a skill. It is the setup that the learning parts run on: a weekly stats script, a guess-first hook, a `CLAUDE.md` snippet that makes Claude ask you one question about a risky hunk, and templates for your profile and progress files under `~/.claude/learning/`. | [learning-loop/README.md](learning-loop/README.md) |
+| `learning-by-building` | Keeps you learning while agents write the code. A `CLAUDE.md` snippet makes Claude ask you one question about a risky hunk at the moments that matter; a weekly scheduled job (cron or Task Scheduler) counts your week and runs its `weekly-review` skill, which updates your learning profile only from evidence a check produced. Templates for your profile and progress files under `~/.claude/learning/`. | [learning-by-building/README.md](learning-by-building/README.md) |
 
 ## How the parts fit together
 
@@ -35,9 +34,10 @@ a plan ─────> grilling ───> design tree, decisions settled
                       (you sketch first, the skill grills the drawing,
                        then draws its alternative beside yours)
 
-while agents build ──> learning-loop ──> weekly.md (counts)
-                                              │
-                                              └──> weekly-review ──> profile.md updated
+while agents build ──> learning-by-building
+                          ├─ code questions at risky commits ──> progress.md
+                          └─ weekly job (cron) ──> weekly.md (counts)
+                                                     └──> weekly-review ──> profile.md updated
 ```
 
 - **glendonize** structures the repo once, so agents have written rules to follow and cannot
@@ -45,16 +45,16 @@ while agents build ──> learning-loop ──> weekly.md (counts)
 - **grilling** stress-tests a plan before it is built. When the plan reaches a structure
   decision (a new layer, step, data shape or boundary), you draw the first sketch with
   **whiteboard**, and the grilling works on your drawing.
-- **The learning loop and weekly-review** keep track of what you learn while agents build.
-  Grilling sessions write what you showed you understand to
-  `~/.claude/learning/progress.md`. The `CLAUDE.md` snippet makes Claude ask you about code
-  you are about to trust. Once a week, `weekly-review` reads all of it and updates your
+- **learning-by-building** keeps track of what you learn while agents build. Grilling
+  sessions write what you showed you understand to `~/.claude/learning/progress.md`. The
+  `CLAUDE.md` snippet makes Claude ask you about code you are about to trust. Once a week a
+  scheduled job runs its `weekly-review` skill, which reads all of it and updates your
   profile.
 
 Each part also works alone. You can install `whiteboard` without `grilling`, or `glendonize`
 without any of the learning parts. Grilling's learning mode reads
-`~/.claude/learning/profile.md` and `progress.md`, and the learning loop's templates create
-those files.
+`~/.claude/learning/profile.md` and `progress.md`, and the learning-by-building templates
+create those files.
 
 ## Install
 
@@ -79,9 +79,9 @@ Or as a Claude Code plugin, from inside a session:
 When installed as a plugin, the commands are namespaced, for example
 `/bobo-cooking-stack:glendonize`.
 
-Both ways install the four skills only. The learning loop's scripts, hooks and templates are
-copied by hand from a clone of this repo. The steps are in the
-[learning loop's install section](learning-loop/README.md#install).
+Both ways install the skills only. The learning-by-building scripts, scheduled job, hook and
+templates are copied by hand from a clone of this repo. The steps are in the
+[learning-by-building install section](learning-by-building/README.md#install).
 
 ### One skill at a time
 
@@ -89,11 +89,10 @@ copied by hand from a clone of this repo. The steps are in the
 npx skills@latest add bobocs50/bobo-cooking-stack --skill glendonize
 npx skills@latest add bobocs50/bobo-cooking-stack --skill grilling
 npx skills@latest add bobocs50/bobo-cooking-stack --skill whiteboard
-npx skills@latest add bobocs50/bobo-cooking-stack --skill weekly-review
 ```
 
 Each skill's README lists what else it needs. For example, `whiteboard` needs Python and a
-browser that can reach a CDN, and `weekly-review` needs the learning loop's files.
+browser that can reach a CDN, and `weekly-review` is installed with the rest of learning-by-building.
 
 ## Run
 
@@ -102,7 +101,7 @@ browser that can reach a CDN, and `weekly-review` needs the learning loop's file
 | `glendonize` | `/glendonize` or `/glendonize path/to/repo`, "make this repo agent-ready", or a request for a decision register, constraints doc, boundary checks or a gate |
 | `grilling` | `/grilling` or "grill me" |
 | `whiteboard` | `/whiteboard`, "draw it", "sketch this", or a grilling that reaches a structure decision |
-| `weekly-review` | Runs itself when the `SessionStart` hook says a review is due, or from a scheduled task; by hand with `/weekly-review` or "weekly review" |
+| `weekly-review` (learning-by-building) | Weekly by a scheduled job (cron / Task Scheduler); the `SessionStart` hook catches a missed week; by hand with `/weekly-review` or "weekly review" |
 
 ## Repo layout
 
@@ -119,21 +118,21 @@ bobo-cooking-stack/
 │   │   ├── SKILL.md
 │   │   ├── README.md
 │   │   └── agents/openai.yaml
-│   ├── whiteboard/
-│   │   ├── SKILL.md
-│   │   ├── README.md
-│   │   ├── serve.py         # local server, Python standard library only
-│   │   ├── board.html       # the Excalidraw board
-│   │   └── example.mmd      # a sample Mermaid flowchart
-│   └── weekly-review/
+│   └── whiteboard/
 │       ├── SKILL.md
-│       └── README.md
-├── learning-loop/
+│       ├── README.md
+│       ├── serve.py         # local server, Python standard library only
+│       ├── board.html       # the Excalidraw board
+│       └── example.mmd      # a sample Mermaid flowchart
+├── learning-by-building/
 │   ├── README.md
+│   ├── weekly-review/       # the skill the weekly job runs
+│   │   ├── SKILL.md
+│   │   └── README.md
 │   ├── weekly_stats.py      # counts the week, appends to weekly.md
-│   ├── guess_first.py       # UserPromptSubmit hook: guess before a swarm
-│   ├── run_weekly.ps1       # Windows scheduled-task runner
-│   ├── settings.example.json  # the hooks to merge into ~/.claude/settings.json
+│   ├── run_weekly.sh        # the weekly job for cron (macOS / Linux)
+│   ├── run_weekly.ps1       # the weekly job for Windows Task Scheduler
+│   ├── settings.example.json  # the SessionStart fallback hook
 │   ├── CLAUDE.snippet.md    # paste into a project's CLAUDE.md
 │   └── templates/           # profile.md, progress.md, agentic-coding.md
 ├── LICENSE

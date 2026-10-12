@@ -4,16 +4,16 @@
 
 Once a week, turns the raw counts in `~/.claude/learning/weekly.md` into 3–5 plain bullets
 on how your learning went, and updates your learning profile, but only from evidence a check
-produced. It is the interpreting half of the [learning loop](../../learning-loop/README.md);
-the counting half is `learning-loop/weekly_stats.py`.
+produced. It is the interpreting half of the [learning-by-building setup](../README.md);
+the counting half is `learning-by-building/weekly_stats.py`.
 
 ## Why it exists
 
 Counts alone mislead. "9 correction prompts this week" could mean you got sloppier or that
 you got more precise about what you want. A profile that moves on counts turns into a score
 you start optimising. So this skill reads the counts as background and changes your profile
-only when something was actually checked: a `paper:` page that was marked, a guess compared
-with what the agents found, a code question you answered, a test you took.
+only when something was actually checked: a `paper:` page that was marked, a code question
+you answered, a test you took.
 
 ## How it works, step by step
 
@@ -46,10 +46,9 @@ files, only counts and short quotes.
 
 ## Example
 
-Monday morning you open Claude Code. The `SessionStart` hook sees that 7 days have passed,
-writes this week's counts to `weekly.md`, and tells Claude a review is due. Before your first
-task Claude reads the week, finds your `paper:` page on evals from Wednesday with two gaps
-marked, and four answered code questions, and writes:
+Monday 08:00 the scheduled job writes this week's counts to `weekly.md` and starts Claude
+headless with `/weekly-review`. Claude reads the week, finds your `paper:` page on evals from
+Wednesday with two gaps marked, and four answered code questions, and writes:
 
 ```markdown
 Interpretation:
@@ -60,7 +59,7 @@ Interpretation:
 ```
 
 In `profile.md`, "Evals" stays under Developing with a dated note, because the page had gaps.
-Then: "Weekly review done, see `~/.claude/learning/weekly.md`." and your task.
+When you next open the log or `weekly.md`, it is there; nothing interrupted your morning.
 
 ## What it reads and writes
 
@@ -77,24 +76,27 @@ Then: "Weekly review done, see `~/.claude/learning/weekly.md`." and your task.
 
 ## Install
 
-```sh
-npx skills@latest add bobocs50/bobo-cooking-stack --skill weekly-review
-```
-
-The skill alone has nothing to read. Set up the rest of the loop too: the two scripts, the
-hooks and your profile, as in the [learning loop's install section](../../learning-loop/README.md#install).
+It is installed with the rest of the learning setup, from a clone of this repo: the skill
+folder is copied to `~/.claude/skills/weekly-review/`, next to the scripts and templates in
+`~/.claude/learning/`. The steps are in the
+[learning-by-building install section](../README.md#install). Installed as the Claude Code
+plugin from this repo, the skill comes with it, but the scripts and templates are still
+needed: without them it has nothing to read.
 
 ## Run
 
-- **Automatically:** the `SessionStart` hook from `learning-loop/settings.example.json`
-  starts it in the first session of a new week; on Windows, `learning-loop/run_weekly.ps1`
-  from Task Scheduler runs it headless.
+- **Weekly, by a scheduled job** (the normal way): cron runs `run_weekly.sh`, or Windows Task
+  Scheduler runs `run_weekly.ps1`, for example Mondays 08:00. The job writes the counts, then
+  runs `claude -p "/weekly-review"` headless, allowed only to read and to edit files in
+  `~/.claude/learning/`.
+- **As the fallback**: if the job was missed, the `SessionStart` hook from
+  `settings.example.json` starts it in the first Claude Code session after 7 days.
 - **By hand:** type `/weekly-review` or "weekly review".
 
 ## Limits
 
-- It interprets what the counts and your files show; a week with no `paper:` page, no guess
-  and no code question gives a short review that says so.
+- It interprets what the counts and your files show; a week with no `paper:` page and no
+  code question gives a short review that says so.
 - It needs `profile.md` filled in. With the empty template it can only report counts.
 - It finds `paper:` pages and code questions in your session transcripts, so they must have
   happened in Claude Code.

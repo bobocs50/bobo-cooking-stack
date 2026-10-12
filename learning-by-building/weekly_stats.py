@@ -37,7 +37,6 @@ CORRECTION = re.compile(r"^\s*(no[,!. ]|nein|nope|wrong|falsch|why did|that'?s n
 DONE_WHEN = re.compile(r"done when|definition of done|definiton of done|fertig wenn", re.I)
 # The habits in profile.md: a prompt that starts with the marker.
 PAPER = re.compile(r"^\s*paper\s*:", re.I)
-GUESS = re.compile(r"^\s*(guess|predict)\s*:", re.I)
 
 
 def last_review():
@@ -139,7 +138,6 @@ def entry(since, today, d):
     corrections = [p for p in prompts if CORRECTION.search(p)]
     done_when = sum(1 for p in prompts if DONE_WHEN.search(p))
     paper = sum(1 for p in prompts if PAPER.search(p))
-    guess = sum(1 for p in prompts if GUESS.search(p))
     lines = [
         f"## Week ending {today.isoformat()}",
         "",
@@ -147,7 +145,7 @@ def entry(since, today, d):
         "",
         f"- Sessions: {d['sessions']}; prompts: {len(prompts)}; median prompt length: {median} chars",
         f"- Projects: {', '.join(f'{k} {v}' for k, v in d['projects'].most_common()) or 'none'}",
-        f"- Habits: 'paper:' pages sent: {paper}; 'guess:' / 'predict:' guesses written: {guess}",
+        f"- Habits: 'paper:' pages sent: {paper}",
         "",
         "Background only, no targets:",
         f"- Prompts with a 'done when': {done_when}",

@@ -20,10 +20,6 @@ still pass if the fix were wrong. Never yes/no, never answerable from the commit
 never style. I say sure or unsure and answer in 2–3 sentences; you correct in one line that
 names the line and the consequence. Record the result in `~/.claude/learning/progress.md`.
 
-**Struggle first.** Before a swarm that looks for a cause, ask for my one-line guess
-("I think X because Y") unless I wrote `guess:` or `skip`. When the findings come back, show
-them, let me say which hold, then give your verdict.
-
 **Explanations.** Plain language first, 2–5 short bullets, one concrete example; details only
 when I ask. Use the correct engineering term when you explain, and when I use a wrong or vague
 term, correct it in passing with the right word and one example.

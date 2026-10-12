@@ -159,7 +159,7 @@ reached a shared understanding.
 ## Learning mode: what it reads and records
 
 Learning mode sits on top of the grilling and never makes it softer. It uses the files of
-the [learning loop](../../learning-loop/README.md) in `~/.claude/learning/`.
+the [learning-by-building](../../learning-by-building/README.md) in `~/.claude/learning/`.
 
 **Before Round 0** it reads:
 
@@ -202,7 +202,7 @@ It never records quotations of whole exchanges, and never anything from a propri
 document: concepts and decisions only.
 
 If you have no `~/.claude/learning/` folder, the grilling itself still works; set the folder
-up from the [learning loop's install section](../../learning-loop/README.md#install) to get
+up from the [learning-by-building install section](../../learning-by-building/README.md#install) to get
 the learning mode.
 
 ## A short session
@@ -282,7 +282,7 @@ New-Item -ItemType Directory -Force "$HOME\.claude\skills\grilling" | Out-Null; 
 ```
 
 For the drawing step, install [whiteboard](../whiteboard/README.md) too. For learning mode,
-set up the [learning loop](../../learning-loop/README.md#install).
+set up the [learning-by-building](../../learning-by-building/README.md#install).
 
 ## Run
 
@@ -316,7 +316,7 @@ Installed as a plugin, the command is namespaced: `/bobo-cooking-stack:grilling`
 - The drawing step needs the [whiteboard](../whiteboard/README.md) skill (Python, and a
   browser that can reach the CDN Excalidraw loads from).
 - Learning mode needs the files in `~/.claude/learning/` from the
-  [learning loop](../../learning-loop/README.md).
+  [learning-by-building](../../learning-by-building/README.md).
 
 ## FAQ
 
@@ -340,9 +340,9 @@ as a sign its options were wrong and rethinks the tree.
 ## Related
 
 - [whiteboard](../whiteboard/README.md): the hand-drawn board used at structure decisions.
-- [learning loop](../../learning-loop/README.md): the `~/.claude/learning/` files this skill
-  reads and updates, the guess-first habit before agent swarms, and the weekly report.
-- [weekly-review](../weekly-review/README.md): turns the week's counts into a review and
+- [learning-by-building](../../learning-by-building/README.md): the `~/.claude/learning/` files this skill
+  reads and updates, and the weekly report.
+- [weekly-review](../../learning-by-building/weekly-review/README.md): turns the week's counts into a review and
   updates the same profile.
 
 ## Credits

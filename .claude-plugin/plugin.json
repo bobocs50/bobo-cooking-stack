@@ -20,6 +20,6 @@
     "./skills/glendonize",
     "./skills/grilling",
     "./skills/whiteboard",
-    "./skills/weekly-review"
+    "./learning-by-building/weekly-review"
   ]
 }

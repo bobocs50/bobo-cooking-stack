@@ -379,7 +379,7 @@ and subagents.
   `docs/WORKFLOW.md` that glendonize can install starts with a "Grill" step; this is a skill
   for that step. glendonize does not call it.
 - [whiteboard](../whiteboard/SKILL.md): a hand-drawn board for sketching a structure.
-- [weekly-review](../weekly-review/README.md) and the [learning loop](../../learning-loop/README.md):
+- [weekly-review](../../learning-by-building/weekly-review/README.md) and the [learning-by-building](../../learning-by-building/README.md):
   separate from glendonize.
 
 ## Credits

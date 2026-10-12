@@ -12,17 +12,6 @@
           }
         ]
       }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python ~/.claude/learning/guess_first.py",
-            "timeout": 10
-          }
-        ]
-      }
     ]
   }
 }

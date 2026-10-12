@@ -1,4 +1,4 @@
-# learning-loop
+# learning-by-building
 
 [← all skills](../README.md)
 
@@ -13,10 +13,8 @@ back, without slowing the project down:
   down what you understood from memory.
 - **Claude asks you one real question about the code** at the moments that matter, and
   tracks how sure you were against how right you were.
-- **Before you hand a "why" question to agents, you guess first**, so you have something to
-  compare their answer with.
-- **Once a week, a report** tells you what you learned and what is due next, from evidence,
-  not from vibes.
+- **Once a week, a scheduled job writes a report** on what you learned and what is due next,
+  from evidence, not from vibes.
 
 It runs on your machine under `~/.claude/learning/`. Nothing is sent anywhere: the weekly
 counts are read from Claude Code's local session files, and only counts and your own short
@@ -27,14 +25,13 @@ prompts are used, never tool output (which can hold file contents).
 | File | What it does |
 |---|---|
 | [`README.md`](README.md) | This page |
-| [`weekly_stats.py`](weekly_stats.py) | Counts the last 7 days of your Claude Code sessions and appends them to `weekly.md`. Run as a `SessionStart` hook (`--hook`) or by hand (`--force`) |
-| [`guess_first.py`](guess_first.py) | A `UserPromptSubmit` hook: when a prompt asks for agents without a `guess:`, it reminds Claude to ask you for your guess first |
-| [`run_weekly.ps1`](run_weekly.ps1) | Windows only, optional: a script for Task Scheduler that writes the counts and runs `/weekly-review` headless once a week |
-| [`settings.example.json`](settings.example.json) | The two hooks, ready to merge into `~/.claude/settings.json` |
+| [`weekly-review/`](weekly-review/README.md) | The skill that interprets the week: reads the counts and your files, writes the review, updates your profile from evidence |
+| [`weekly_stats.py`](weekly_stats.py) | Counts the last 7 days of your Claude Code sessions and appends them to `weekly.md`. `--force` writes an entry now; `--hook` writes one only if 7 days have passed |
+| [`run_weekly.sh`](run_weekly.sh) | The weekly job for cron (macOS / Linux): runs `weekly_stats.py --force`, then `claude -p "/weekly-review"` headless |
+| [`run_weekly.ps1`](run_weekly.ps1) | The same job for Windows Task Scheduler |
+| [`settings.example.json`](settings.example.json) | The `SessionStart` hook, the fallback when the job was missed |
 | [`CLAUDE.snippet.md`](CLAUDE.snippet.md) | Rules to paste into a project's `CLAUDE.md`: when Claude asks you a code question, how, and how it explains |
 | [`templates/`](templates/) | Empty starting copies of `profile.md`, `progress.md` and `agentic-coding.md` |
-
-The interpreting half is a skill: [`skills/weekly-review`](../skills/weekly-review/README.md).
 
 ## The loop, per concept
 
@@ -95,31 +92,29 @@ def pick_report(cited, found):
 You answered by reading four lines, and the next time you see a fallback you will look for
 the flag.
 
-## Struggle first
-
-Before you hand a *why* question to agents ("why does this value miss", "why did the run
-get worse"), spend 15 minutes on it yourself: look at the data, write your guess as
-`guess: I think X because Y`. Then the agents check it, and when their findings come back
-you say which hold before Claude gives its verdict.
-
-`guess_first.py` is a `UserPromptSubmit` hook that reminds Claude of this whenever a
-prompt asks for a swarm or agents without a `guess:` or `skip`. It never blocks a prompt.
-
 ## The weekly report
 
-Once a week `weekly_stats.py` counts how you worked with Claude Code over the last 7 days,
-across all projects, and appends the counts to `weekly.md` with `Interpretation: pending`:
+A scheduled job runs once a week (for example Mondays 08:00) and does two things:
 
-- sessions, prompts, median prompt length, projects
-- your habits: `paper:` pages sent, `guess:` guesses written
-- background only, never a target: prompts with a "done when", correction prompts,
-  actions you rejected, interrupts, subagents and skills used
+1. **Count.** `weekly_stats.py --force` reads the last 7 days of your Claude Code sessions,
+   across all projects, and appends an entry to `weekly.md` with `Interpretation: pending`:
+   - sessions, prompts, median prompt length, projects
+   - your habit: `paper:` pages sent
+   - background only, never a target: prompts with a "done when", correction prompts,
+     actions you rejected, interrupts, subagents and skills used
+2. **Interpret.** It runs `claude -p "/weekly-review"` headless. The
+   [`weekly-review`](weekly-review/README.md) skill reads the new entry, `profile.md` and
+   `progress.md`, writes 3 to 5 plain bullets in place of `Interpretation: pending`, and
+   updates your profile, but only from evidence a check produced (a `paper:` page marked, a
+   code question answered), never from the counts alone. Claude may only read, and edit
+   files in `~/.claude/learning/`.
 
-Then the [`weekly-review`](../skills/weekly-review/README.md) skill reads the counts,
-`profile.md` and `progress.md`, writes 3 to 5 plain bullets in place of
-`Interpretation: pending`, and updates your profile, but only from evidence a check
-produced (a `paper:` page marked, a guess scored against real output), never from the
-counts alone.
+The job writes its output to `~/.claude/learning/weekly_run.log`.
+
+**The fallback.** If the laptop was off or asleep when the job was due, the `SessionStart`
+hook catches it: the first Claude Code session after 7 days writes the counts and tells
+Claude to run the review before your first task. While an entry is still pending, every
+session start reminds Claude again.
 
 A made-up entry after the review has run:
 
@@ -130,7 +125,7 @@ Window: 2026-10-05 to 2026-10-12 (all projects).
 
 - Sessions: 31; prompts: 412; median prompt length: 58 chars
 - Projects: Repos-myapp 380, Repos-notes 32
-- Habits: 'paper:' pages sent: 1; 'guess:' / 'predict:' guesses written: 3
+- Habits: 'paper:' pages sent: 1
 
 Background only, no targets:
 - Prompts with a 'done when': 4
@@ -148,14 +143,6 @@ Interpretation:
 - Next concept from "Now": CI, when the first workflow is added.
 ```
 
-Two ways it runs, use either or both:
-
-- **A `SessionStart` hook**: the first session of a new week writes the counts and tells
-  Claude to run the review before your first task.
-- **A scheduled task** (Windows: `run_weekly.ps1` from Task Scheduler, e.g. Mondays 08:00):
-  writes the counts and runs Claude headless with `/weekly-review`, allowed only to read
-  and to edit files in this folder.
-
 ## Your files
 
 | File | What it holds | Who writes it |
@@ -170,68 +157,104 @@ your filled-in versions anywhere public, they describe you and your work.
 
 ## Install
 
-The skill installs with `npx`; the scripts and templates are copied from a clone of this
-repo, because they live in your home folder, not in a skill:
+Everything here is copied from a clone of this repo: the scripts and templates go to
+`~/.claude/learning/`, the skill to `~/.claude/skills/weekly-review/`.
 
 ```sh
 git clone https://github.com/bobocs50/bobo-cooking-stack.git
-cd bobo-cooking-stack
+cd bobo-cooking-stack/learning-by-building
 ```
+
+**1. Copy the files.**
 
 macOS / Linux:
 
 ```sh
-mkdir -p ~/.claude/learning
-cp learning-loop/weekly_stats.py learning-loop/guess_first.py ~/.claude/learning/
-cp -n learning-loop/templates/*.md ~/.claude/learning/
-npx skills@latest add bobocs50/bobo-cooking-stack --skill weekly-review
+mkdir -p ~/.claude/learning ~/.claude/skills
+cp weekly_stats.py run_weekly.sh ~/.claude/learning/
+cp -n templates/*.md ~/.claude/learning/
+cp -r weekly-review ~/.claude/skills/
 ```
 
 Windows PowerShell:
 
 ```powershell
-New-Item -ItemType Directory -Force "$HOME\.claude\learning" | Out-Null
-Copy-Item learning-loop\weekly_stats.py, learning-loop\guess_first.py, learning-loop\run_weekly.ps1 "$HOME\.claude\learning\"
-Get-ChildItem learning-loop\templates\*.md | ForEach-Object { $t = "$HOME\.claude\learning\$($_.Name)"; if (-not (Test-Path $t)) { Copy-Item $_.FullName $t } }
-npx skills@latest add bobocs50/bobo-cooking-stack --skill weekly-review
+New-Item -ItemType Directory -Force "$HOME\.claude\learning", "$HOME\.claude\skills" | Out-Null
+Copy-Item weekly_stats.py, run_weekly.ps1 "$HOME\.claude\learning\"
+Get-ChildItem templates\*.md | ForEach-Object { $t = "$HOME\.claude\learning\$($_.Name)"; if (-not (Test-Path $t)) { Copy-Item $_.FullName $t } }
+Copy-Item -Recurse -Force weekly-review "$HOME\.claude\skills\"
 ```
 
-Then add the hooks from [`settings.example.json`](settings.example.json) to
-`~/.claude/settings.json` (merge them into an existing `"hooks"` block), and fill in the
-top of `profile.md`: who you are, what you want to become, what you already know.
+Installed as the Claude Code plugin from this repo, the skill comes with it; the files in
+step 1 are still needed.
 
-Check it works: `python ~/.claude/learning/weekly_stats.py --force` writes an entry to
-`weekly.md` now, whatever the date.
+**2. Schedule the weekly job.**
+
+macOS / Linux, with `crontab -e`:
+
+```
+0 8 * * 1  sh $HOME/.claude/learning/run_weekly.sh
+```
+
+cron runs with a short `PATH`. If `python3` or `claude` is not found (see `weekly_run.log`),
+add a `PATH=...` line at the top of the crontab.
+
+Windows PowerShell (runs at the next start if the laptop was off at 08:00):
+
+```powershell
+$action   = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$HOME\.claude\learning\run_weekly.ps1`""
+$trigger  = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday -At 8am
+$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
+Register-ScheduledTask -TaskName "Claude weekly learning review" -Action $action -Trigger $trigger -Settings $settings
+```
+
+**3. Add the fallback hook.** Merge [`settings.example.json`](settings.example.json) into
+`~/.claude/settings.json` (into an existing `"hooks"` block if there is one).
+
+**4. Fill in your profile.** The top of `~/.claude/learning/profile.md`: who you are, what
+you want to become, what you already know.
+
+**5. Turn on the code questions** in a project: paste [`CLAUDE.snippet.md`](CLAUDE.snippet.md)
+into its `CLAUDE.md`.
+
+**Check it works:** `python ~/.claude/learning/weekly_stats.py --force` writes an entry to
+`weekly.md` now, whatever the date. Then `/weekly-review` in Claude Code interprets it.
 
 ## Requirements
 
-- Claude Code (the hooks and the skill run there).
-- Python 3.9 or newer on `PATH` as `python`, standard library only.
-- For `run_weekly.ps1`: Windows, and `python` and `claude` on `PATH`. On macOS or Linux, use
-  the `SessionStart` hook alone, or a cron line that runs
-  `python ~/.claude/learning/weekly_stats.py --force && claude -p "/weekly-review"`.
+- Claude Code; the `claude` command on `PATH` for the scheduled job.
+- Python 3.9 or newer, standard library only (`python3` for cron, `python` for the hook and
+  on Windows).
+- A scheduler: cron on macOS / Linux, Task Scheduler on Windows. Without one, the hook alone
+  still runs the review in the first session of each new week.
 
 ## FAQ
 
 **Does anything leave my machine?** No. The scripts read local files and write local files.
-The review runs in your own Claude Code session like any other prompt.
+The review runs in your own Claude Code, like any other prompt.
 
 **What exactly is read from my sessions?** For the last 7 days: your own prompts (to count
-them, measure their length, and spot `paper:`, `guess:` and correction words), which tools,
-subagents, skills and slash commands were used, and whether a tool call was rejected or
-blocked. Tool results are only scanned in their first 400 characters for those markers and
-are never written anywhere.
+them, measure their length, and spot `paper:` and correction words), which tools, subagents,
+skills and slash commands were used, and whether a tool call was rejected or blocked. Tool
+results are only scanned in their first 400 characters for those markers and are never
+written anywhere.
+
+**Why a scheduled job and a hook?** The job runs the review even when you do not open
+Claude Code that day. The hook catches the weeks the job missed, because the laptop was off.
+The hook only writes when 7 days have passed since the last entry, so in a normal week it
+stays quiet. One rare double: a session opened on the job's day before the job runs; delete
+the extra entry in `weekly.md` if it bothers you.
 
 **Will it nag me?** The weekly review asks nothing; it writes and tells you in two lines.
-The code question comes at most about once a day, only after risky changes. The guess
-reminder fires only when you ask for agents.
+The code question comes at most about once a day, only after risky changes.
 
 **Why are the counts "background only"?** Because they are easy to game and easy to
 misread: more corrections can mean you got more precise, not worse. The profile changes only
 when a check produced evidence.
 
-**How do I turn it off?** Remove the two hooks from `~/.claude/settings.json` and the
-snippet from your `CLAUDE.md`. Your files in `~/.claude/learning/` stay.
+**How do I turn it off?** Delete the cron line or the scheduled task, remove the hook from
+`~/.claude/settings.json` and the snippet from your `CLAUDE.md`. Your files in
+`~/.claude/learning/` stay.
 
 **Can I share my profile?** You can, but it describes you and your work. The templates here
 are empty on purpose.

@@ -23,9 +23,6 @@ The loop, per concept:
 4. **You explain it** to people: <which meeting or group>.
 Redo step 3 after ~3 and ~10 days when the concept matters.
 
-**Struggle first.** Before a swarm that looks for a cause: 15 minutes yourself first, then
-write `guess: I think X because Y`; the swarm checks it.
-
 ## Concepts (topic areas, introduced only when the work needs them)
 
 1. **<concept>** (now): <what it covers>. Sources: <links>.

@@ -277,4 +277,4 @@ accepts any path.
   sketch, it questions the drawing, then draws its alternative beside yours.
 - The system-design terms Claude names boxes with come from the "System design vocabulary"
   section of `~/.claude/learning/progress.md`, part of the
-  [learning loop](../../learning-loop/README.md), when you have it set up.
+  [learning-by-building](../../learning-by-building/README.md), when you have it set up.

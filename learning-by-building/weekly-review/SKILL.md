@@ -11,9 +11,9 @@ The user is learning to be a better engineer while agents write much of their co
 3. Write the interpretation in place of `Interpretation: pending`, 3–5 plain bullets, judged against the loop in `profile.md` only:
    - Which concept was introduced, studied, written as a `paper:` page and checked this week (find the pages in the transcripts). Is a redo due (~3 and ~10 days after a page)?
    - Which concept comes next, from "Now" in `profile.md`.
-   - The code questions this week (see `learning-loop/CLAUDE.snippet.md`): how many were asked, how sure the user was against how right, and whether a risky diff went by without one.
+   - The code questions this week (see `learning-by-building/CLAUDE.snippet.md`): how many were asked, how sure the user was against how right, and whether a risky diff went by without one.
    The "Background only" counts (corrections, done-when, subagents…) are context, never a target: do not praise or criticise a rise or drop in them.
-4. Update `profile.md` only from evidence a check produced: a `paper:` page checked against the code or docs, a guess scored against real output, an answered code question, a test score. Never from keyword counts alone, and never from your own earlier verdicts. Date every change; move a concept between Strong / Developing / Revisit only with that evidence. Keep the user's own words.
+4. Update `profile.md` only from evidence a check produced: a `paper:` page checked against the code or docs, an answered code question, a test score. Never from keyword counts alone, and never from your own earlier verdicts. Date every change; move a concept between Strong / Developing / Revisit only with that evidence. Keep the user's own words.
 5. If `profile.md` declares a freeze, respect it: do not propose new files, hooks, skills or rules until it ends.
 6. If the week shows a lesson about working with Claude, add a dated line to `agentic-coding.md` under "Lessons learned".
 7. Tell the user in two lines that the weekly review is done and where to read it, then continue with their request.
