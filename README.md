@@ -2,152 +2,149 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Claude Code skills by bobocs50 for building software with AI coding agents without losing
-track of what gets built. There are two goals:
+My Claude Code skills for building real software with AI agents, and still understanding
+what got built.
 
-- **Keep the repo safe for agents.** Agents follow written rules, cite recorded decisions,
-  and never run a step that costs money.
-- **Keep the human learning.** You still understand and can explain the code and the design,
-  even though agents write most of it.
+I build a production data pipeline almost entirely through Claude Code agents, often several
+at once. It is the kind of project where a silent wrong value is worse than a crash. These
+skills came out of the things that went wrong along the way: agents that guessed a rule,
+plans that were misunderstood, and a builder (me) who shipped code without learning from it.
 
-It is for developers who use Claude Code every day, often with several agents at once, and
-who want both of those things.
+They are small, plain Markdown, and meant to be edited. Take what fits, change the rest.
 
-## The parts
+## Installation (30-second setup)
 
-| Part | What it does | Read more |
-|---|---|---|
-| `glendonize` | Makes a repo agent-ready in gated phases. It adds an `AGENTS.md` working agreement, a numbered register of requirements, decisions and open questions that code cites, boundary checks that read source as text, and a gate that runs only free commands. It writes nothing on the first pass and nothing it cannot trace to a line in your repo. | [skills/glendonize/README.md](skills/glendonize/README.md) |
-| `grilling` | Interviews you about a plan, one round of questions at a time, mapped as a design tree, until every decision is settled. Its learning mode has you state the problem and your own approach first, and it teaches a missing concept on a small example instead of handing you its design. | [skills/grilling/README.md](skills/grilling/README.md) |
-| `whiteboard` | Opens a Mermaid flowchart as a full-screen, hand-drawn Excalidraw board in your browser. You draw on it and press "Send to Claude"; the agent reads the PNG and the scene and updates the Mermaid to match. | [skills/whiteboard/README.md](skills/whiteboard/README.md) |
-| `learning-by-building` | Keeps you learning while agents write the code. A `CLAUDE.md` snippet makes Claude ask you one question about a risky hunk at the moments that matter; a weekly scheduled job (cron or Task Scheduler) counts your week and runs its `weekly-review` skill, which updates your learning profile only from evidence a check produced. Templates for your profile and progress files under `~/.claude/learning/`. | [learning-by-building/README.md](learning-by-building/README.md) |
+### 1. Get the skills
 
-## How the parts fit together
+<details>
+<summary><strong>Claude Code plugin</strong> (updates through <code>/plugin</code>)</summary>
 
-```
-your repo ──> glendonize ──> AGENTS.md, register, boundary checks, free gate
-                                   (agents can now work in it safely)
-
-a plan ─────> grilling ───> design tree, decisions settled
-                 │
-                 └─ at a structure decision ──> whiteboard
-                      (you sketch first, the skill grills the drawing,
-                       then draws its alternative beside yours)
-
-while agents build ──> learning-by-building
-                          ├─ code questions at risky commits ──> progress.md
-                          └─ weekly job (cron) ──> weekly.md (counts)
-                                                     └──> weekly-review ──> profile.md updated
-```
-
-- **glendonize** structures the repo once, so agents have written rules to follow and cannot
-  spend money by accident.
-- **grilling** stress-tests a plan before it is built. When the plan reaches a structure
-  decision (a new layer, step, data shape or boundary), you draw the first sketch with
-  **whiteboard**, and the grilling works on your drawing.
-- **learning-by-building** keeps track of what you learn while agents build. Grilling
-  sessions write what you showed you understand to `~/.claude/learning/progress.md`. The
-  `CLAUDE.md` snippet makes Claude ask you about code you are about to trust. Once a week a
-  scheduled job runs its `weekly-review` skill, which reads all of it and updates your
-  profile.
-
-Each part also works alone. You can install `whiteboard` without `grilling`, or `glendonize`
-without any of the learning parts. Grilling's learning mode reads
-`~/.claude/learning/profile.md` and `progress.md`, and the learning-by-building templates
-create those files.
-
-## Install
-
-### Everything at once
-
-With the `skills` CLI:
-
-```sh
-npx skills@latest add bobocs50/bobo-cooking-stack
-```
-
-You pick which coding agents to install it on. It writes each skill as an ordinary file that
-you own and can edit. Run `npx skills update` to pull later changes.
-
-Or as a Claude Code plugin, from inside a session:
+Inside a Claude Code session:
 
 ```
 /plugin marketplace add bobocs50/bobo-cooking-stack
 /plugin install bobo-cooking-stack@bobo-cooking-stack
 ```
 
-When installed as a plugin, the commands are namespaced, for example
-`/bobo-cooking-stack:glendonize`.
+Commands are namespaced, for example `/bobo-cooking-stack:glendonize`.
 
-Both ways install the skills only. The learning-by-building scripts, scheduled job, hook and
-templates are copied by hand from a clone of this repo. The steps are in the
-[learning-by-building install section](learning-by-building/README.md#install).
+</details>
 
-### One skill at a time
+<details>
+<summary><strong>Any agent, as editable files</strong> (manual updates)</summary>
 
-```sh
-npx skills@latest add bobocs50/bobo-cooking-stack --skill glendonize
-npx skills@latest add bobocs50/bobo-cooking-stack --skill grilling
-npx skills@latest add bobocs50/bobo-cooking-stack --skill whiteboard
+```bash
+npx skills@latest add bobocs50/bobo-cooking-stack
 ```
 
-Each skill's README lists what else it needs. For example, `whiteboard` needs Python and a
-browser that can reach a CDN, and `weekly-review` is installed with the rest of learning-by-building.
+Pick the agents to install on, and the skills you want. Each skill becomes an ordinary file
+you own. `npx skills@latest update` pulls changes. One skill only:
+`npx skills@latest add bobocs50/bobo-cooking-stack --skill grilling`.
 
-## Run
+</details>
 
-| Part | Trigger |
-|---|---|
-| `glendonize` | `/glendonize` or `/glendonize path/to/repo`, "make this repo agent-ready", or a request for a decision register, constraints doc, boundary checks or a gate |
-| `grilling` | `/grilling` or "grill me" |
-| `whiteboard` | `/whiteboard`, "draw it", "sketch this", or a grilling that reaches a structure decision |
-| `weekly-review` (learning-by-building) | Weekly by a scheduled job (cron / Task Scheduler); the `SessionStart` hook catches a missed week; by hand with `/weekly-review` or "weekly review" |
+<details>
+<summary><strong>By hand</strong> (copy the files yourself)</summary>
 
-## Repo layout
+Copy a skill's folder from [`skills/`](skills/) into `~/.claude/skills/`. The READMEs of
+glendonize, grilling and whiteboard have the exact commands for macOS / Linux and Windows.
 
-```
-bobo-cooking-stack/
-├── .claude-plugin/
-│   ├── plugin.json          # plugin manifest: lists the four skills
-│   └── marketplace.json     # makes the repo a one-plugin marketplace
-├── skills/
-│   ├── glendonize/
-│   │   ├── SKILL.md
-│   │   └── README.md
-│   ├── grilling/
-│   │   ├── SKILL.md
-│   │   ├── README.md
-│   │   └── agents/openai.yaml
-│   └── whiteboard/
-│       ├── SKILL.md
-│       ├── README.md
-│       ├── serve.py         # local server, Python standard library only
-│       ├── board.html       # the Excalidraw board
-│       └── example.mmd      # a sample Mermaid flowchart
-├── learning-by-building/
-│   ├── README.md
-│   ├── weekly-review/       # the skill the weekly job runs
-│   │   ├── SKILL.md
-│   │   └── README.md
-│   ├── weekly_stats.py      # counts the week, appends to weekly.md
-│   ├── run_weekly.sh        # the weekly job for cron (macOS / Linux)
-│   ├── run_weekly.ps1       # the weekly job for Windows Task Scheduler
-│   ├── settings.example.json  # the SessionStart fallback hook
-│   ├── CLAUDE.snippet.md    # paste into a project's CLAUDE.md
-│   └── templates/           # profile.md, progress.md, agentic-coding.md
-├── LICENSE
-└── README.md
-```
+</details>
+
+Pick one way per agent. Installing both the plugin and the files gives you every skill twice.
+
+### 2. Optional: set up learning-by-building
+
+If you want to keep learning while agents write the code, clone this repo and follow
+[learning-by-building's install](learning-by-building/README.md#install): it copies a stats
+script and your profile templates to `~/.claude/learning/`, installs the `weekly-review`
+skill, and schedules a weekly job (cron, or Task Scheduler on Windows).
+
+### 3. That's it
+
+Type `/glendonize` in a repo you want agents to work in, or "grill me" about your next plan.
+
+## Why these skills exist
+
+### #1: The agent made up a rule
+
+> "Don't ever take down a fence until you know the reason it was put up."
+>
+> Chesterton's fence, as usually paraphrased from G. K. Chesterton
+
+**The Problem.** An agent reads "never retry uploads" in your README and helpfully adds the
+reason: "to avoid duplicate charges". Nobody ever said that. Months later the invented reason
+is load-bearing. Agents also run the script that bills per call, cite rules that were
+renamed, and fill a missing decision with a plausible guess.
+
+**The Fix** is a repo that holds its own rules: a working agreement every agent reads, a
+numbered register of requirements and decisions that code cites (with `Rationale: not
+recorded` when nobody said why), checks that fail when a cited rule disappears, and a gate
+made only of free commands.
+
+- [`/glendonize`](skills/glendonize/README.md) installs all of that, one phase at a time,
+  writing nothing it cannot trace to a line already in your repo.
+
+### #2: The agent built the wrong thing
+
+> "No one knows exactly what they want."
+>
+> David Thomas & Andrew Hunt, *The Pragmatic Programmer*
+
+**The Problem.** You think the plan is clear. The agent builds it. Then you see the result and
+realise the two of you meant different things, usually at a structure decision: where a
+boundary sits, which step owns a value.
+
+**The Fix** is to be interviewed before anything is built, one round of questions at a time,
+until every decision in the design tree is settled. And for structure decisions, to draw
+first, because a sketch shows the gap that a sentence hides.
+
+- [`grilling`](skills/grilling/README.md) runs that interview. In its learning mode you state
+  your own approach first, and it teaches the missing concept instead of handing you its
+  design.
+- [`whiteboard`](skills/whiteboard/README.md) opens a Mermaid flowchart as a hand-drawn board
+  in your browser. You draw, press "Send to Claude", and the agent reads your drawing.
+
+### #3: I shipped code I don't understand
+
+> "What I cannot create, I do not understand."
+>
+> Richard Feynman
+
+**The Problem.** When the agent writes the code, you skip the part where you would have
+learned. You never trace the value, never find the bug yourself, never defend the design.
+You ship faster and understand less, and the gap shows the first time something breaks.
+
+**The Fix** is to put the learning back at the few moments that matter, without slowing the
+project down: one question about a risky hunk right after it is committed, concepts that
+come with an example when the work needs them, and a weekly review that changes your profile
+only from evidence.
+
+- [`learning-by-building`](learning-by-building/README.md) is the setup: a `CLAUDE.md`
+  snippet for the code questions, profile templates, and a weekly cron job.
+- [`weekly-review`](learning-by-building/weekly-review/README.md) is the skill the job runs.
+
+## Reference
+
+| Skill | How it starts | What it does |
+|---|---|---|
+| **[glendonize](skills/glendonize/README.md)** | `/glendonize`, "make this repo agent-ready" | Gives a repo the structure parallel agents need: `AGENTS.md`, a cited R/D/Q register, boundary checks that read source as text, a free-only gate. Gated phases; the first pass writes nothing. |
+| **[grilling](skills/grilling/README.md)** | "grill me", `/grilling` | Interviews you about a plan as a design tree, a round at a time, until every decision is settled. Learning mode teaches what you are missing. |
+| **[whiteboard](skills/whiteboard/README.md)** | `/whiteboard`, "draw it", "sketch this", or a grilling at a structure decision | A full-screen, hand-drawn Excalidraw board from a Mermaid file, served locally; the agent reads the PNG and scene you send. |
+| **[weekly-review](learning-by-building/weekly-review/README.md)** | the weekly cron job, or `/weekly-review` | Turns the week's counts into 3–5 bullets and updates your learning profile, only from evidence a check produced. |
+
+Not a skill: **[learning-by-building](learning-by-building/README.md)**, the scripts,
+templates and `CLAUDE.md` snippet the learning parts run on.
 
 ## Credits
 
-- `glendonize` is named after the repo structure of glendonC
-  ([github.com/glendonC](https://github.com/glendonC)), in particular his public repo
-  [1321](https://github.com/glendonC/1321), and is inspired by it.
+- `glendonize` is named after and modelled on the repo structure of
+  [glendonC](https://github.com/glendonC), in particular his public repo
+  [1321](https://github.com/glendonC/1321).
 - `grilling` builds on the grilling skill in Matt Pocock's
-  [skills](https://github.com/mattpocock/skills) (MIT).
-- The learning mode in `grilling` and the teach-first, explain-it-back part of the learning
-  loop are modelled on [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise).
+  [skills](https://github.com/mattpocock/skills) (MIT), whose README this one is shaped after.
+- The learning mode in `grilling` and the teach-first, explain-it-back part of
+  learning-by-building are modelled on [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise).
 
 ## License
 
