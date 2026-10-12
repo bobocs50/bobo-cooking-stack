@@ -8,8 +8,10 @@ Claude Code puts the learning back without slowing the project down.
 
 ## How it works
 
-1. **Concepts come when the work needs them**, with an example and a source. You write what
-   you know from memory and send it as `paper: ...`; Claude marks only what is wrong.
+1. **Concepts come when the work needs them**, with an example and a source. You apply the
+   concept inside the work, where a check is waiting: a code question on a real hunk, or a
+   two-line prediction before a paid run; the drill or the run checks you, Claude rates it.
+   Reading comes after, for what the rating marked wrong.
 2. **One code question at risky commits.** After a commit that decides a value (null
    handling, fallbacks, swallowed errors, a weakened test), or before a paid run, Claude
    shows the hunk and asks one question, about once a day at most. You say sure or unsure

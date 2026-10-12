@@ -6,7 +6,7 @@ Once a week, turns the raw counts in `~/.claude/learning/weekly.md` into 3–5 p
 on how your learning went, and updates your learning profile. Counts alone mislead: "9
 correction prompts" could mean you got sloppier or more precise, and a profile that moves on
 counts becomes a score you optimise. So the profile changes only when something was checked:
-a marked `paper:` page, an answered code question, a test you took.
+a rated code question, a prediction scored against a run, a test you took.
 
 ## How it works
 
@@ -23,8 +23,8 @@ a marked `paper:` page, an answered code question, a test you took.
 
 ## Example
 
-Claude finds your `paper:` page on evals with two gaps marked and four answered code
-questions, and writes:
+Claude finds one prediction scored against a run and four rated code questions, and
+writes:
 
 ```markdown
 Interpretation:
