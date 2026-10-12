@@ -23,4 +23,5 @@ Set-Location $learning
 Get-Content $out | Out-File -FilePath $log -Append -Encoding utf8
 
 & python (Join-Path $learning "weekly_stats.py") --apply $out 2>&1 | Out-File -FilePath $log -Append -Encoding utf8
+& python (Join-Path $learning "weekly_stats.py") --html 2>&1 | Out-File -FilePath $log -Append -Encoding utf8
 "=== $(Get-Date -Format s) end" | Out-File -FilePath $log -Append -Encoding utf8

@@ -23,4 +23,5 @@ echo "--- claude exit $?" >> "$LOG"
 cat "$OUT" >> "$LOG"
 
 python3 "$LEARNING/weekly_stats.py" --apply "$OUT" >> "$LOG" 2>&1
+python3 "$LEARNING/weekly_stats.py" --html >> "$LOG" 2>&1
 echo "=== $(date +%Y-%m-%dT%H:%M:%S) end" >> "$LOG"

@@ -80,7 +80,7 @@ Then merge [`settings.example.json`](settings.example.json) into `~/.claude/sett
 | File | What it does |
 |---|---|
 | [`weekly-review/`](weekly-review/README.md) | The skill that interprets the week and updates your profile |
-| [`weekly_stats.py`](weekly_stats.py) | Counts the last 7 days of sessions into `weekly.md` (`--force` now, `--hook` only after 7 days, `--apply` to write the headless review back) |
+| [`weekly_stats.py`](weekly_stats.py) | Counts the last 7 days of sessions into `weekly.md` (`--force` now, `--hook` only after 7 days, `--apply` / `--html` (writes `weekly.html`, newest week first, for reading) to write the headless review back) |
 | [`run_weekly.sh`](run_weekly.sh) / [`run_weekly.ps1`](run_weekly.ps1) | The weekly job for cron / Windows Task Scheduler |
 | [`settings.example.json`](settings.example.json) | The `SessionStart` fallback hook |
 | [`CLAUDE.snippet.md`](CLAUDE.snippet.md) | The code-question rules for a project's `CLAUDE.md` |
