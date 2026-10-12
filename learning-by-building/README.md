@@ -13,9 +13,14 @@ Claude Code puts the learning back without slowing the project down.
 2. **One code question at risky commits.** After a commit that decides a value (null
    handling, fallbacks, swallowed errors, a weakened test), or before a paid run, Claude
    shows the hunk and asks one question, about once a day at most. You say sure or unsure
-   first; the gap between how sure and how right you were is tracked.
+   first; the gap between how sure and how right you were is tracked. Claude opens the
+   question with a line starting `Code question` and closes it with a line
+   `Rating (sure|unsure|not said): ...`; `weekly_stats.py` counts asked, answered and
+   sure/unsure from those two markers.
 3. **A weekly job writes a report.** `weekly_stats.py` counts your last 7 days, then
-   `claude -p "/weekly-review"` updates your profile, only from evidence a check produced.
+   `claude -p "/weekly-review"` runs read-only (a headless Claude may not edit `~/.claude`)
+   and prints its interpretation between markers; `weekly_stats.py --apply` writes that into
+   `weekly.md`, and the next interactive session applies the profile changes it noted.
 4. **The `SessionStart` hook is the fallback** when the job was missed (laptop off).
 5. Nothing leaves your machine: everything lives in `~/.claude/learning/`, and only counts
    and your own prompts are used, never tool output.
@@ -73,7 +78,7 @@ Then merge [`settings.example.json`](settings.example.json) into `~/.claude/sett
 | File | What it does |
 |---|---|
 | [`weekly-review/`](weekly-review/README.md) | The skill that interprets the week and updates your profile |
-| [`weekly_stats.py`](weekly_stats.py) | Counts the last 7 days of sessions into `weekly.md` (`--force` now, `--hook` only after 7 days) |
+| [`weekly_stats.py`](weekly_stats.py) | Counts the last 7 days of sessions into `weekly.md` (`--force` now, `--hook` only after 7 days, `--apply` to write the headless review back) |
 | [`run_weekly.sh`](run_weekly.sh) / [`run_weekly.ps1`](run_weekly.ps1) | The weekly job for cron / Windows Task Scheduler |
 | [`settings.example.json`](settings.example.json) | The `SessionStart` fallback hook |
 | [`CLAUDE.snippet.md`](CLAUDE.snippet.md) | The code-question rules for a project's `CLAUDE.md` |

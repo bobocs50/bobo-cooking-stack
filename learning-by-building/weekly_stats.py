@@ -11,6 +11,7 @@ document text) is never copied.
 
     python weekly_stats.py --hook     as the hook: maybe write, maybe remind
     python weekly_stats.py --force    write an entry now, whatever the date
+    python weekly_stats.py --apply F  write the interpretation printed in file F into weekly.md
 """
 
 import json
@@ -35,8 +36,16 @@ HOME_PREFIX = re.sub(r"[:\\/]", "-", str(Path.home())) + "-"
 # behaviour, and "don't"/"stop" are ordinary instructions, so neither is counted.
 CORRECTION = re.compile(r"^\s*(no[,!. ]|nein|nope|wrong|falsch|why did|that'?s not|not what|i told you)", re.I)
 DONE_WHEN = re.compile(r"done when|definition of done|definiton of done|fertig wenn", re.I)
-# The habits in profile.md: a prompt that starts with the marker.
-PAPER = re.compile(r"^\s*paper\s*:", re.I)
+# The one practice that runs inside the work. Both ends are Claude's own markers, so a
+# clarifying question by the user is not booked as an answer: a question is an assistant text
+# block that starts with "Code question"; it counts as answered when a later assistant block in
+# the same session carries a line "Rating (sure|unsure|not said): ...", and "sure/unsure said"
+# is read off that rating. CLAUDE.snippet.md tells Claude to write both markers.
+CODE_Q = re.compile(r"^\s*(\*\*)?code question\s*(\(|:|\*\*)", re.I)
+RATING = re.compile(r"^\s*(\*\*)?rating\s*\((sure|unsure|not said)\)", re.I | re.M)
+# The weekly job runs Claude without Edit; it prints these blocks and --apply writes them.
+INTERP = re.compile(r"<<<INTERPRETATION\s*\n(.*?)\nINTERPRETATION>>>", re.S)
+PROFILE = re.compile(r"<<<PROFILE\s*\n(.*?)\nPROFILE>>>", re.S)
 
 
 def last_review():
@@ -61,6 +70,9 @@ def collect(since):
     denied = 0
     interrupts = 0
     paid_blocks = 0
+    asked = 0
+    answered = 0
+    sure = 0
     cutoff = since.timestamp() - 86400
     for path in (HOME / "projects").glob("*/*.jsonl"):
         try:
@@ -69,6 +81,7 @@ def collect(since):
             lines = path.read_text(encoding="utf-8").splitlines()
         except Exception:
             continue
+        open_question = False
         for line in lines:
             try:
                 o = json.loads(line)
@@ -85,12 +98,31 @@ def collect(since):
             content = msg.get("content")
             if o.get("type") == "assistant":
                 for c in content or []:
-                    if isinstance(c, dict) and c.get("type") == "tool_use":
+                    if not isinstance(c, dict):
+                        continue
+                    if c.get("type") == "text":
+                        text = c.get("text") or ""
+                        if CODE_Q.search(text) and not open_question:
+                            asked += 1
+                            open_question = True
+                        rating = RATING.search(text)
+                        if rating and open_question:
+                            answered += 1
+                            if rating.group(2).lower() in ("sure", "unsure"):
+                                sure += 1
+                            open_question = False
+                    if c.get("type") == "tool_use":
                         inp = c.get("input") or {}
                         if c.get("name") in ("Agent", "Task"):
                             agents[inp.get("subagent_type") or "general-purpose"] += 1
                         if c.get("name") == "Skill":
                             skills[inp.get("skill")] += 1
+                        if c.get("name") == "AskUserQuestion":
+                            for q in inp.get("questions") or []:
+                                if isinstance(q, dict) and CODE_Q.search(q.get("question") or ""):
+                                    if not open_question:
+                                        asked += 1
+                                    open_question = True
                 continue
             if o.get("type") != "user":
                 continue
@@ -128,6 +160,7 @@ def collect(since):
         "sessions": len(sessions), "projects": projects, "prompts": prompts, "agents": agents,
         "skills": skills, "slash": slash, "rejected": rejected, "denied": denied,
         "interrupts": interrupts, "paid_blocks": paid_blocks,
+        "asked": asked, "answered": answered, "sure": sure,
     }
 
 
@@ -137,7 +170,6 @@ def entry(since, today, d):
     median = lengths[len(lengths) // 2] if lengths else 0
     corrections = [p for p in prompts if CORRECTION.search(p)]
     done_when = sum(1 for p in prompts if DONE_WHEN.search(p))
-    paper = sum(1 for p in prompts if PAPER.search(p))
     lines = [
         f"## Week ending {today.isoformat()}",
         "",
@@ -145,7 +177,7 @@ def entry(since, today, d):
         "",
         f"- Sessions: {d['sessions']}; prompts: {len(prompts)}; median prompt length: {median} chars",
         f"- Projects: {', '.join(f'{k} {v}' for k, v in d['projects'].most_common()) or 'none'}",
-        f"- Habits: 'paper:' pages sent: {paper}",
+        f"- Code questions: asked {d['asked']}; answered {d['answered']}; 'sure'/'unsure' said: {d['sure']}",
         "",
         "Background only, no targets:",
         f"- Prompts with a 'done when': {done_when}",
@@ -175,18 +207,51 @@ def write_entry():
     LAST.write_text(today.isoformat(), encoding="utf-8")
 
 
+def apply(out_path):
+    """Write what the headless review printed into weekly.md (run_weekly calls this).
+    A non-interactive Claude may not edit ~/.claude files, so the skill prints the
+    interpretation between markers and this puts it in place. Profile changes are only
+    noted; the next interactive session applies them."""
+    out = Path(out_path).read_text(encoding="utf-8-sig", errors="replace")
+    weekly = WEEKLY.read_text(encoding="utf-8")
+    m = INTERP.search(out)
+    if not m:
+        print("no <<<INTERPRETATION block in " + out_path + "; weekly.md left pending")
+        return
+    block = "Interpretation (" + date.today().isoformat() + ", written by the weekly job):\n" + m.group(1).strip()
+    p = PROFILE.search(out)
+    if p:
+        block += "\n\nProfile changes: pending (apply in the next interactive session)\n" + p.group(1).strip()
+    if "Interpretation: pending" not in weekly:
+        print("weekly.md has no pending entry; nothing applied")
+        return
+    weekly = weekly.replace("Interpretation: pending", block, 1)
+    WEEKLY.write_text(weekly, encoding="utf-8")
+    print("interpretation applied")
+
+
+def profile_pending():
+    return WEEKLY.exists() and "Profile changes: pending" in WEEKLY.read_text(encoding="utf-8")
+
+
 def hook():
     last = last_review()
     wrote = False
     if last is None or (date.today() - last).days >= DAYS:
         write_entry()
         wrote = True
-    if not pending():
+    if not pending() and not profile_pending():
         return
-    context = ("Weekly learning review is due: ~/.claude/learning/weekly.md has an entry with "
-               "'Interpretation: pending'. Before the user's first task, run the weekly-review skill "
-               "without asking (the user chose automatic weekly updates), keep it short, "
-               "then carry on with their request.")
+    if pending():
+        context = ("Weekly learning review is due: ~/.claude/learning/weekly.md has an entry with "
+                   "'Interpretation: pending'. Before the user's first task, run the weekly-review skill "
+                   "without asking (the user chose automatic weekly updates), keep it short, "
+                   "then carry on with their request.")
+    else:
+        context = ("The weekly learning review ran headless and left 'Profile changes: pending' in the "
+                   "newest entry of ~/.claude/learning/weekly.md. Before the user's first task, apply "
+                   "those changes to profile.md / agentic-coding.md exactly as listed, replace that line "
+                   "with 'Profile changes: applied <today>', tell the user in one line, then carry on.")
     out = {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": context}}
     if wrote:
         out["systemMessage"] = "Weekly learning stats written to ~/.claude/learning/weekly.md; Claude will update your profile."
@@ -198,6 +263,8 @@ if __name__ == "__main__":
     if "--force" in sys.argv:
         write_entry()
         print(f"entry written in {time.time() - started:.1f}s")
+    elif "--apply" in sys.argv:
+        apply(sys.argv[sys.argv.index("--apply") + 1])
     else:
         try:
             hook()

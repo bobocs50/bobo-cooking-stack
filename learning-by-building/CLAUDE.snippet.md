@@ -19,6 +19,9 @@ assumes the old shape (show the call sites); why this and not null; which test l
 still pass if the fix were wrong. Never yes/no, never answerable from the commit message,
 never style. I say sure or unsure and answer in 2–3 sentences; you correct in one line that
 names the line and the consequence. Record the result in `~/.claude/learning/progress.md`.
+Start the question with a line `Code question: ...` and, once I have answered and you have
+corrected, write a line `Rating (sure|unsure|not said): right|partly|wrong`; the weekly stats
+count both lines.
 
 **Explanations.** Plain language first, 2–5 short bullets, one concrete example; details only
 when I ask. Use the correct engineering term when you explain, and when I use a wrong or vague
