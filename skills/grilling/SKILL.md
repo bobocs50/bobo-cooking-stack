@@ -31,7 +31,7 @@ Then branch:
   4. Only if they are still stuck, or ask for options, show 2-3 approaches on the example with what each costs and where it breaks. These are proposals, not their decision: they pick and say **why** in their own words. If the why doesn't hold up, name the gap and ask again; don't pick for them.
   5. Their approach becomes the root of the design tree; grill it as below.
 
-They can always say "just tell me" or "skip" — then explain or proceed, and record it as Introduced.
+They can always say "just tell me" or "skip" — then explain or proceed, and list it under "Shown so far" in progress.md, not as a record.
 
 **Throughout:** don't invent their rationale, don't lead them through your plan one hint at a time, no praise or hype — say what holds and what breaks. **Their answer first, where it is practice (2026-10-08):** at a structure decision (next section) and wherever a new, Developing or Revisit concept decides the answer, ask "what would you do and why?" in plain text, wait, then say where their answer agrees or differs from yours; the picker comes after, because a click does not show their reasoning. Every other decision goes straight to the picker; their reasoning fits under Other or a note. Asking at every click was a ritual, not practice. When they ask about existing code, answer *why*; *what it does* is theirs to say first.
 
@@ -42,9 +42,9 @@ A decision about structure — a new layer, step, data shape, boundary or compon
 1. **The user draws the first sketch** as a Mermaid flowchart, opened with `/whiteboard` (hand-drawn, dark, full screen), one concept per diagram, every box named with a system-design term (the system design section of `~/.claude/learning/progress.md` if there is one, otherwise the standard terms: pipeline, boundary, cache, fallback, …); arrows bare, labelled only where the label says something the boxes don't ("retry and reconcile"). A box without a term is the first question. An uncertain edge is drawn with a question mark, not asserted. You never draw before their sketch exists.
 2. **Grill the drawing** in plain text, one box or edge at a time: why does this box exist; what is its one responsibility; what happens when it fails, times out or half-succeeds, and where is that surfaced; who owns each piece of state that crosses a boundary; what still works if this box dies; what did this choice reject, and what would make you reconsider.
 3. **Then draw your alternative beside it**, same look and vocabulary, and say where it differs and why.
-4. **They pick** (`AskUserQuestion`, `preview` on both sketches) and say why. A term they used and defended is Demonstrated for progress.md; a click alone is Introduced.
+4. **They pick** (`AskUserQuestion`, `preview` on both sketches) and say why. A term they used and defended goes into progress.md "Words you used"; a click alone is exposure and goes under "Shown so far" at most.
 
-On their ask, open the sketch in lavish (kunchenguid/lavish-axi) as an editable whiteboard; the Mermaid in the conversation stays the record.
+On their ask, open the sketch on `/whiteboard`; the Mermaid in the conversation stays the record.
 
 ## Closing the session
 
@@ -56,19 +56,19 @@ When the frontier is empty and they have confirmed the shared understanding:
 
 ### What counts as evidence
 
-- **Demonstrated**: they reasoned it themselves — proposed it, or explained why, and it held up.
-- **Introduced**: you explained it, or they picked your recommendation without their own why. Clicking a recommendation is never demonstrated understanding.
+- **A record**: they did something themselves — answered a code question, predicted a run, explained a decision, caught a wrong claim — rated in one line (right or off, which line, the consequence). Clicking a recommendation is never a record.
+- **Shown so far**: you explained it, or they picked your recommendation without their own why. Exposure, not learning.
 - **Needs reinforcement**: they got it wrong, or said it is still unclear.
 
 Never record quotations of whole exchanges, and never anything from a proprietary document — concepts and decisions only.
 
 ### `~/.claude/learning/progress.md`
 
-One `## <Topic>` per concept (e.g. `## Caching`, `## Idempotent retries`), each readable on its own, with three bullet lists: Introduced / Demonstrated / Needs reinforcement, each bullet dated and naming the project. Update an existing topic instead of adding a duplicate.
+Append to the existing sections, never a new topic heading: a dated paragraph under "Records" (project, what they did, the rating, what is not yet there), a line under "Needs reinforcement", a term under "Words you used" only if they used and defended it, and anything you explained under "Shown so far". A record is never deleted; a wrong one gets "superseded <date>".
 
 ### `~/.claude/learning/profile.md`
 
-The user's own document. Touch only the Strong / Developing / Revisit lists at its end (Strong: demonstrated more than once across sessions; Developing: once, or introduced and partly applied; Revisit: needs reinforcement); never rewrite the rest.
+The user's own document. Touch only the Strong / Developing / Revisit lists at its end (Strong: a rated record more than once across sessions; Developing: once, or shown and partly applied; Revisit: needs reinforcement); never rewrite the rest.
 
 ## The design tree
 
@@ -82,7 +82,7 @@ Each round is a single `AskUserQuestion` call:
 
 - **Up to 4 questions per call.** If the frontier is wider than 4, ask the 4 most load-bearing ones and say in your message that the rest are queued for the next round.
 - **2-4 options per question**, each a real, mutually exclusive answer — not "yes/no/maybe". Give each a 1-5 word `label` and a `description` that states the consequence of choosing it, not a restatement of the label.
-- **Your recommendation goes first**, with `(Recommended)` appended to its label. You always have a recommendation; a grilling that only asks is half a grilling.
+- **Your recommendation goes first**, with `(Recommended)` appended to its label. You always have a recommendation on a design decision; a grilling that only asks is half a grilling. A question that tests the user (a prediction, a which-line, a what-would-happen) carries no `(Recommended)` and equal-length options.
 - `header` is the axis being decided in <=12 chars (e.g. "Engine", "Scope", "Test bar").
 - Set `multiSelect: true` only when the options genuinely combine.
 - Don't add an "Other" option — the tool supplies one, and that is how the user escapes a false choice you constructed.
