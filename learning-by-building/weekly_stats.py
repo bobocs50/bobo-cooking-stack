@@ -97,9 +97,9 @@ def load_terms():
 
 
 def term_pattern(term):
-    # whole words, hyphen or space between the words, any ending on the last word
-    # ("rate limit" also finds "rate-limiting"); the look-around keeps "contract" from
-    # matching inside "contracted rates"
+    # whole words, hyphen or space between the words ("rate limit" also finds "rate-limit");
+    # no endings: the look-around keeps "contract" out of "contracted rates", so another
+    # form of a word ("rate limiting", "overfitted") is an alias in the Terms table
     words = [re.escape(w) for w in re.split(r"[\s-]+", term) if w]
     return re.compile(r"(?<![\w-])" + r"[\s-]+".join(words) + r"(?![\w-])", re.I)
 
