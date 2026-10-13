@@ -5,7 +5,7 @@ changed. Rewrite "How I work now" when it changes; append to the other sections 
 
 ## How I work now
 
-<your steps, e.g. grill the plan → read the slice list → write my own slices → rule on
+<your steps, e.g. grill the plan → read the work-split table → write my own rows → rule on
 review findings → QA>
 
 Rules I keep:

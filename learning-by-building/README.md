@@ -9,12 +9,12 @@ Claude Code puts the learning back without slowing the project down.
 ## How it works
 
 1. **Concepts come when the work needs them**, with an example and a source. You apply the
-   concept inside the work, where a check is waiting: a code question on a real hunk, or a
-   two-line prediction before a paid run; the drill or the run checks you, Claude rates it.
+   concept inside the work, where a check is waiting: a question on real changed lines, or a
+   two-line prediction before a paid run; the test or the run checks you, Claude rates it.
    Reading comes after, for what the rating marked wrong.
 2. **One question at risky commits, of four kinds.** After a commit that decides a value (null
    handling, fallbacks, swallowed errors, a weakened test), or before a paid run, Claude
-   shows the hunk and asks one question, about once a day at most: the code question (what
+   shows the changed lines and asks one question, about once a day at most: the code question (what
    comes out for this input, which line excludes a case), name the mechanism (the textbook
    term for what the function does), the failure question (what reaches the user when a call
    fails or a file is half-written) or the trade-off question (why this design and not the

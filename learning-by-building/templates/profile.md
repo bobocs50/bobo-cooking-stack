@@ -34,7 +34,7 @@ The loop, per concept:
 
 ## How you read code
 
-**The code question**: one hunk where a value is decided, at most about one a day, right after
+**The question**: one set of changed lines where a value is decided, at most about one a day, right after
 a risky commit or before a paid run (see `CLAUDE.snippet.md`). Say sure or unsure first.
 
 **Claude's role during reading**: you summarise first, Claude confirms or corrects; Claude never

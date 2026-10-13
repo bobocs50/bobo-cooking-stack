@@ -8,9 +8,9 @@ it lists as Strong.
 1. A commit touches code that decides a value: null handling, a fallback, a merge rule, an
    error path that swallows a failure, a cache key, or a test that is deleted or weakened.
    Right after the commit, first run a reviewer subagent that sees only the diff and reports
-   gaps; then show me the hunk (at most ~40 lines, with one sentence on what it decides) and
+   gaps; then show me the changed lines (at most ~40, with one sentence on what it decides) and
    ask one question.
-2. Before a paid or long run: the hunk the run will test, if not already asked under 1. My
+2. Before a paid or long run: the changed lines the run will test, if not already asked under 1. My
    answer is the prediction the run's numbers then check.
 
 Never for imports, renames, comments, formatting or test scripts. Rotate the question: what

@@ -64,7 +64,7 @@ decision is settled. At structure decisions you sketch first on
 **Problem:** when the agent writes the code, you skip the part where you would have learned.
 
 **Fix:** [`learning-by-building`](learning-by-building/README.md) asks you one question about
-a risky hunk when it lands, and a weekly cron job runs
+a risky change when it lands, and a weekly cron job runs
 [`weekly-review`](learning-by-building/weekly-review/README.md), which updates your learning
 profile only from evidence.
 
