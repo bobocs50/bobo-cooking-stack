@@ -2,7 +2,7 @@
 
 [← all skills](../../README.md)
 
-Once a week, turns the raw counts in `~/.claude/learning/weekly.md` into 3–5 plain bullets
+Once a week, turns the raw counts in `~/.claude/learning/weekly.md` into six short bullets
 on how your learning went, and updates your learning profile. Counts alone mislead: "9
 correction prompts" could mean you got sloppier or more precise, and a profile that moves on
 counts becomes a score you optimise. So the profile changes only when something was checked:
@@ -25,18 +25,21 @@ a rated code question, a prediction scored against a run, a test you took.
 
 ## Example
 
-Claude finds one prediction scored against a run and four rated code questions, and
-writes:
+Claude finds one prediction scored against a run and four rated questions, and writes six
+bullets in this shape:
 
 ```markdown
-Interpretation:
-- Evals: page sent Wednesday, 2 gaps (unit of scoring, why no LLM judge). Redo due Saturday.
-- Code questions: 4; sure and right 2, unsure and right 1, sure and wrong 1 (a fallback read
-  as cited). Habit to build: read to the last `return` before answering.
-- Next from "Now": CI, when the first workflow is added.
+- **How you got better:** You answered four questions, none last week.
+  Three times you found the deciding line yourself.
+  One needed a hint; one was right for the wrong reason.
+- **What went wrong:** …
+- **What you learned:** …
+- **Learn next:** …
+- **How you worked with Claude:** 18 corrections, 21 last week. …
+- **Context:** …
 ```
 
-"Evals" stays under Developing in `profile.md`, because the page had gaps.
+"Evals" stays under Developing in `profile.md`, because the prediction was off.
 
 ## Install
 

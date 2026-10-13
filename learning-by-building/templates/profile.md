@@ -16,12 +16,16 @@ Claude's role: introduce new concepts when the work needs them, with an example 
 correct you when you state or cite something wrong.
 
 The loop, per concept:
-1. **Claude introduces it** with one concrete example and 1–2 sources.
-2. **You study it** (the sources, about 30 min).
-3. **You write what you know** from memory, on paper, sent as `paper:`. Claude marks only what
-   is wrong or missing.
-4. **You explain it** to people: <which meeting or group>.
-Redo step 3 after ~3 and ~10 days when the concept matters.
+1. **Claude introduces it** with one concrete example and a source, or says "my own reading",
+   and ends with one line: "after this you can: …".
+2. **You apply it inside the work, where a check is waiting**: one question a day on real
+   changed lines (code, mechanism, failure or trade-off question), or a two-line prediction
+   before a paid run. The test or the run checks it at once.
+3. **Claude rates the answer in one line** (right or off, which line, the consequence) and
+   writes a record in `progress.md`.
+4. **Reading comes after**, the source for what went wrong, about 30 min. The same kind of
+   check again after ~3 and ~10 days.
+5. **You explain it** to people: <which meeting or group>.
 
 ## Concepts (topic areas, introduced only when the work needs them)
 

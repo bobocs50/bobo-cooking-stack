@@ -46,7 +46,8 @@ CHARTS = [
     ("agent_runs", "Agent runs"),
     ("prompts", "Prompts"),
     ("paid_runs", "Paid-run commands"),
-    ("terms_used", "CS terms in your own words (set out by Claude behind)"),
+    ("terms_used", "CS terms in your own words (shown behind)"),
+    ("done_when", "Prompts that said when the work is done"),
 ]
 
 LABELS = [
@@ -251,12 +252,12 @@ def bar_path(x, base, w, h):
     )
 
 
-def bar_chart(weeks, key, title, behind=None):
+def bar_chart(weeks, key, title, behind=None, word=""):
     """One small bar chart as inline SVG: x = week_ending, last bar in the accent, earlier
     bars in the lighter step, an optional second series (behind) as a wider lighter bar."""
     n = len(weeks)
     w, h = 300, 120
-    top, bottom, left, right = 22, 26, 6, 6
+    top, bottom, left, right = 30, 26, 6, 6
     plot_h = h - top - bottom
     vals = [num(wk, key) for wk in weeks]
     back = [num(wk, behind) for wk in weeks] if behind else [0] * n
@@ -276,8 +277,8 @@ def bar_chart(weeks, key, title, behind=None):
         if behind:
             bh = back[i] / peak * plot_h
             out.append(
-                '<path class="back" d="%s"><title>%s: %s asked</title></path>'
-                % (bar_path(x, top + plot_h, bar_w, bh), html.escape(label), fmt(back[i]))
+                '<path class="back" d="%s"><title>%s: %s %s</title></path>'
+                % (bar_path(x, top + plot_h, bar_w, bh), html.escape(label), fmt(back[i]), word)
             )
         bh = vals[i] / peak * plot_h
         bw = bar_w * 0.6 if behind else bar_w
@@ -312,8 +313,8 @@ def bar_chart(weeks, key, title, behind=None):
 def charts(weeks):
     out = ['<div class="charts">']
     for key, title in CHARTS:
-        behind = {"code_q_answered": "code_q_asked", "terms_used": "terms_shown"}.get(key)
-        out.append(bar_chart(weeks, key, title, behind))
+        behind, word = {"code_q_answered": ("code_q_asked", "asked"), "terms_used": ("terms_shown", "shown")}.get(key, (None, ""))
+        out.append(bar_chart(weeks, key, title, behind, word))
     out.append("</div>")
     return "\n".join(out)
 
@@ -495,7 +496,7 @@ code{background:var(--code);padding:1px 4px;border-radius:3px;font-size:.9em}
 .chart .val{fill:var(--fg);font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
 .chart .ax{fill:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}
 .chart .axis{stroke:var(--axis);stroke-width:1}
-.chart .cur{fill:var(--acc)}.chart .prev{fill:var(--acc-lite)}.chart .back{fill:var(--acc-back)}
+.chart .cur{fill:var(--acc)}.chart .prev{fill:var(--acc-lite)}.chart .back{fill:var(--acc-back);stroke:var(--acc-lite);stroke-width:1}
 .chart path:hover{opacity:.8}
 .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .cols.two{grid-template-columns:1fr 1fr}
@@ -504,9 +505,9 @@ code{background:var(--code);padding:1px 4px;border-radius:3px;font-size:.9em}
 .col li{font-size:.92rem}
 .tbox{overflow-x:auto;border:1px solid var(--ring);border-radius:8px}
 table{border-collapse:collapse;width:100%;font-size:.85rem;white-space:nowrap}
-th,td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:6px 7px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
 th:first-child,td:first-child{text-align:left}
-th{color:var(--muted);font-weight:500;background:var(--plane)}
+th{color:var(--muted);font-weight:500;background:var(--plane);white-space:normal;vertical-align:bottom;line-height:1.2}
 tbody tr:last-child td{border-bottom:0}
 footer{margin-top:36px;color:var(--muted);font-size:.75rem;word-break:break-all}
 """

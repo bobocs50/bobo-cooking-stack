@@ -69,7 +69,7 @@ INTERP = re.compile(r"<<<INTERPRETATION\s*\n(.*?)\nINTERPRETATION>>>", re.S)
 PROFILE = re.compile(r"<<<PROFILE\s*\n(.*?)\nPROFILE>>>", re.S)
 FAR_FUTURE = datetime(9999, 1, 1, tzinfo=timezone.utc)
 # Project folders under ~/.claude/projects are named after the path with separators as "-".
-HOME_PREFIX = re.sub(r"[:\/]", "-", str(Path.home())) + "-"
+HOME_PREFIX = re.sub(r"[:\\/]", "-", str(Path.home())) + "-"
 
 
 def load_terms():
@@ -98,8 +98,8 @@ def load_terms():
 
 def term_pattern(term):
     # whole words, hyphen or space between the words, any ending on the last word
-    # ("rate limit" also finds "rate-limiting"; "contract" does not find "contracted rates"
-    # because a pasted block is replaced by "[pasted]" before the prompt is searched)
+    # ("rate limit" also finds "rate-limiting"); the look-around keeps "contract" from
+    # matching inside "contracted rates"
     words = [re.escape(w) for w in re.split(r"[\s-]+", term) if w]
     return re.compile(r"(?<![\w-])" + r"[\s-]+".join(words) + r"(?![\w-])", re.I)
 
@@ -185,7 +185,9 @@ def scan(windows, mtime_cutoff=None):
                             t["asked_kind"][q.group(2).lower().replace("tradeoff", "trade-off")] += 1
                             open_question = True
                         if TERM_LINE is not None:
-                            t["terms_shown"] += len(TERM_LINE.findall(text))
+                            # a "term = " line inside a fenced code block is code, not a term line
+                            prose = re.sub(r"```.*?```", "", text, flags=re.S)
+                            t["terms_shown"] += len(TERM_LINE.findall(prose))
                         rating = RATING.search(text)
                         if rating and open_question:
                             t["answered"] += 1
@@ -238,9 +240,11 @@ def scan(windows, mtime_cutoff=None):
             if m:
                 t["slash"][m.group(1).strip()] += 1
                 continue
-            if content.startswith("<") or content.startswith("Caveat:"):
+            # Mask pasted blocks first: a prompt that opens with a paste still holds the
+            # user's own words after it (found by a fixture test on 2026-10-13).
+            text = re.sub(r"<pasted_content.*?</pasted_content[^>]*>", "[pasted]", content, flags=re.S).strip()
+            if text.startswith("<") or text.startswith("Caveat:") or not text:
                 continue
-            text = re.sub(r"<pasted_content.*?</pasted_content[^>]*>", "[pasted]", content, flags=re.S)
             t["prompts"].append(text)
             t["sessions"].add(session)
             t["projects"][project] += 1

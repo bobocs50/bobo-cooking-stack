@@ -62,7 +62,7 @@ On Windows, run the copy step in Git Bash and copy `run_weekly.ps1` instead of `
 git clone https://github.com/bobocs50/bobo-cooking-stack.git
 cd bobo-cooking-stack/learning-by-building
 mkdir -p ~/.claude/learning ~/.claude/skills
-cp weekly_stats.py run_weekly.sh ~/.claude/learning/   # Windows: run_weekly.ps1
+cp weekly_stats.py weekly_page.py run_weekly.sh ~/.claude/learning/   # Windows: run_weekly.ps1
 cp -n templates/*.md ~/.claude/learning/
 cp -r weekly-review ~/.claude/skills/
 ```
