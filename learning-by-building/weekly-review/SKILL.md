@@ -6,7 +6,7 @@ description: Interpret the weekly learning stats in ~/.claude/learning/weekly.md
 The user is a 4th-semester Information Systems student aiming for a software / AI engineering internship, and has no software-engineer supervisor. Once a week this updates their learning record automatically; they read it when they want. Do not ask them questions: the update runs without them.
 
 1. Read the newest entry in `~/.claude/learning/weekly.md` that says `Interpretation: pending`. If none is pending, run `python ~/.claude/learning/weekly_stats.py --force` first.
-2. Read `~/.claude/learning/profile.md` ("How learning works here", "How the user reads code", "Monthly check", "Now"), `progress.md` ("Records", "Needs reinforcement", "Words you used"), and the previous entries in `weekly.md`.
+2. Read `~/.claude/learning/profile.md` ("How learning works here", "How the user reads code", "Monthly check", "Now"), `progress.md` ("Records", "Needs reinforcement", "Words you used", "Terms"), and the previous entries in `weekly.md`.
    If the user ran `/insights` since the last weekly entry, read the newest `~/.claude/usage-data/report-*.html` (by file date; never run `/insights` yourself) as extra evidence and name its date.
 3. Write the interpretation in place of `Interpretation: pending` as **six bullets with these exact bold labels, in this order** (the user, 2026-10-12: "it should show me how good I got, how I progressed, what I did not good, what I learned, what I should learn"). Writing rule for every bullet: 2–4 lines, one sentence per line, each sentence at most 12 words, continuation lines indented two spaces under the bullet; plain words a student reads in ten seconds, addressed to the user as "you"; a number always stands next to last week's number ("18 corrections, 21 last week"); no file names, no decision ids, no quotes longer than six words. Example bullet in that shape (copy the shape, not the words):
    - **How you got better:** You answered two code questions, none last week.
@@ -21,7 +21,8 @@ The user is a 4th-semester Information Systems student aiming for a software / A
    - `**Context:**` one line on the workload beside it (prompts, agent runs, paid runs) and anything the machinery did wrong.
    Judge against the loop in `profile.md` ("How learning works here") only; the questions below are what to look at, not extra bullets:
    - Was a concept introduced this week with a source and an "after this you can:" line (loop step 1)? Did reading follow a wrong rating (step 4)?
-   - The code-question line: asked, answered, with sure/unsure said. Which records were added to `progress.md` this week, and what each says the user can do now. Is a redo of the same kind of check due (~3 and ~10 days after a record)?
+   - The questions line: asked by kind (code, mechanism, failure, trade-off), answered, with sure/unsure said. Which records were added to `progress.md` this week, and what each says the user can do now. Is a redo of the same kind of check due (~3 and ~10 days after a record)?
+   - The terms line: which CS terms the user used in their own prompts this week (count and words, next to last week's), and how many terms Claude set out as a line. A term the user used and defended moves to `progress.md` "Words you used" in step 4; a week with 0 is said plainly under "What went wrong" only if it repeats.
    - Was a prediction written before a paid run this week, and did the run confirm it (the run's findings in `notes/`)?
    - Which concept comes next, from "Now" in `profile.md`.
    - Prompt diffs in `main/` this week: were they shown to the user before the run (D-085)?

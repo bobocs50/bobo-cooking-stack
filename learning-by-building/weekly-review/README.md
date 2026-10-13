@@ -14,10 +14,12 @@ a rated code question, a prediction scored against a run, a test you took.
    `weekly_stats.py --force` if there is none).
 2. Reads `profile.md`, `progress.md`, the earlier weeks, and your newest `/insights` report if
    there is one.
-3. Writes 3–5 bullets in place of `pending`: the concept checked this week and whether a redo
-   is due, the next concept from "Now", and how sure against how right you were on code questions.
+3. Writes six short-line bullets in place of `pending`: how you got better, what went wrong,
+   what you learned, learn next, how you worked with Claude (the counts next to last week's),
+   context. It names the questions by kind, how sure against how right you were, and which
+   CS terms from `progress.md` "Terms" you used in your own prompts.
 4. Updates `profile.md`, dated, only from that evidence. Its own earlier verdicts do not count.
-5. Proposes nothing new if your profile declares a freeze.
+5. Proposes no new files, hooks, skills or rules; you build those when you ask for them.
 6. Logs a lesson about working with Claude in `agentic-coding.md`, if the week shows one.
 7. Tells you in two lines where to read it. It asks you no questions.
 

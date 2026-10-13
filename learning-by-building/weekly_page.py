@@ -34,7 +34,7 @@ TILES = [
     ("dont_understand", "“Don’t understand” prompts", -1),
     ("agent_runs", "Agent runs", 0),
     ("prompts", "Prompts", 0),
-    ("paid_runs", "Paid-run commands", 0),
+    ("terms_used", "CS terms in your own words", 1),
 ]
 
 CHARTS = [
@@ -46,6 +46,7 @@ CHARTS = [
     ("agent_runs", "Agent runs"),
     ("prompts", "Prompts"),
     ("paid_runs", "Paid-run commands"),
+    ("terms_used", "CS terms in your own words (set out by Claude behind)"),
 ]
 
 LABELS = [
@@ -311,7 +312,7 @@ def bar_chart(weeks, key, title, behind=None):
 def charts(weeks):
     out = ['<div class="charts">']
     for key, title in CHARTS:
-        behind = "code_q_asked" if key == "code_q_answered" else None
+        behind = {"code_q_answered": "code_q_asked", "terms_used": "terms_shown"}.get(key)
         out.append(bar_chart(weeks, key, title, behind))
     out.append("</div>")
     return "\n".join(out)
@@ -345,6 +346,7 @@ def table(weeks):
         "Don’t understand",
         "Agent runs",
         "Paid-run commands",
+        "CS terms used",
     ]
     keys = [
         "prompts",
@@ -357,6 +359,7 @@ def table(weeks):
         "dont_understand",
         "agent_runs",
         "paid_runs",
+        "terms_used",
     ]
     out = ['<div class="tbox"><table><thead><tr>']
     for h_ in head:

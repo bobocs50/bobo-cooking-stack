@@ -12,13 +12,23 @@ Claude Code puts the learning back without slowing the project down.
    concept inside the work, where a check is waiting: a code question on a real hunk, or a
    two-line prediction before a paid run; the drill or the run checks you, Claude rates it.
    Reading comes after, for what the rating marked wrong.
-2. **One code question at risky commits.** After a commit that decides a value (null
+2. **One question at risky commits, of four kinds.** After a commit that decides a value (null
    handling, fallbacks, swallowed errors, a weakened test), or before a paid run, Claude
-   shows the hunk and asks one question, about once a day at most. You say sure or unsure
-   first; the gap between how sure and how right you were is tracked. Claude opens the
-   question with a line starting `Code question` and closes it with a line
-   `Rating (sure|unsure|not said): ...`; `weekly_stats.py` counts asked, answered and
-   sure/unsure from those two markers.
+   shows the hunk and asks one question, about once a day at most: the code question (what
+   comes out for this input, which line excludes a case), name the mechanism (the textbook
+   term for what the function does), the failure question (what reaches the user when a call
+   fails or a file is half-written) or the trade-off question (why this design and not the
+   other; what breaks the other way). You say sure or unsure first; the gap between how sure
+   and how right you were is tracked. Claude opens the question with a line starting
+   `Code question`, `Mechanism question`, `Failure question` or `Trade-off question` and
+   closes it with a line `Rating (sure|unsure|not said): ...`; `weekly_stats.py` counts
+   asked by kind, answered and sure/unsure from those two markers.
+   **The terms are the standard CS words**, never Claude's own: a table under `## Terms` in
+   `progress.md` (term, where it lives in your code: content-addressed cache, exponential
+   backoff, idempotent, single point of failure…). The first time one comes up Claude writes
+   one line `term = plain meaning; your example`, and the question carries the term when it
+   touches that place. `weekly_stats.py` counts the terms in your own prompts (pasted blocks
+   and prompts over 1500 characters skipped), so the review can say which words became yours.
 3. **A weekly job writes a report.** `weekly_stats.py` counts your last 7 days, then
    `claude -p "/weekly-review"` runs read-only (a headless Claude may not edit `~/.claude`)
    and prints its interpretation between markers; `weekly_stats.py --apply` writes that into

@@ -34,8 +34,6 @@ from pathlib import Path
 
 HOME = Path.home() / ".claude"
 LEARNING = HOME / "learning"
-# Project folders under ~/.claude/projects are named after the path with separators as "-".
-HOME_PREFIX = re.sub(r"[:\/]", "-", str(Path.home())) + "-"
 WEEKLY = LEARNING / "weekly.md"
 WEEKLY_JSON = LEARNING / "weekly.json"
 OVERRIDES = LEARNING / "weekly_overrides.json"
@@ -55,19 +53,63 @@ DONT_UNDERSTAND = re.compile(
     r"|erkl[äa]r|\bexplain\b|dont get it|don'?t get it|dont undrs|dont undsr",
     re.I,
 )
-# The one practice that runs inside the work (D-089). Both ends are Claude's own markers,
-# so a clarifying question by the user is not booked as an answer: a question is an
-# assistant text block that starts with "Code question"; it counts as answered when a later
-# assistant block in the same session carries a line "Rating (sure|unsure|not said): ...",
-# and "sure/unsure said" is read off that rating (profile.md "Monthly check"). The earlier
-# paper:/guess: counters matched 0 prompts ever and were replaced on 2026-10-12; a first
-# version that took the next user prompt as the answer booked "what does this mean?" as one.
-CODE_Q = re.compile(r"^\s*(\*\*)?code question\s*(\(|:|\*\*)", re.I)
+# The practice that runs inside the work (D-089), four kinds since 2026-10-13: the code
+# question, name the mechanism, the failure question, the trade-off question. Both ends are
+# Claude's own markers, so a clarifying question by the user is not booked as an answer: a
+# question is an assistant text block that starts with "<Kind> question"; it counts as
+# answered when a later assistant block in the same session carries a line
+# "Rating (sure|unsure|not said): ...", and "sure/unsure said" is read off that rating
+# (profile.md "Monthly check"). The earlier paper:/guess: counters matched 0 prompts ever and
+# were replaced on 2026-10-12; a first version that took the next user prompt as the answer
+# booked "what does this mean?" as one.
+QUESTION = re.compile(r"^\s*(\*\*)?(code|mechanism|failure|trade-?off) question\s*(\(|:|\*\*)", re.I)
 RATING = re.compile(r"^\s*(\*\*)?rating\s*\((sure|unsure|not said)\)", re.I | re.M)
 # The Monday task runs Claude without Edit; it prints these blocks and --apply writes them.
 INTERP = re.compile(r"<<<INTERPRETATION\s*\n(.*?)\nINTERPRETATION>>>", re.S)
 PROFILE = re.compile(r"<<<PROFILE\s*\n(.*?)\nPROFILE>>>", re.S)
 FAR_FUTURE = datetime(9999, 1, 1, tzinfo=timezone.utc)
+# Project folders under ~/.claude/projects are named after the path with separators as "-".
+HOME_PREFIX = re.sub(r"[:\/]", "-", str(Path.home())) + "-"
+
+
+def load_terms():
+    """The CS terms the user is meant to pick up: the first column of the table under
+    "## Terms" in progress.md, aliases split on " / " (2026-10-13). Only the user's own
+    prompts are searched for them, never Claude's text, so a term counts once it is the
+    user's word."""
+    try:
+        text = (LEARNING / "progress.md").read_text(encoding="utf-8")
+    except Exception:
+        return []
+    m = re.search(r"^## Terms[^\n]*\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+    if not m:
+        return []
+    terms = []
+    for line in m.group(1).splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 2 or not cells[0] or cells[0].startswith("-") or cells[0].lower() == "term":
+            continue
+        for alias in cells[0].split(" / "):
+            alias = alias.strip().strip("`*")
+            if alias:
+                terms.append(alias)
+    return terms
+
+
+def term_pattern(term):
+    # whole words, hyphen or space between the words, any ending on the last word
+    # ("rate limit" also finds "rate-limiting"; "contract" does not find "contracted rates"
+    # because a pasted block is replaced by "[pasted]" before the prompt is searched)
+    words = [re.escape(w) for w in re.split(r"[\s-]+", term) if w]
+    return re.compile(r"(?<![\w-])" + r"[\s-]+".join(words) + r"(?![\w-])", re.I)
+
+
+TERMS = load_terms()
+TERM_PATTERNS = [(t, term_pattern(t)) for t in TERMS]
+# The line Claude writes the first time a term comes up: `term = plain meaning; edat example`.
+TERM_LINE = re.compile(
+    r"^\s*(\*\*)?(" + "|".join(re.escape(t) for t in TERMS) + r")(\*\*)?\s*=\s", re.I | re.M
+) if TERMS else None
 
 
 def last_review():
@@ -86,7 +128,7 @@ def new_tally():
         "sessions": set(), "projects": Counter(), "prompts": [], "agents": Counter(),
         "skills": Counter(), "slash": Counter(), "rejected": 0, "denied": 0,
         "interrupts": 0, "paid_blocks": 0, "paid_runs": 0,
-        "asked": 0, "answered": 0, "sure": 0,
+        "asked": 0, "answered": 0, "sure": 0, "asked_kind": Counter(), "terms_shown": 0,
     }
 
 
@@ -137,9 +179,13 @@ def scan(windows, mtime_cutoff=None):
                         continue
                     if c.get("type") == "text":
                         text = c.get("text") or ""
-                        if CODE_Q.search(text) and not open_question:
+                        q = QUESTION.search(text)
+                        if q and not open_question:
                             t["asked"] += 1
+                            t["asked_kind"][q.group(2).lower().replace("tradeoff", "trade-off")] += 1
                             open_question = True
+                        if TERM_LINE is not None:
+                            t["terms_shown"] += len(TERM_LINE.findall(text))
                         rating = RATING.search(text)
                         if rating and open_question:
                             t["answered"] += 1
@@ -157,9 +203,13 @@ def scan(windows, mtime_cutoff=None):
                             t["paid_runs"] += 1
                         if name == "AskUserQuestion":
                             for q in inp.get("questions") or []:
-                                if isinstance(q, dict) and CODE_Q.search(q.get("question") or ""):
+                                if not isinstance(q, dict):
+                                    continue
+                                qm = QUESTION.search(q.get("question") or "")
+                                if qm:
                                     if not open_question:
                                         t["asked"] += 1
+                                        t["asked_kind"][qm.group(2).lower().replace("tradeoff", "trade-off")] += 1
                                     open_question = True
                 continue
             if o.get("type") != "user":
@@ -218,12 +268,23 @@ def prompt_stats(prompts):
     corrections = [p for p in prompts if CORRECTION.search(p)]
     done_when = sum(1 for p in prompts if DONE_WHEN.search(p))
     dont_understand = sum(1 for p in prompts if DONT_UNDERSTAND.search(p))
-    return median, corrections, done_when, dont_understand
+    terms = Counter()
+    for p in prompts:
+        # A prompt that long is a pasted report or skill text, not the user's own words
+        # (2026-10-13: three of seven hits were 15-22k-char pastes without a pasted tag).
+        if len(p) > 1500:
+            continue
+        for term, pattern in TERM_PATTERNS:
+            if pattern.search(p):
+                terms[term] += 1
+    return median, corrections, done_when, dont_understand, terms
 
 
 def entry(since, today, d):
     prompts = d["prompts"]
-    median, corrections, done_when, _ = prompt_stats(prompts)
+    median, corrections, done_when, _, terms = prompt_stats(prompts)
+    kinds = ", ".join(f"{k} {v}" for k, v in d["asked_kind"].most_common()) or "none"
+    words = ", ".join(f"{k} {v}" for k, v in terms.most_common()) or "none"
     lines = [
         f"## Week ending {today.isoformat()}",
         "",
@@ -231,7 +292,8 @@ def entry(since, today, d):
         "",
         f"- Sessions: {d['sessions']}; prompts: {len(prompts)}; median prompt length: {median} chars",
         f"- Projects: {', '.join(f'{k} {v}' for k, v in d['projects'].most_common()) or 'none'}",
-        f"- Code questions (D-089): asked {d['asked']}; answered {d['answered']}; 'sure'/'unsure' said: {d['sure']}",
+        f"- Questions (D-089, four kinds since 2026-10-13): asked {d['asked']} ({kinds}); answered {d['answered']}; 'sure'/'unsure' said: {d['sure']}",
+        f"- CS terms in your own prompts (progress.md 'Terms'): {sum(terms.values())} ({words}); term lines Claude set out: {d['terms_shown']}",
         "",
         "Background only, no targets:",
         f"- Prompts with a 'done when': {done_when}",
@@ -315,7 +377,7 @@ def week_rows():
     rows = []
     for (start, _end, t), week_ending in zip(windows, mondays):
         finish(t)
-        median, corrections, done_when, dont_understand = prompt_stats(t["prompts"])
+        median, corrections, done_when, dont_understand, terms = prompt_stats(t["prompts"])
         row = {
             "week_ending": week_ending.isoformat(),
             "window_start": start.date().isoformat(),
@@ -326,6 +388,10 @@ def week_rows():
             "code_q_asked": t["asked"],
             "code_q_answered": t["answered"],
             "code_q_sure": t["sure"],
+            "question_kinds": dict(t["asked_kind"].most_common()),
+            "terms_used": sum(terms.values()),
+            "terms_by_word": dict(terms.most_common()),
+            "terms_shown": t["terms_shown"],
             "done_when": done_when,
             "corrections": len(corrections),
             "dont_understand": dont_understand,
@@ -364,7 +430,7 @@ def write_json():
 def print_rows(rows):
     cols = ["week_ending", "prompts", "corrections", "dont_understand", "rejected", "interrupts",
             "auto_mode_blocks", "paid_guard_blocks", "agent_runs", "paid_runs",
-            "code_q_asked", "code_q_answered", "code_q_sure"]
+            "code_q_asked", "code_q_answered", "code_q_sure", "terms_used", "terms_shown"]
     print("\t".join(cols))
     for r in rows:
         print("\t".join(str(r[c]) for c in cols) + ("\toverrides=" + ",".join(r["overrides"]) if r.get("overrides") else ""))
