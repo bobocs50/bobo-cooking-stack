@@ -4,7 +4,7 @@ description: Open a Mermaid flowchart as a full-screen, hand-drawn, editable whi
 argument-hint: "[what to draw]"
 ---
 
-A whiteboard between the user and Claude: one dark, full-screen board, the drawing toolbar, a "Save draft" and a "Send to Claude" button. Nothing else. The page is `board.html` next to this file (Excalidraw from a CDN), served by `serve.py` (Python standard library, local only).
+A whiteboard between the user and Claude: one dark, full-screen board, the drawing toolbar, and three buttons: "Close board", "Save draft" and "Send to Claude". Nothing else. The page is `board.html` next to this file (Excalidraw from a CDN), served by `serve.py` (Python standard library, local only).
 
 ## The user draws first
 
@@ -25,9 +25,9 @@ The drawing is the user's thinking. So:
 ## The loop
 
 1. Write the Mermaid to `.lavish/<slug>.mmd` in the current working directory (add `.lavish/` to the project's `.gitignore` if it is not there).
-2. Run `python <skill dir>/serve.py .lavish/<slug>.mmd`, where `<skill dir>` is this skill's base directory (shown when the skill loads; `~/.claude/skills/whiteboard` for a user-level install), as a tracked background command with a long timeout. It opens the browser on a free port and waits. The user draws; **Save draft** (or Ctrl+S) writes `<slug>.excalidraw` + `<slug>.png` next to the `.mmd` and keeps the page open; **Send to Claude** writes them and the server exits (code 0), which notifies this session.
+2. Run `python <skill dir>/serve.py .lavish/<slug>.mmd`, where `<skill dir>` is this skill's base directory (shown when the skill loads; `~/.claude/skills/whiteboard` for a user-level install), as a tracked background command with a long timeout. It opens the browser on a free port and waits. The user draws; **Save draft** (or Ctrl+S) writes `<slug>.excalidraw` + `<slug>.png` next to the `.mmd` and keeps the page open; **Send to Claude** writes them and the server exits (code 0), which notifies this session; **Close board** writes them too and the server exits (code 3) without sending, for a user who is done for now.
 3. Read `<slug>.png` (the Read tool shows images) and, when the picture is not enough, `<slug>.excalidraw` (JSON: element `text` fields hold the box labels and the user's notes). Then update the Mermaid in `<slug>.mmd` to match what the user drew: the Mermaid stays the record, never the `.excalidraw`.
 4. To reopen the same board, run `serve.py` again on the same `.mmd`: it loads the saved `.excalidraw` first, so the user's layout survives. Delete the `.excalidraw` to start from the Mermaid again.
 5. At the end, paste the final Mermaid in the conversation. It goes into the project's docs only on the user's go.
 
-If `serve.py` exits with code 1, it was stopped (Ctrl+C) before **Send to Claude**. Closing the browser tab does not stop it: the server keeps waiting. When the user says they closed the board, stop the background command and ask whether to reopen. The CDN (jsdelivr, esm.sh) must be reachable; without it the page shows "load failed".
+If `serve.py` exits with code 3, the user clicked **Close board**: the draft is on disk, nothing was sent, so do not read the board as an answer; ask whether to reopen or to leave it. Code 1 means it was stopped (Ctrl+C) before either button. Closing the browser tab alone does not stop it: the server keeps waiting. When the user says they closed the tab, stop the background command and ask whether to reopen. The CDN (jsdelivr, esm.sh) must be reachable; without it the page shows "load failed".

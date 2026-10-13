@@ -30,6 +30,7 @@
   }
   #bar button:active { transform: scale(0.97); }
   #bar button:disabled { cursor: default; }
+  #bar button.quiet { border-color: var(--line); color: var(--muted); }
   #bar button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   #bar button.primary:disabled { background: transparent; border-color: var(--line); color: var(--muted); }
   @media (hover: hover) and (pointer: fine) {
@@ -67,7 +68,7 @@
 </head>
 <body>
 <div id="root"></div>
-<div id="bar"><button id="save" type="button" title="Save a copy, keep drawing (Ctrl+S)">Save draft</button><button id="done" type="button" class="primary" title="Send the board to Claude and finish">Send to Claude</button></div>
+<div id="bar"><button id="close" type="button" class="quiet" title="Save a draft and stop the local server; nothing is sent to Claude">Close board</button><button id="save" type="button" title="Save a copy, keep drawing (Ctrl+S)">Save draft</button><button id="done" type="button" class="primary" title="Send the board to Claude and finish">Send to Claude</button></div>
 <div id="msg" role="status" aria-live="polite"></div>
 <script type="module">
 import { parseMermaidToExcalidraw } from "https://esm.sh/@excalidraw/mermaid-to-excalidraw@1.1.2";
@@ -114,8 +115,9 @@ async function payload() {
 
 async function send(path) {
   const done = path === "/done";
+  const close = path === "/close";
   try {
-    msg(done ? "Sending…" : "Saving…", { sticky: true });
+    msg(done ? "Sending…" : close ? "Closing…" : "Saving…", { sticky: true });
     const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(await payload()) });
     if (!r.ok) throw new Error(r.status);
@@ -123,12 +125,17 @@ async function send(path) {
       const b = document.getElementById("done");
       b.textContent = "Sent ✓"; b.disabled = true; bar.classList.add("done");
       msg("Sent to Claude. You can close this tab.", { sticky: true });
+    } else if (close) {
+      for (const b of bar.querySelectorAll("button")) b.disabled = true;
+      bar.classList.add("done");
+      msg("Board closed, server stopped. Draft saved. You can close this tab.", { sticky: true });
     } else {
       msg("Draft saved");
     }
   } catch (e) { msg("Save failed: " + e, { sticky: true }); }
 }
 
+document.getElementById("close").onclick = () => send("/close");
 document.getElementById("save").onclick = () => send("/save");
 document.getElementById("done").onclick = () => send("/done");
 window.addEventListener("keydown", (e) => {

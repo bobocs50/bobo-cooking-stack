@@ -1,6 +1,7 @@
 """Local whiteboard server for the /whiteboard skill: serves board.html (Excalidraw)
 with a Mermaid file converted in the browser, and writes the edited scene and a PNG
-next to the .mmd.
+next to the .mmd. Exit code: 0 after Send to Claude, 3 after Close board (draft
+written, nothing sent), 1 after Ctrl+C.
 
 Usage: python serve.py <path/to/slug.mmd> [--port 0] [--no-open]
 
@@ -56,7 +57,7 @@ def make_handler(mmd, state):
 
         def do_POST(self):
             path = self.path.split("?")[0]
-            if path not in ("/save", "/done"):
+            if path not in ("/save", "/done", "/close"):
                 self._send(404, b"not found")
                 return
             try:
@@ -65,10 +66,17 @@ def make_handler(mmd, state):
                 scene_path.write_text(data["scene"], encoding="utf-8")
                 png_path.write_bytes(base64.b64decode(data["png_base64"]))
             except (ValueError, KeyError, OSError) as e:
-                self._send(400, ("bad request: %s" % e).encode())
-                return
+                if path != "/close":
+                    self._send(400, ("bad request: %s" % e).encode())
+                    return
+                # Close must stop the server even when the draft cannot be written
+                print("close: draft not written: %s" % e, file=sys.stderr, flush=True)
             self._send(200, b'{"ok": true}', "application/json")
-            if path == "/done":
+            if path == "/close":
+                state["closed"] = True
+                print("closed by the user before Send to Claude", flush=True)
+                threading.Thread(target=self.server.shutdown, daemon=True).start()
+            elif path == "/done":
                 state["done"] = True
                 print("wrote %s" % scene_path, flush=True)
                 print("wrote %s" % png_path, flush=True)
@@ -89,7 +97,7 @@ def main():
         print("error: Mermaid file not found: %s" % mmd, file=sys.stderr)
         return 2
 
-    state = {"done": False}
+    state = {"done": False, "closed": False}
     server = ThreadingHTTPServer(("127.0.0.1", args.port), make_handler(mmd, state))
     url = "http://127.0.0.1:%d/" % server.server_address[1]
     print("whiteboard at %s" % url, flush=True)
@@ -102,7 +110,11 @@ def main():
         return 1
     finally:
         server.server_close()
-    return 0 if state["done"] else 1
+    if state["done"]:
+        return 0
+    if state["closed"]:
+        return 3
+    return 1
 
 
 if __name__ == "__main__":

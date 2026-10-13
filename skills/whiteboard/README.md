@@ -14,6 +14,7 @@ and Claude reads what you drew.
 3. Your browser opens on the board, built from the `.mmd`.
 4. You draw. **Save draft** (Ctrl+S) writes `<slug>.png` and `<slug>.excalidraw` next to the `.mmd`.
 5. **Send to Claude** writes the same two files and stops the server, which notifies Claude.
+   **Close board** also writes them and stops the server, but sends nothing: use it when you are done for now.
 6. Claude reads the PNG (and the scene for exact text) and updates the `.mmd`, which stays the record.
 7. Local only: the server binds to `127.0.0.1`. The page loads its libraries from a CDN, so it needs internet.
 
@@ -50,8 +51,8 @@ or `/whiteboard the upload pipeline`.
 | File | What it does |
 |---|---|
 | [`SKILL.md`](SKILL.md) | The instructions Claude follows |
-| [`serve.py`](serve.py) | Local server: serves the page, writes the PNG and scene, exits on Send |
-| [`board.html`](board.html) | The page: Excalidraw, the Mermaid conversion, the two buttons |
+| [`serve.py`](serve.py) | Local server: serves the page, writes the PNG and scene, exits on Send or Close |
+| [`board.html`](board.html) | The page: Excalidraw, the Mermaid conversion, the three buttons |
 | [`example.mmd`](example.mmd) | A five-box sample; try it with `python serve.py example.mmd` |
 
 Full rules in [SKILL.md](SKILL.md). Used by [grilling](../grilling/README.md) at structure decisions.
