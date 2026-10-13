@@ -128,7 +128,11 @@ async function send(path) {
     } else if (close) {
       for (const b of bar.querySelectorAll("button")) b.disabled = true;
       bar.classList.add("done");
-      msg("Board closed, server stopped. Draft saved. You can close this tab.", { sticky: true });
+      msg("Board closed, server stopped. Draft saved.", { sticky: true });
+      // a browser closes the tab only when the page is "script-closable" (opened by a
+      // script, or a single page in the tab's history); otherwise the message stays
+      window.close();
+      setTimeout(() => msg("Board closed, server stopped. Draft saved. You can close this tab.", { sticky: true }), 400);
     } else {
       msg("Draft saved");
     }
