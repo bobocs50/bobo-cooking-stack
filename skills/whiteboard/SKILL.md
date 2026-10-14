@@ -16,6 +16,7 @@ The drawing is the user's thinking. So:
 ## Mermaid rules
 
 - `flowchart TD` (top to bottom). No front matter needed; the board is hand-drawn and dark by itself.
+- A label is at most about four words per line; break a longer one with `<br>` inside the quotes (`A["OCR service<br>paid per page"]`). The page turns the tag into a line break; a label with no break makes a box as wide as the text, and a board of such boxes is one unreadable strip.
 - One concept per board. A second concept is a second board.
 - Every box named with the system-design term where one applies (the system design section of `~/.claude/learning/progress.md` if there is one, otherwise the standard terms: cache, boundary, fallback, grounding step…). A box with no term is the first question to ask.
 - Arrows are bare (`-->`). A label only where it says something the boxes don't, like `-->|retry and reconcile|`; a label that just repeats the boxes ("submit", "ok") is noise. An uncertain edge gets `?` as its label.

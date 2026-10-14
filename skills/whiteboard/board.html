@@ -96,8 +96,19 @@ async function initialData() {
   let src = await (await fetch("/mermaid")).text();
   src = src.replace(/^\s*---[\s\S]*?\n---\s*\n/, "");
   const { elements, files } = await parseMermaidToExcalidraw(src, { themeVariables: { fontSize: "20px" } });
-  return { elements: Lib.convertToExcalidrawElements(elements), appState: { theme: "dark" }, files: files || {},
+  return { elements: Lib.convertToExcalidrawElements(lineBreaks(elements)), appState: { theme: "dark" }, files: files || {},
            scrollToContent: true };
+}
+
+// Mermaid breaks a label at <br>, and lays the box out for those lines, but the
+// converter copies the tag into the text as it is; Excalidraw breaks at "\n".
+const BR = /<br\s*\/?>/gi;
+function lineBreaks(elements) {
+  for (const el of elements) {
+    if (typeof el.text === "string") el.text = el.text.replace(BR, "\n");
+    if (el.label && typeof el.label.text === "string") el.label.text = el.label.text.replace(BR, "\n");
+  }
+  return elements;
 }
 
 async function payload() {
