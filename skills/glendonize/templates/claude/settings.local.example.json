@@ -1,0 +1,8 @@
+{
+  "autoMode": {
+    "environment": [
+      "$defaults",
+      "<repo-specific fact: approved providers, paid scripts, sensitive files, with the D- id that approved it>"
+    ]
+  }
+}

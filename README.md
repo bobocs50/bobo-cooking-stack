@@ -41,6 +41,7 @@ These skills fix one problem each. They are small, plain Markdown, and meant to 
 | Topic | Description |
 |---|---|
 | [glendonize/SKILL.md](skills/glendonize/SKILL.md) | The glendonize instructions |
+| [glendonize/templates/](skills/glendonize/templates/) | Working copies of the hooks, drills, CI gate and rule files the skill installs, with project details replaced by placeholders |
 | [grilling/SKILL.md](skills/grilling/SKILL.md) | The grilling instructions, with the learning mode |
 | [grilling/agents/openai.yaml](skills/grilling/agents/openai.yaml) | Display name and short description for other agent tools |
 | [whiteboard/SKILL.md](skills/whiteboard/SKILL.md) | The whiteboard instructions |

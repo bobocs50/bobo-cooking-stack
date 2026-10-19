@@ -973,7 +973,7 @@ checker today.
 ## M. Templates and the mechanisms added 2026-10-19
 
 `templates/` beside this file holds working copies of every row of L.11, taken from the
-production repo on 2026-10-19 (commits 6ce92bf to 1069187). They carry that repo's names: the `EDAT_` env
+production repo on 2026-10-19 (commits 6ce92bf to 1069187). They carry that repo's names: the `PROJECT_` env
 prefix, its `SCOPE` and `HIGH_RISK` dirs, its D-ids and its paid scripts. Copy, then rename
 every one of those from the Phase 0 survey; never install them unchanged. `review_briefs/B_rules.md`
 names that repo's rules and is rewritten from the target's own `AGENTS.md`.
@@ -996,13 +996,13 @@ other people or cloud sessions must get them too.
 | Issue loader skill (`/issue-context N`) | `claude/skills/issue-context/SKILL.md` | repo | `gh` works and the repo tracks issues |
 | Repo facts for auto mode (approved providers, paid scripts, sensitive files) | `claude/settings.local.example.json` -> `.claude/settings.local.json` | repo, untracked | auto mode is used |
 | Implementer subagent (briefed, worktree, stops on ambiguity) | `claude/agents/implementer.md` | user | already global; copy to `.claude/agents/` only for other people |
-| Working agreement for Claude only: swarm by default, the agent review rule, approval before acting, failures get a permanent fix, definition of done for issues, paid-run estimate, code-question rotation | `claude/CLAUDE.edat.md` (sections "Working agreement", "Paid runs & budget") | repo | always; each rule only once its mechanism is installed |
-| Rules for every agent | `claude/AGENTS.edat.md` (Shapes A shows the shape) | repo | always |
+| Working agreement for Claude only: swarm by default, the agent review rule, approval before acting, failures get a permanent fix, definition of done for issues, paid-run estimate, code-question rotation | `claude/CLAUDE.example.md` (sections "Working agreement", "Paid runs & budget") | repo | always; each rule only once its mechanism is installed |
+| Rules for every agent | `claude/AGENTS.example.md` (Shapes A shows the shape) | repo | always |
 | Coordination log | Shapes J | repo, gitignored | parallel sessions |
 | Harness matrix in the root README | Shapes N | repo | always; rebuilt on every run |
 | Weekly learning hook (`SessionStart`), humanizer and pyright plugins | `~/.claude/settings.json` | user | already global; never copied, it is personal |
 
-The two `*.edat.md` files are reference, not templates: take a section's shape, never its
+The two `*.example.md` files are reference, not templates: take a section's shape, never its
 D-ids, paths or domain words.
 
 ### L.8 Commit-review hook (Claude Code)

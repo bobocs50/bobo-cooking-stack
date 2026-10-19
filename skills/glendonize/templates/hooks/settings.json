@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_paid_run.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking for a paid run"
+          },
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/review_diff.py\"",
+            "timeout": 900,
+            "statusMessage": "Agent review of the staged diff (D-123)"
+          }
+        ]
+      }
+    ]
+  }
+}

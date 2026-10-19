@@ -1,0 +1,84 @@
+# Everything here is free and offline. This workflow holds no secrets, so a paid call
+# cannot succeed even by accident. Never run here: main/step1_parsing.py (the OCR
+# service bills per page and takes minutes),
+# main/pipeline.py, main/api.py (one LLM call per criterion), eval/loop_run.py
+# (N LLM calls per run), eval/pn_run.py (<OCR service> and LLM).
+# See AGENTS.md "Gates". eval/score.py, eval/gold.py, eval/gold_init.py
+# and main/step3_classification.py are free but read gitignored inputs, so they cannot run
+# from a clean checkout either.
+#
+# The pip line mirrors notes/LOCAL_SETUP.md 1; the repo has no
+# Python manifest by decision, recorded in CLAUDE.md under "Project status" (D-021).
+# The first three packages were derived by walking the drills' imports transitively, not
+# copied from the setup section. Pillow is the fourth: pypdfium2 imports it lazily inside
+# to_pil(), so no import walk sees it, and drill_di_poll.py renders a page. fastapi and
+# python-multipart are the fifth and sixth: drill_api_part_number.py imports main/api.py
+# (uvicorn is still absent, nothing imports it). That duplication is recorded as drift in Q-019.
+# ruff is pinned because tests/drill_ruff.py runs it as part of the gate and a newer release can change what it flags or how it formats (D-105).
+name: Verify
+on:
+  pull_request:
+  push:
+permissions:
+  contents: read
+concurrency:
+  # A cancelled run on main leaves no record of whether that commit was green.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: verify-${{ github.ref }}
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: .github/workflows/verify.yml
+      - run: pip install python-dotenv requests pypdfium2 Pillow fastapi python-multipart openpyxl ruff==0.17.0 pyright==1.1.414
+      - name: Every main/ change carries a drill (D-094)
+        env:
+          BEFORE: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          base="$BEFORE"
+          if [ -z "$base" ] || [ -z "${base//0/}" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            base="HEAD~1"
+          fi
+          changed=$(git diff --name-only "$base" "$HEAD_SHA" || true)
+          main_py=$(echo "$changed" | grep -E '^main/.*\.py$' || true)
+          tests=$(echo "$changed" | grep -E '^tests/' || true)
+          subject=$(git log -1 --format=%s "$HEAD_SHA")
+          if [ -n "$main_py" ] && [ -z "$tests" ] && [[ "$subject" != *"no drill:"* ]]; then
+            echo "main/ changed without a tests/ change and no 'no drill:' in the subject:"
+            echo "$main_py"
+            exit 1
+          fi
+          echo "ok"
+      - name: Boundary checks and failure drills
+        env:
+          PROJECT_RATCHET_BASE: ${{ github.event.before }}
+        run: python tests/run_drills.py
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui
