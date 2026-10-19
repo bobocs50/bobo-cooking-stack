@@ -1,41 +1,32 @@
+<div align="center">
+
 # learning-by-building
 
-[← all skills](../README.md)
+*Learn to be a better engineer while AI agents write most of your code.*
 
-Learning to be a better engineer while AI agents write most of your code. When an agent
-writes the code, you skip the part where you would have learned. This small setup for
-Claude Code puts the learning back without slowing the project down.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)
+
+[All skills](../README.md)
+
+</div>
+
+When an agent writes the code, you skip the part where you would have learned. This small
+Claude Code setup puts the learning back without slowing the project down. Everything stays in
+`~/.claude/learning/`; only counts and your own prompts are used, never tool output.
+
+---
 
 ## How it works
 
-1. **Concepts come when the work needs them**, with an example and a source. You apply the
-   concept inside the work, where a check is waiting: a question on real changed lines, or a
-   two-line prediction before a paid run; the test or the run checks you, Claude rates it.
-   Reading comes after, for what the rating marked wrong.
-2. **One question at risky commits, of four kinds.** After a commit that decides a value (null
-   handling, fallbacks, swallowed errors, a weakened test), or before a paid run, Claude
-   shows the changed lines and asks one question, about once a day at most: the code question (what
-   comes out for this input, which line excludes a case), name the mechanism (the textbook
-   term for what the function does), the failure question (what reaches the user when a call
-   fails or a file is half-written) or the trade-off question (why this design and not the
-   other; what breaks the other way). You say sure or unsure first; the gap between how sure
-   and how right you were is tracked. Claude opens the question with a line starting
-   `Code question`, `Mechanism question`, `Failure question` or `Trade-off question` and
-   closes it with a line `Rating (sure|unsure|not said): ...`; `weekly_stats.py` counts
-   asked by kind, answered and sure/unsure from those two markers.
-   **The terms are the standard CS words**, never Claude's own: a table under `## Terms` in
-   `progress.md` (term, where it lives in your code: content-addressed cache, exponential
-   backoff, idempotent, single point of failure…). The first time one comes up Claude writes
-   one line `term = plain meaning; your example`, and the question carries the term when it
-   touches that place. `weekly_stats.py` counts the terms in your own prompts (pasted blocks
-   and prompts over 1500 characters skipped), so the review can say which words became yours.
-3. **A weekly job writes a report.** `weekly_stats.py` counts your last 7 days, then
-   `claude -p "/weekly-review"` runs read-only (a headless Claude may not edit `~/.claude`)
-   and prints its interpretation between markers; `weekly_stats.py --apply` writes that into
-   `weekly.md`, and the next interactive session applies the profile changes it noted.
-4. **The `SessionStart` hook is the fallback** when the job was missed (laptop off).
-5. Nothing leaves your machine: everything lives in `~/.claude/learning/`, and only counts
-   and your own prompts are used, never tool output.
+| Topic | Description |
+|---|---|
+| Concepts in the work | A concept comes when the work needs it, with an example and a source, and a check waiting |
+| One question per risky change | After a commit that decides a value, or before a paid run, Claude shows the changed lines and asks one question, about once a day at most |
+| Four kinds | Code (what comes out), mechanism (the textbook term), failure (what reaches the user), trade-off (why this design) |
+| Sure or unsure | You say how sure you are first; the gap between sure and right is tracked |
+| Terms | Standard CS words from the `## Terms` table in `progress.md`; the weekly count shows which became yours |
+| Weekly job | `weekly_stats.py` counts the week, then [weekly-review](weekly-review/README.md) writes the report |
+| Fallback | A `SessionStart` hook says the review is due when the weekly job was missed |
 
 ## Example
 
@@ -52,13 +43,26 @@ def pick_report(cited, found):
 >
 > **You:** Unsure. `"QTR-12"`, and nothing marks it as a fallback.
 >
-> **Claude:** Right. Line 5 fills the field silently. Logged as *unsure → right*.
+> **Claude:** Right. Line 5 fills the field silently. Logged as *unsure, right*.
+
+## Files
+
+| Topic | Description |
+|---|---|
+| [weekly-review/](weekly-review/README.md) | The skill that reads the week and updates your profile |
+| [weekly_stats.py](weekly_stats.py) | Counts the last 7 days into `weekly.md`; `--force`, `--hook`, `--apply`, `--html` |
+| [weekly_page.py](weekly_page.py) | Renders one offline progress page from the profile, progress and weekly files |
+| [run_weekly.sh](run_weekly.sh) / [run_weekly.ps1](run_weekly.ps1) | The weekly job for cron or Windows Task Scheduler |
+| [settings.example.json](settings.example.json) | The `SessionStart` fallback hook |
+| [CLAUDE.snippet.md](CLAUDE.snippet.md) | The question rules for a project's `CLAUDE.md` |
+| [templates/](templates/) | Empty `profile.md`, `progress.md` and `agentic-coding.md` |
+
+---
 
 ## Install
 
-On Windows, run the copy step in Git Bash and copy `run_weekly.ps1` instead of `run_weekly.sh`.
-
 ```sh
+# On Windows: run this in Git Bash and copy run_weekly.ps1 instead of run_weekly.sh
 git clone https://github.com/bobocs50/bobo-cooking-stack.git
 cd bobo-cooking-stack/learning-by-building
 mkdir -p ~/.claude/learning ~/.claude/skills
@@ -82,18 +86,9 @@ $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
 Register-ScheduledTask -TaskName "Claude weekly learning review" -Action $action -Trigger $trigger -Settings $settings
 ```
 
-Then merge [`settings.example.json`](settings.example.json) into `~/.claude/settings.json`, fill in
-`~/.claude/learning/profile.md`, and paste [`CLAUDE.snippet.md`](CLAUDE.snippet.md) into a project's `CLAUDE.md`.
+Then merge [settings.example.json](settings.example.json) into `~/.claude/settings.json`, fill in
+`~/.claude/learning/profile.md`, and paste [CLAUDE.snippet.md](CLAUDE.snippet.md) into a project's `CLAUDE.md`.
 
-## Files
+## License
 
-| File | What it does |
-|---|---|
-| [`weekly-review/`](weekly-review/README.md) | The skill that interprets the week and updates your profile |
-| [`weekly_stats.py`](weekly_stats.py) | Counts the last 7 days of sessions into `weekly.md` (`--force` now, `--hook` only after 7 days, `--apply` / `--html` (runs `weekly_page.py`: one progress page from profile.md, progress.md and weekly.md) to write the headless review back) |
-| [`run_weekly.sh`](run_weekly.sh) / [`run_weekly.ps1`](run_weekly.ps1) | The weekly job for cron / Windows Task Scheduler |
-| [`settings.example.json`](settings.example.json) | The `SessionStart` fallback hook |
-| [`CLAUDE.snippet.md`](CLAUDE.snippet.md) | The code-question rules for a project's `CLAUDE.md` |
-| [`templates/`](templates/) | Empty `profile.md`, `progress.md` and `agentic-coding.md` |
-
-Full rules for the review: [`weekly-review/SKILL.md`](weekly-review/SKILL.md).
+MIT. See [LICENSE](../LICENSE).

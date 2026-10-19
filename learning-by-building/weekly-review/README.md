@@ -1,50 +1,57 @@
+<div align="center">
+
 # weekly-review
 
-[← all skills](../../README.md)
+*Once a week, turns your raw learning counts into six short bullets and updates your profile.*
 
-Once a week, turns the raw counts in `~/.claude/learning/weekly.md` into six short bullets
-on how your learning went, and updates your learning profile. Counts alone mislead: "9
-correction prompts" could mean you got sloppier or more precise, and a profile that moves on
-counts becomes a score you optimise. So the profile changes only when something was checked:
-a rated code question, a prediction scored against a run, a test you took.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
+
+[All skills](../../README.md)
+
+</div>
+
+Counts alone mislead: "9 correction prompts" could mean you got sloppier or more precise, and
+a profile that moves on counts becomes a score you optimise. So the profile changes only when
+something was checked: a rated code question, a prediction scored against a run, a test you took.
+
+---
 
 ## How it works
 
-1. Finds the newest `weekly.md` entry still marked `Interpretation: pending` (runs
-   `weekly_stats.py --force` if there is none).
-2. Reads `profile.md`, `progress.md`, the earlier weeks, and your newest `/insights` report if
-   there is one.
-3. Writes six short-line bullets in place of `pending`: how you got better, what went wrong,
-   what you learned, learn next, how you worked with Claude (the counts next to last week's),
-   context. It names the questions by kind, how sure against how right you were, and which
-   CS terms from `progress.md` "Terms" you used in your own prompts.
-4. Updates `profile.md`, dated, only from that evidence. Its own earlier verdicts do not count.
-5. Proposes no new files, hooks, skills or rules; you build those when you ask for them.
-6. Logs a lesson about working with Claude in `agentic-coding.md`, if the week shows one.
-7. Tells you in two lines where to read it. It asks you no questions.
+| Topic | Description |
+|---|---|
+| Find the week | Reads the newest `weekly.md` entry marked `Interpretation: pending`, or makes one |
+| Read the record | Reads `profile.md`, `progress.md`, earlier weeks, and your newest `/insights` report if any |
+| Six bullets | How you got better, what went wrong, what you learned, learn next, how you worked with Claude, context |
+| Update the profile | Changes `profile.md` only from checked evidence, dated; its own earlier verdicts do not count |
+| Lessons | Logs a lesson about working with Claude in `agentic-coding.md` when the week shows one |
+| No questions | It asks you nothing and proposes no new files, hooks or rules |
 
 ## Example
-
-Claude finds one prediction scored against a run and four rated questions, and writes six
-bullets in this shape:
 
 ```markdown
 - **How you got better:** You answered four questions, none last week.
   Three times you found the deciding line yourself.
   One needed a hint; one was right for the wrong reason.
 - **What went wrong:** …
-- **What you learned:** …
-- **Learn next:** …
 - **How you worked with Claude:** 18 corrections, 21 last week. …
-- **Context:** …
 ```
 
-"Evals" stays under Developing in `profile.md`, because the prediction was off.
+## Files
+
+| Topic | Description |
+|---|---|
+| [SKILL.md](SKILL.md) | The instructions Claude follows, including the headless Monday run |
+| [weekly_stats.py](../weekly_stats.py) | Writes the counts this skill reads |
+
+---
 
 ## Install
 
-It is installed with the rest of the [learning-by-building setup](../README.md#install),
-which also adds the scripts and templates in `~/.claude/learning/` it needs. A scheduled job
-runs it weekly; type `/weekly-review` to run it by hand.
+It is installed with the rest of the [learning-by-building setup](../README.md#install), which
+also adds the scripts and templates it needs. A scheduled job runs it weekly; type
+`/weekly-review` to run it by hand.
 
-Full rules: [`SKILL.md`](SKILL.md).
+## License
+
+MIT. See [LICENSE](../../LICENSE).
