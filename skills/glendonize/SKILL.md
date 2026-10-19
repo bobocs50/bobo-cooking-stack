@@ -1,6 +1,6 @@
 ---
 name: glendonize
-description: Give a repo a structure modelled on glendonC's many-minions and 1321 so parallel agents can work in it safely — an AGENTS.md working agreement, a numbered R/D/Q register that code cites, PLATFORM_CONSTRAINTS with VERIFIED/ASSERTED facts, boundary checks that read source as text, a free-only gate, a test beside every source file enforced as a ratchet, and a numbered docs/ set written from an owner index. Gated phases; writes nothing on the first pass; mines what the repo already says; parks what it cannot verify. Use when the user invokes /glendonize, says "glendonize this", "make this repo agent-ready", "structure it like many-minions", or asks for a decision register, constraints doc, boundary checks or a gate.
+description: Give a repo a structure modelled on glendonC's many-minions and 1321 so parallel agents can work in it safely — an AGENTS.md working agreement, a numbered R/D/Q register that code cites, PLATFORM_CONSTRAINTS with VERIFIED/ASSERTED facts, boundary checks that read source as text, a free-only gate, a test beside every source file enforced as a ratchet, a numbered docs/ set written from an owner index with a plans doc, and for Claude Code repos a paid-run guard and a commit-review hook (agents read every code commit before it lands), all listed in a Harness table in the README. Gated phases; writes nothing on the first pass; mines what the repo already says; parks what it cannot verify. Use when the user invokes /glendonize, says "glendonize this", "make this repo agent-ready", "structure it like many-minions", or asks for a decision register, constraints doc, boundary checks or a gate.
 ---
 
 # Glendonize
@@ -50,7 +50,9 @@ never re-asked.
 ## Escape hatch
 
 If Phase 0 finds the structure already present and unchanged, say so, list what is
-missing (usually the register) and offer only the phases that add something.
+missing (usually the register) and offer only the phases that add something. The README's
+Harness matrix (Shapes N) is still rebuilt from the files on disk on every run, so it never
+lists a file that was moved or deleted since the last one.
 
 ## Commits — automatic, one per change
 
@@ -70,7 +72,7 @@ stayed red for a week, across dozens of pushes, and nobody noticed).
 |---|---|
 | `AGENTS.md` | the working agreement, ≤ 8 KiB — Shapes A |
 | `CLAUDE.md` | imports `@AGENTS.md` — Shapes B |
-| `README.md` | outward-facing; links the docs index, never copies it |
+| `README.md` | outward-facing; links the docs index, never copies it; ends in the Harness matrix — Shapes N |
 | `.gitignore` | includes `.claude/worktrees/` |
 | `.env.example` | one line per secret, no values, a comment saying which steps need none |
 | `docs/README.md` + fixed docs | the owner index and its rows — Shapes C |
@@ -162,7 +164,8 @@ second copy; every scan double-counts it); promised-but-empty files; no remote (
 degrades to a local gate script); `gh auth status` failing (parking stays local; no
 `gh run watch`).
 
-**7. Phase menu.** Phases 1–8, one line each on what they add here; which to skip.
+**7. Phase menu.** Phases 1–8, one line each on what they add here; which to skip. Add the
+L.11 carry-over table with a yes / no / not-applicable per row.
 
 Write `AGENT_READY.md` (Shapes I): Progress list, survey, candidates, **rulings verbatim**,
 recorded `HEAD`. **Gate:** the user rules on every conflict and approves every list.
@@ -249,6 +252,9 @@ it runs zero tests, or when a test is skipped, pending or `.only` without a line
 tracked list of accepted skips, each with its reason (vitest `passWithNoTests: false`,
 `forbidOnly`): a green run that ran nothing is what the gate exists to catch.
 
+For a Claude Code repo also propose the commit-review hook (Shapes L.8, copied from
+`templates/`), the plans doc (L.9) and the vacuous-pass guards (L.10), each with its reason.
+
 Four more steps a production repo earned (Shapes L), each optional, each proposed with its
 reason: a CI step that fails a commit touching the spine dirs without a change under the test
 dir unless the subject says `no test:` and why (`fetch-depth: 0` and `github.event.before` give
@@ -263,8 +269,10 @@ pinned in CI, run by a check script; a typecheck with a per-file error baseline 
 is the counted-exemption variant for types.
 
 **Dependencies are derived, then proven:** walk the gate scripts' imports with `ast`,
-subtract stdlib, then `git archive HEAD | tar -x -C <tmp>`, create a fresh venv with only
-the derived packages, and run the whole gate there. Global site-packages hide lazy imports
+subtract stdlib, then `git clone --no-hardlinks . <tmp>` (not `git archive`: an export has
+no `.git`, so every check that calls `git ls-files` or `git log` fails there for no reason —
+seen 2026-10-19), create a fresh venv with only the derived packages (`python -m venv`, no
+`--system-site-packages`), and run the whole gate there. Global site-packages hide lazy imports
 (in one production repo a PDF library imported Pillow inside a method; the walk missed it,
 the local run passed because Pillow was installed globally, CI was red for a week). On Windows keep `<tmp>`
 short — 260-char path limit. When a manifest is banned, install inline with a comment
@@ -285,12 +293,22 @@ prose stays where the Phase 0 ruling put it, is never rewritten, translated or r
 and is cited by filename alone. Existing code citations are upgraded to `docs/X.md N.N`;
 ids go into existing test/drill labels (`expect("raises empty_input (D-014)")`); no new
 comments in files whose style rule forbids them.
-**Verify:** every index link resolves; every cited doc has numbered headings; every agent-written doc has a Status block. **Gate.**
+
+Last, the root `README.md` gets its **Harness matrix** (Shapes N): one `| Topic | Description |`
+table per group (Rules, Register, Checks, Gate, Hooks, Docs), one row per harness file that
+exists in the repo, found with `git ls-files`, never from this skill's own list. A group with
+no file is left out; a file the repo has that the skill did not install (an older check, an
+existing workflow) is listed too if it does a harness job. The section sits between
+`<!-- harness:start -->` and `<!-- harness:end -->`; a re-run replaces only what is between
+the markers and leaves the rest of the README alone. Before the markers exist, show the
+section and ask where it goes; the user's README text is never rewritten.
+**Verify:** every index link resolves; every cited doc has numbered headings; every agent-written doc has a Status block; every Harness matrix link resolves to a tracked file. **Gate.**
 
 ## Phase 8 — Close
 
-Summary in the Working-loop report order: files written, `D-` count, open `Q-` list, skips
-and why. Delete `AGENT_READY.md` and its `.git/info/exclude` line. Say in one sentence which
+Rebuild the README's Harness matrix (Shapes N) from `git ls-files` as the last write, so it
+shows what this run left on disk, and commit it with the close. Summary in the Working-loop
+report order: files written, `D-` count, open `Q-` list, skips and why. Delete `AGENT_READY.md` and its `.git/info/exclude` line. Say in one sentence which
 mechanisms carry regardless of domain (register, constraints, parking, boundary checks,
 gate) and which depend on the domain tolerating unreviewed output (worktree fan-out).
 
@@ -425,8 +443,9 @@ Fixed rows: OVERVIEW — the whole idea in one page, ending in *Standing non-cla
 limit the product does not claim, one line, pointing at the doc that explains it); PRODUCT
 — what it is, for whom, what it is not; ARCHITECTURE — the map, linking the contracts;
 PLATFORM_CONSTRAINTS (E); OPERATIONS — health, checks, recovery, deploying; LOCAL_SETUP —
-real systems locally, first run; REQUIREMENTS, DECISIONS, OPEN_QUESTIONS (D); `<DOMAIN>.md`
-— one per contract several parts of the code honour.
+real systems locally, first run (a small repo may fold OPERATIONS into it; record that as a
+`D-`); REQUIREMENTS, DECISIONS, OPEN_QUESTIONS (D); PLANS — work that runs over more than one
+session (Shapes L.9); `<DOMAIN>.md` — one per contract several parts of the code honour.
 
 Under each agent-written doc's heading — a commit, not a date: a typed date is a freshness
 claim nothing checks; `git rev-parse HEAD` at the moment of checking is one anybody can.
@@ -496,7 +515,7 @@ Drop what the survey did not find; always keep the header comment.
 # Everything here is free. This workflow holds no secrets, so a paid call
 # cannot succeed even by accident. Never run here: <script> (<why: bills per page>).
 # See AGENTS.md "Gates". The pip line mirrors <setup section>; no manifest by D-nnn
-# (drift: Q-nnn); derived from imports, proven in a fresh venv from `git archive`.
+# (drift: Q-nnn); derived from imports, proven in a fresh venv from a `git clone`.
 name: Verify
 on: { pull_request: {}, push: { branches: [main] } }
 permissions: { contents: read }
@@ -924,7 +943,9 @@ Cost: PAID - one LLM call per <unit>; --dry-run only prints the plan.
 The boundary check fails a script without the line, and builds the deny-list from the `PAID`
 lines plus a fixed floor of known names, in case a docstring loses its label. Only the gate scan
 reads that derived list; the CI header comment and the hook's own list below are still written
-by hand, and nothing yet checks that the three agree.
+by hand, so the boundary check also reads both as text (the hook's `PAID_SCRIPTS` tuple, the
+workflow's leading `#` block) and fails, per side, on a derived name missing from either. A
+script added to one list and not the others is otherwise let through by the hook or unwarned in CI.
 
 ### L.5 Paid-run hook (Claude Code)
 
@@ -948,3 +969,157 @@ run's findings. Estimates ran about 2x low when many pages were sent, so the row
 added. The check fails a file with more errors than listed, and a file with fewer until its line
 is lowered: counted exemptions applied to types, so a code base with old errors still gets a
 checker today.
+
+## M. Templates and the mechanisms added 2026-10-19
+
+`templates/` beside this file holds working copies of every row of L.11, taken from the
+production repo on 2026-10-19 (commits 6ce92bf to 1069187). They carry that repo's names: the `EDAT_` env
+prefix, its `SCOPE` and `HIGH_RISK` dirs, its D-ids and its paid scripts. Copy, then rename
+every one of those from the Phase 0 survey; never install them unchanged. `review_briefs/B_rules.md`
+names that repo's rules and is rewritten from the target's own `AGENTS.md`.
+
+### L.11 Carry-over inventory: everything the production repo runs
+
+Phase 0 lists this table with a yes / no / not-applicable per row; nothing is installed unasked.
+User-level rows already act in every repo on this machine; copy them into the repo only when
+other people or cloud sessions must get them too.
+
+| Piece | Template | Level | Carried when |
+|---|---|---|---|
+| Paid-run guard (L.5) | `hooks/guard_paid_run.py`, `tests/drill_guard_paid_run.py` | repo | a deny-list exists |
+| Commit-review hook, 3 finders + verifier, tiered (L.8) | `hooks/review_diff.py`, `hooks/review_briefs/*`, `tests/drill_review_hook.py`, `tests/drill_review_stamp.py` | repo | code commits by agents |
+| Both hooks wired | `hooks/settings.json` -> `.claude/settings.json` | repo | either hook carried |
+| Drill runner that fails on an empty glob (L.10) | `tests/run_drills.py`, `tests/drill_run_drills.py` | repo | Python, no runner |
+| Boundary checks: citations, cost labels, three-list deny-list agreement, AGENTS.md 8 KiB, drill-count ratchet | `tests/drill_boundaries.py` (Shapes G) | repo | always; cut to the confirmed checks |
+| CI gate | `github/verify.yml` (Shapes F) | repo | GitHub remote |
+| Plans doc (L.9) | `notes/PLANS.md` | repo | always |
+| Issue loader skill (`/issue-context N`) | `claude/skills/issue-context/SKILL.md` | repo | `gh` works and the repo tracks issues |
+| Repo facts for auto mode (approved providers, paid scripts, sensitive files) | `claude/settings.local.example.json` -> `.claude/settings.local.json` | repo, untracked | auto mode is used |
+| Implementer subagent (briefed, worktree, stops on ambiguity) | `claude/agents/implementer.md` | user | already global; copy to `.claude/agents/` only for other people |
+| Working agreement for Claude only: swarm by default, the agent review rule, approval before acting, failures get a permanent fix, definition of done for issues, paid-run estimate, code-question rotation | `claude/CLAUDE.edat.md` (sections "Working agreement", "Paid runs & budget") | repo | always; each rule only once its mechanism is installed |
+| Rules for every agent | `claude/AGENTS.edat.md` (Shapes A shows the shape) | repo | always |
+| Coordination log | Shapes J | repo, gitignored | parallel sessions |
+| Harness matrix in the root README | Shapes N | repo | always; rebuilt on every run |
+| Weekly learning hook (`SessionStart`), humanizer and pyright plugins | `~/.claude/settings.json` | user | already global; never copied, it is personal |
+
+The two `*.edat.md` files are reference, not templates: take a section's shape, never its
+D-ids, paths or domain words.
+
+### L.8 Commit-review hook (Claude Code)
+
+A commit that touches code is read by agents before it lands, and a confirmed defect blocks it.
+`templates/hooks/review_diff.py`, registered as a second `PreToolUse` hook on `Bash|PowerShell`
+next to L.5 (timeout 900 s; `templates/hooks/settings.json` shows both):
+
+1. It acts only on a command that runs a commit. It refuses what it cannot review: staging and
+   committing in one command (`add ... && commit`, `-a`, a pathspec), since the staged diff at hook
+   time would not be what lands, and `--amend` on a code commit. The working-loop rule says: stage
+   in one call, commit in the next.
+2. The staged diff decides the tier. Untouched code dirs pass with no trailer. A diff touching the
+   spine or the hooks gets the full review: three finders as headless `claude -p` processes in
+   parallel (A bugs, B the repo's own rules, C silent wrong values), then one verifier per
+   `defect` finding, on the strong model. Any other code diff gets finder A and its verifier on a
+   lighter model. Tiering came after a full review on every commit cost about 3 minutes and three
+   strong-model calls at 20–48 code commits a day.
+3. Children run read-only (`--allowedTools Read,Grep,Glob`, `--permission-mode dontAsk`,
+   `--no-session-persistence`) with an env var set that makes the hook do nothing in them, so it
+   cannot recurse. They bill against the user's Claude plan, not an API key.
+4. A confirmed defect needs evidence; without it, it counts as not confirmed. A confirmed defect
+   that the commit message does not answer with `review: <id> - not a defect because ...` denies the
+   commit. Otherwise the command is rewritten (`updatedInput`) with a trailer
+   `Agent-Review: <pass|answered|skipped> <diff hash> <model-tier>`.
+5. A review that did not run (CLI missing, timeout, unparseable answer) denies: a skipped check
+   reported as passed is a defect. Only the user sets the skip variable.
+6. Findings are cached by staged diff, model and briefs, so the retry after a `review:` answer
+   sees the same ids; every run appends a line to a gitignored log, the data for re-checking the
+   rule after two weeks.
+7. Two drills: `drill_review_hook.py` runs the hook on stubbed answers in a temp repo;
+   `drill_review_stamp.py` recomputes the diff hash of every code commit after the hook was wired
+   and fails on a missing or wrong trailer, the CI backstop for a commit made outside Claude Code.
+
+Known limit, seen 2026-10-19: the commit pattern is kept broad so a wrapped commit (`bash -c`,
+env assignments) cannot slip through, so a shell command whose *text* names a commit (a heredoc,
+an echo, a grep for the words) is treated as one and rewritten. Agents put such text in a file
+and run the file. Narrowing the pattern let wrapped commits through, so it was reverted.
+
+The hook does not replace the human's reading of the spine diff; it is a second reader.
+
+### L.9 Plans doc
+
+`notes/PLANS.md` (template in `templates/notes/PLANS.md`): work that runs over more than one
+session, written where every session and every subagent reads it, because a plan kept in one
+session's memory or the gitignored coordinator log is invisible to the others. Each plan names
+its goal, a "Done when" line a number can check, its steps with their state, and a dated log of
+the choices made on the way, each pointing at its `D-`/`Q-`/issue. A step's state changes in the
+same commit as the work that moved it. A finished plan is never deleted: it moves to Completed,
+its steps folded into one line, with the numbers that met "Done when"; a dropped plan moves there
+with its reason. A plan holds no rule and no decision of its own. Modelled on OpenAI's
+`exec-plans/active` + `completed`, kept as one file while the docs dir stays flat.
+
+### L.10 Vacuous-pass guards
+
+Each of these let a run print green while checking nothing, in the production repo:
+
+- The gate runner fails when its glob found no check at all (`templates/tests/run_drills.py`,
+  pinned by `drill_run_drills.py` on an empty temp dir).
+- The typecheck baseline fails on a line whose count is 0: such a line hides that the file is
+  clean, and lets it regress unnoticed back to one error.
+- `AGENTS.md` over 8 KiB fails the boundary check; when it grows past the cap, trim by moving
+  Claude-only rules (what a hook enforces, approval words, swarm sizing) to `CLAUDE.md` and
+  deleting duplicates, never by dropping a rule.
+- CI: `permissions: contents: read`, cancel only pull-request runs, Playwright `forbidOnly` in CI.
+- The citation check scans every tracked source root including the spine and the root rule
+  files, and resolves doc paths against tracked files, not the disk.
+
+## N. The Harness matrix in the root `README.md`
+
+The README shows the whole harness at a glance, in the format of
+github.com/nexu-io/harness-engineering-guide: a table per group, the file as a relative link
+in the left column, one short plain sentence in the right. Rules for it:
+
+- Rows come from `git ls-files`, never from this list: a file that is not tracked is not a row,
+  and a path is never guessed. Ignored files (the coordination log, `settings.local.json`) are
+  left out.
+- One table per group, in this order, a group with no file dropped: **Rules** (`AGENTS.md`,
+  `CLAUDE.md`), **Register** (REQUIREMENTS, DECISIONS, OPEN_QUESTIONS, PLATFORM_CONSTRAINTS,
+  the budget ledger), **Checks** (boundary checks, the test ratchet and its list, the drill or
+  test runner), **Gate** (the CI workflow or the local gate script), **Hooks** (the paid-run
+  guard, the commit-review hook, the settings file that wires them), **Docs** (the docs index,
+  WORKFLOW, PLANS).
+- One row per file, one line per row. The description says what the file stops going wrong, in
+  plain words: no register ids, no emoji, no trailing stop.
+- Header row `| Topic | Description |` with `|---|---|`. A horizontal rule `---` above the
+  section, none inside it.
+- If the repo's README already opens in the nexu style (centred title, italic tagline, badges),
+  keep it; if it has no README, propose that opening too, with badges only for what is real
+  (license file, CI workflow).
+
+```markdown
+---
+
+<!-- harness:start -->
+## Harness
+
+How agents are kept safe in this repo. Regenerated by `/glendonize`; edit outside the markers.
+
+### Rules
+
+| Topic | Description |
+|---|---|
+| [AGENTS.md](AGENTS.md) | The working agreement every agent reads first |
+| [CLAUDE.md](CLAUDE.md) | Rules only Claude Code can follow, on top of AGENTS.md |
+
+### Register
+
+| Topic | Description |
+|---|---|
+| [DECISIONS.md](docs/DECISIONS.md) | Every settled decision with its reason, or a note that none was recorded |
+| [OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | What is still undecided and the exact step that would settle it |
+
+### Gate
+
+| Topic | Description |
+|---|---|
+| [verify.yml](.github/workflows/verify.yml) | Runs the free checks on every push and holds no secrets |
+<!-- harness:end -->
+```
