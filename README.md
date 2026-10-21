@@ -19,7 +19,7 @@ These skills fix one problem each. They are small, plain Markdown, and meant to 
 | Topic | Description |
 |---|---|
 | [Install](#install) | As a Claude Code plugin or as editable files for any agent; pick one way, not both |
-| [Learning setup](learning-by-building/README.md#install) | Scripts, templates and a weekly job in `~/.claude/learning/` |
+| [Learning setup](learning-by-building/README.md#install) | Templates in `~/.claude/learning/` and the question rules for `CLAUDE.md` |
 
 ## Skills
 
@@ -34,7 +34,6 @@ These skills fix one problem each. They are small, plain Markdown, and meant to 
 | Topic | Description |
 |---|---|
 | [learning-by-building](learning-by-building/README.md) | One question about a risky change when it lands, at most about once a day |
-| [weekly-review](learning-by-building/weekly-review/README.md) | A weekly job that updates your learning profile only from checked evidence |
 
 ## Harness
 
@@ -48,11 +47,6 @@ These skills fix one problem each. They are small, plain Markdown, and meant to 
 | [whiteboard/serve.py](skills/whiteboard/serve.py) | Local server that saves the drawing and tells Claude |
 | [whiteboard/board.html](skills/whiteboard/board.html) | The Excalidraw board page |
 | [whiteboard/example.mmd](skills/whiteboard/example.mmd) | A sample chart to try the board on |
-| [weekly-review/SKILL.md](learning-by-building/weekly-review/SKILL.md) | The weekly review instructions |
-| [weekly_stats.py](learning-by-building/weekly_stats.py) | Counts the last 7 days of sessions into `weekly.md` |
-| [weekly_page.py](learning-by-building/weekly_page.py) | Renders the week as one offline HTML page |
-| [run_weekly.sh](learning-by-building/run_weekly.sh) / [.ps1](learning-by-building/run_weekly.ps1) | The weekly job for cron or Windows Task Scheduler |
-| [settings.example.json](learning-by-building/settings.example.json) | A `SessionStart` hook that catches a missed weekly job |
 | [CLAUDE.snippet.md](learning-by-building/CLAUDE.snippet.md) | The question rules to paste into a project's `CLAUDE.md` |
 | [templates/](learning-by-building/templates/) | Empty `profile.md`, `progress.md` and `agentic-coding.md` |
 

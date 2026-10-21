@@ -23,8 +23,7 @@ you used before as "avoid". The pool is the table under "Terms".
 ## Terms
 
 Standard CS terms only, each with the place in your code where it lives. Claude writes one
-line `term = plain meaning; your example` the first time one comes up; `weekly_stats.py`
-counts the terms in your own prompts from the first column (aliases split on " / ").
+line `term = plain meaning; your example` the first time one comes up.
 
 | Term | Where it lives in <project> |
 |---|---|

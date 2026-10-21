@@ -21,8 +21,7 @@ never style. I say sure or unsure and answer in 2–3 sentences; you correct in 
 names the line and the consequence. Record the result in `~/.claude/learning/progress.md`.
 Start the question with a line `Code question: ...`, `Mechanism question: ...`,
 `Failure question: ...` or `Trade-off question: ...` and, once I have answered and you have
-corrected, write a line `Rating (sure|unsure|not said): right or off, the line, the consequence`; the weekly stats
-count both lines. A mechanism question asks for the textbook term (what does this function
+corrected, write a line `Rating (sure|unsure|not said): right or off, the line, the consequence`. A mechanism question asks for the textbook term (what does this function
 implement: a content-addressed cache, an atomic write, exponential backoff); a failure question
 asks what reaches the user when a call fails or a file is half-written; a trade-off question
 asks why this design and not the other, and what breaks the other way.
