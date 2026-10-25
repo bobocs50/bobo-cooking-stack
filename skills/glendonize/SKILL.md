@@ -47,6 +47,15 @@ now; if either moved, re-run Phase 0 in diff mode and report what changed. Then 
 first unchecked phase and ask: resume there, or discard? Rulings stored in the file are
 never re-asked.
 
+Diff mode with agents: one read-only surveyor per phase group (gate and boundary checks;
+register; docs governance; parking, constraints and the agreement), each given the skill,
+the state file (its rulings are final), the repo and a JSON shape `{gaps, candidates}` in
+which every item cites `file:lines`; then one synthesizer that re-reads every cited line,
+drops what it cannot confirm and says so, and returns the text to append as
+`## Diff survey <date> (<sha>)`: a one-line survey update, gaps `S1…` grouped by phase,
+candidates, conflicts `K1…` in Shape H, the phase menu, the questions. Nothing is written
+before the rulings.
+
 ## Escape hatch
 
 If Phase 0 finds the structure already present and unchanged, say so, list what is
@@ -156,7 +165,8 @@ proposed resolution, "Your ruling?". Always check: docs home ≠ `docs/`; a ban 
 planned artifact could fall under; **two working agreements** (`CLAUDE.md` with rules of
 its own beside `AGENTS.md`; `.cursorrules`, `copilot-instructions.md`, `GEMINI.md`);
 `AGENTS.md` untracked; a "no linter / no build" sentence that a subdir already contradicts;
-the push rule (when asked vs when the batch is done).
+the push rule (when asked, when the batch is done, or straight to main after every green
+change — a user who has said "we are not committing enough" has ruled the third).
 
 **6. Blockers.** Dirty tree (the phases read the working tree; CI reads the commit — they
 will disagree); `.claude/worktrees/` or any dir holding a `.git` *file* not ignored (a full
@@ -367,6 +377,9 @@ and linked. A plausible value is a defect; a null with a reason is correct.
 
 Run before any commit, in this order: <free steps>. Never run here: <deny-list, with why>.
 Boundary checks read source as text and cost nothing; they are not a test suite.
+A paid step runs only after the user's yes for THAT run, stated with its cost; a goal, a
+loop instruction or an earlier yes is not a yes. After every paid run, report its cost and
+what is left of the budget in <ledger file>, unasked, before any other number.
 <!-- conflict slot: "<existing rule, verbatim>" — ruled <date>: <ruling> (D-nnn). -->
 
 While working, the minimum check per kind of change — the full gate still runs before the commit:
@@ -409,9 +422,10 @@ last row is reachable at phone width — fed a recorded fixture of **invented** 
 every backend call intercepted (`page.route('**/api/**')`), and an unknown call fails it.
 It checks plumbing, never whether a value is right; that stays with the human walkthrough
 and the scored run. A flaky check is deleted with its reason in the subject line, never
-muted: deleting flaky end-to-end tests outright, even the day before a demo, beats muting them. Push <when asked | when the batch is done —
-ruled in Phase 0>; a push is done when `gh run watch` reports success. Uncommitted work in a
-worktree is lost when the worktree is removed. Every report states, in order: outcome, files
+muted: deleting flaky end-to-end tests outright, even the day before a demo, beats muting them. Push <when asked | when the batch is done |
+straight to main after every green change — ruled in Phase 0>; a push is done when `gh run
+watch` reports success. In a checkout another session also works in, stage only this
+session's files. Uncommitted work in a worktree is lost when the worktree is removed. Every report states, in order: outcome, files
 changed, exact checks run, what was skipped, what was not touched.
 ```
 
@@ -807,6 +821,14 @@ apart and keep the history readable:
   stayed behind env flags and out of CI; UI was rendered and looked at. Install the habit as
   one line: *after a scored or live check, the number and the date go into the note that owns
   the fact.* A number that lives only in chat is lost by the next session.
+- **A mechanical score is not the verdict.** A card lint in one production repo reported 96%
+  acceptance on a run that judges reading the user's written rulings passed 7 of 46: the
+  lint measured what it checked. Where output is judged, the answer key is the user's own
+  rulings in a tracked note, a judge pass runs against that note after every paid run, and
+  the judge is calibrated against the user on ten items before its number is trusted. Loops
+  run on a fixed subset — known failures named by cause plus two passing controls, a tracked
+  list the run takes as `--set=` — and the full set only confirms; a re-score from stored
+  output costs nothing and is its own subcommand, never a run.
 - **The loop itself is a doc, or nobody runs it.** Install `docs/WORKFLOW.md` from Shape K:
   the human's steps, the slice-list shape, what happens between "go" and the report, review
   by concern, QA when needed, the never-list. Owner row in `docs/README.md`.
@@ -955,13 +977,28 @@ deny-listed script unless it carries `<REPO>_PAID_OK=1` (an estimate-only invoca
 without its `--go`, passes), lets everything else through, and lets unreadable input through too, so a broken hook cannot stop every command. The agent adds the
 marker only after the user's go for that run, never to get past a block; the rule says so in
 `CLAUDE.md`. Limit, stated in the docstring: it reads the command text, so a scratch script that
-imports the paid module is not caught. The hook gets its own test in the gate.
+imports the paid module is not caught. The hook gets its own test in the gate. Key it on
+the script's name, never on its flag: a hook keyed on `--yes` blocked a `git commit` whose
+message quoted the flag, and the user had it removed the same day.
 
 ### L.6 Budget ledger
 
 A fixed docs row when a deny-list exists: before each paid run, the script's own estimate and
 the balance after it; after, the actual from the script's output, in the same commit as the
 run's findings. Estimates ran about 2x low when many pages were sent, so the row says that.
+
+Where the paid script is the repo's own CLI, the ledger is code, not a habit: one tracked
+file (`eval/SPEND.md`) with a `Budget:` line in the user's words and one row per run — date,
+provider, model, variant, calls, cost, cumulative, note. The CLI reads it before a run and
+refuses when the budget is spent, appends the row after, and prints `Spend: X of Y used, Z
+left`; the agent repeats that line in its report after every paid run, before any quality
+number, unasked. No call without `--yes`; `--help` and `--dry-run` are free. Permission is
+per run: before any paid call, of any size, the agent states what it will run and its cost
+and waits for a yes for that run. A goal ("get to 95%"), a loop instruction, or a yes given
+for an earlier run is not one (three unasked probes, run on the strength of "be as good as
+model X", are what the user remembers of that day, not the cents). The run script exports
+only the credential it needs — sourcing a whole env file once switched the model under an
+eval — and the result file records the exact model, prompt set and variant that ran.
 
 ### L.7 Typecheck baseline
 
