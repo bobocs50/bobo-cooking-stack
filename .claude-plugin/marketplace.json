@@ -9,7 +9,7 @@
     {
       "name": "bobo-cooking-stack",
       "source": "./",
-      "description": "glendonize, grilling and whiteboard: make a repo agent-ready, stress-test a plan, draw and be read.",
+      "description": "The only way to use agents: glendonize (the harness), grilling (outcome, research, decisions) and whiteboard (draw and be read).",
       "category": "engineering",
       "keywords": [
         "agents",

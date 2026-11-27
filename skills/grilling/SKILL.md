@@ -1,58 +1,77 @@
 ---
 name: grilling
-description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+description: Grill the user relentlessly about a plan, decision, or idea. Outcome first, Claude researches and proposes, then every decision is grilled with a recommendation, and the session ends with what good looks like. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
 ---
 
-Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
+Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it. The session runs in five phases: **the outcome, their rough idea, your research and proposal, the grilling, what good looks like.** Facts are your job; decisions are theirs.
 
 ## Learning mode
 
 The user is also learning. The goal is that they can explain every decision afterwards, not just that the plan is good. The rules below sit on top of the grilling; they never make it softer.
 
-**Before Round 0, read `~/.claude/learning/profile.md` and search `~/.claude/learning/progress.md` for topics relevant to this session.** Skip explanations of concepts listed as Strong. When a Developing or Revisit concept comes up, ask them to apply it before you say anything about it — that retrieval is the practice.
+**Before Phase 1, read `~/.claude/learning/profile.md` and search `~/.claude/learning/progress.md` for topics relevant to this session.** Skip explanations of concepts listed as Strong. When a Developing or Revisit concept comes up, ask them to apply it before you say anything about it — that retrieval is the practice.
 
-## Round 0: the user states the problem
+## Phase 1: the outcome
 
-Before any design question, one `AskUserQuestion` call (the user clicks; typing goes under Other) asks for:
+Before anything else, one `AskUserQuestion` call (the user clicks; typing goes under Other) asks for:
 
 1. **The problem**: what is wrong or missing, and how they noticed.
 2. **What done looks like**: how they would know it is solved.
-3. **Their approach, if they have one** — rough is fine, plain English or pseudocode — or "I don't know yet".
+3. **An example of good, if they have one**: a link, a repo, a file, a screenshot. Offer "None" and "Find some"; theirs arrives under Other.
 
-The options for 1 and 2 are readings of what the user already wrote, never your design, which would anchor theirs; for 3 offer only "Don't know yet" and "Just propose", so an approach arrives in their own words under Other. If the trigger message already covers all three, skip Round 0 and open the first frontier round; "nothing to grill" is never the answer. An answer about the desired outcome is a requirement, not an approach: ask for the approach separately.
+The options for 1 and 2 are readings of what the user already wrote, never your design. Skip a question the trigger message already answers; "nothing to grill" is never the answer. Write one `Done when:` line from the answers, observable and testable, and show it.
 
-Then branch:
+## Phase 2: their rough idea
 
-- **They have an approach** → grill it (the tree below), rooted at their approach, not yours. A viable approach need not be the one you would pick.
-- **They don't know yet** → find out *which part* they don't know, then teach that part only:
-  1. Name the kind of problem in one line (e.g. "this is a caching problem"), so they can recognise it next time.
-  2. Explain the missing concept in text, never a drawing, on one small, concrete example, made-up or from the project, with 1–2 sources, under a **Concept** heading (what it is, how it works) and, when it helps, **Why this matters** (what it changes in this project). Facts are yours to give; design choices are not.
-  3. Hand the decision back: "how would you apply this here?" — in plain text, and wait. Hesitation or a short answer is not being stuck; ask them to say more.
-  4. Only if they are still stuck, or ask for options, show 2-3 approaches on the example with what each costs and where it breaks. These are proposals, not their decision: they pick and say **why** in their own words. If the why doesn't hold up, name the gap and ask again; don't pick for them.
-  5. Their approach becomes the root of the design tree; grill it as below.
+Ask in plain text: "Your rough idea, in a line or two, or 'none'?" and wait. This comes before your proposal, so their idea is said before yours can anchor it. Start the research (Phase 3) in the background while they answer.
 
-They can always say "just tell me" or "skip" — then explain or proceed, and list it under "Shown so far" in progress.md, not as a record.
+If they say "none" and the missing piece is a concept rather than a fact, teach that part only before you propose:
 
-**Throughout:** don't invent their rationale, don't lead them through your plan one hint at a time, no praise or hype — say what holds and what breaks. **Their answer first, where it is practice (2026-10-08):** at a structure decision (next section) and wherever a new, Developing or Revisit concept decides the answer, ask "what would you do and why?" in plain text, wait, then say where their answer agrees or differs from yours; the picker comes after, because a click does not show their reasoning. Every other decision goes straight to the picker; their reasoning fits under Other or a note. Asking at every click was a ritual, not practice. When they ask about existing code, answer *why*; *what it does* is theirs to say first.
+1. Name the kind of problem in one line (e.g. "this is a caching problem"), so they can recognise it next time.
+2. Explain the missing concept in text, never a drawing, on one small, concrete example, made-up or from the project, with 1–2 sources, under a **Concept** heading (what it is, how it works) and, when it helps, **Why this matters** (what it changes in this project).
+3. Hand it back: "how would you apply this here?" — in plain text, and wait. Hesitation or a short answer is not being stuck; ask them to say more.
 
-## Structure decisions: the user sketches first
+They can always say "just tell me" or "skip" — then proceed, and list it under "Shown so far" in progress.md, not as a record.
 
-A decision about structure — a new layer, step, data shape, boundary or component — is settled on drawings, not on a list of options:
+## Phase 3: research and propose
 
-1. **The user draws the first sketch** as a Mermaid flowchart, opened with `/whiteboard` (hand-drawn, dark, full screen), one concept per diagram, every box named with a system-design term (the "Terms" table in `~/.claude/learning/progress.md` if there is one, otherwise the standard terms: pipeline, boundary, cache, fallback, …); arrows bare, labelled only where the label says something the boxes don't ("retry and reconcile"). A box without a term is the first question. An uncertain edge is drawn with a question mark, not asserted. You never draw before their sketch exists.
+Send sub-agents for the facts: the existing code, the docs, outside sources, their example of good. Each gets a narrow brief; run them in parallel. Then show, in at most one screen:
+
+- **The approach** in 3–6 lines, and where it differs from their rough idea and why. A viable idea of theirs need not lose to yours; say so when it holds.
+- **Facts found**: a short table, fact | source. Only facts with a source go here. You decide no design question on their behalf; every decision goes to Phase 4.
+- **Open decisions**: the list Phase 4 will grill.
+
+Ask "anything here you'd contest?" as one click; a contested fact is checked again, not argued.
+
+## Phase 4: the grilling
+
+Grill every open decision with the design tree below, each question with your recommended answer. Taste questions (naming, look, tone) are decisions too and get a recommendation like any other.
+
+**Throughout:** don't invent their rationale, no praise or hype — say what holds and what breaks. **Their answer first, where it is practice (2026-10-08):** at a structure decision (next section) and wherever a new, Developing or Revisit concept decides the answer, ask "what would you do and why?" in plain text, wait, then say where their answer agrees or differs from yours; the picker comes after, because a click does not show their reasoning. Every other decision goes straight to the picker; their reasoning fits under Other or a note. When they ask about existing code, answer *why*; *what it does* is theirs to say first.
+
+### Structure decisions: the user sketches first
+
+Only when a decision about structure comes up — a new layer, step, data shape, boundary or component — is it settled on drawings, not on a list of options:
+
+1. **The user draws the first sketch** as a Mermaid flowchart, opened with `/whiteboard` (hand-drawn, dark, full screen), one concept per diagram, every box named with a system-design term (the "Terms" table in `~/.claude/learning/progress.md` if there is one, otherwise the standard terms: pipeline, boundary, cache, fallback, …); arrows bare, labelled only where the label says something the boxes don't ("retry and reconcile"). A box without a term is the first question. An uncertain edge is drawn with a question mark, not asserted. You never draw before their sketch exists; your Phase 3 approach stays in words until then.
 2. **Grill the drawing** in plain text, one box or edge at a time: why does this box exist; what is its one responsibility; what happens when it fails, times out or half-succeeds, and where is that surfaced; who owns each piece of state that crosses a boundary; what still works if this box dies; what did this choice reject, and what would make you reconsider.
 3. **Then draw your alternative beside it**, same look and vocabulary, and say where it differs and why.
 4. **They pick** (`AskUserQuestion`, `preview` on both sketches) and say why. A term they used and defended goes into progress.md "Words you used"; a click alone is exposure and goes under "Shown so far" at most.
 
 On their ask, open the sketch on `/whiteboard`; the Mermaid in the conversation stays the record.
 
+## Phase 5: what good looks like
+
+When the frontier is empty, write a note of 3–6 lines: the examples of good, theirs first, then the ones research found, each with its link and the 2–3 qualities that make it good for this plan; check it against the `Done when:` line. The `Done when:` line, the facts, the settled decisions and this note are the shared understanding. Confirm it with one click ("Shared understanding: yes / something's off"). Do not act on the plan before that.
+
 ## Closing the session
 
-When the frontier is empty and they have confirmed the shared understanding:
+After they confirmed the shared understanding:
 
-1. Ask them for one or two lines in their own words: what they learned, and what is still unclear. Don't write it for them.
-2. Update the learning files (below) from evidence only. Show them the update in a few lines.
-3. If the session taught them something about *working with Claude or agents* (how they prompted, briefed, delegated, verified, or a mistake in that), add a dated line to `~/.claude/learning/agentic-coding.md` under "Lessons learned" or "Setup changes", and rewrite "How I work now" if their workflow changed. Their words where possible.
+1. **Teach-back.** Ask them to explain the two most load-bearing decisions in their own words, in plain text. Their explanation is a record; a decision they accepted without a why is not.
+2. Ask them for one or two lines in their own words: what they learned, and what is still unclear. Don't write it for them.
+3. Update the learning files (below) from evidence only. Show them the update in a few lines.
+4. If the session taught them something about *working with Claude or agents* (how they prompted, briefed, delegated, verified, or a mistake in that), add a dated line to `~/.claude/learning/agentic-coding.md` under "Lessons learned" or "Setup changes", and rewrite "How I work now" if their workflow changed. Their words where possible.
 
 ### What counts as evidence
 
@@ -76,7 +95,7 @@ Work the tree in **rounds**. The **frontier** is every decision whose prerequisi
 
 ## How to ask a round
 
-**Ask decisions via the `AskUserQuestion` tool — never as plain markdown text.** The user picks by clicking, not by typing. The only plain-text questions are the ones Learning mode names, a structure sketch and a new concept, because there the point is their words.
+**Ask decisions via the `AskUserQuestion` tool — never as plain markdown text.** The user picks by clicking, not by typing. The only plain-text questions are their rough idea (Phase 2), the teach-back, and the ones Learning mode names, a structure sketch and a new concept, because there the point is their words.
 
 Each round is a single `AskUserQuestion` call:
 
@@ -99,4 +118,4 @@ When an answer comes back with a note attached, or the user picks "Other", treat
 
 Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch a sub-agent to find it; don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
 
-The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.
+The grilling is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Then go to Phase 5.

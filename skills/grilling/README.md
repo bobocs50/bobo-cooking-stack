@@ -6,7 +6,7 @@
 
 **Nothing gets built by guess.**
 
-Claude interviews you about a plan, one round at a time, until every decision is settled and you can explain each one yourself.
+Outcome first. Claude researches and proposes, then grills you on every decision with its recommendation, and ends with what good looks like.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE) [![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-orange.svg)](SKILL.md)
 
@@ -16,28 +16,32 @@ Claude interviews you about a plan, one round at a time, until every decision is
 
 <p align="center"><img src="../../assets/grilling-tree.svg" width="760" alt=""></p>
 
-<p align="center"><sub>Every decision branches into the ones that hang off it. A round asks all the decisions that are ready; it ends when nothing is open and you confirm.</sub></p>
+<p align="center"><sub>Facts are Claude's job, decisions are yours. Your idea comes before Claude's, so you decide instead of only approving.</sub></p>
 
 ## How it works
 
-| Topic | Description |
+| Phase | What happens |
 |---|---|
-| Round 0 | You state the problem, what done looks like, and your approach or "don't know yet" |
-| Design tree rounds | Each round asks every decision that is ready, up to 4 clickable questions, one recommended |
-| Facts vs decisions | Claude looks facts up with a subagent; decisions stay yours |
-| Draw first | At a structure decision you sketch on the [whiteboard](../whiteboard/README.md), then Claude draws its alternative beside yours |
-| Learning mode | With no approach yet, Claude names the kind of problem, teaches only the missing concept, and hands the decision back |
-| Close | You write what you learned; Claude does not act on the plan until you confirm |
+| 1. Outcome | You state the problem, what done looks like, and an example of good if you have one. Claude writes a `Done when:` line |
+| 2. Your rough idea | One line in your words, or "none", before Claude shows anything, so its proposal can't anchor yours |
+| 3. Research and propose | Subagents look up the facts. Claude shows its approach, the facts with their sources, and the open decisions |
+| 4. Grilling | Every decision, in rounds of up to 4 clickable questions, each with Claude's recommendation. At a structure decision you sketch on the [whiteboard](../whiteboard/README.md) first |
+| 5. What good looks like | A short note with your examples and the ones Claude found, checked against `Done when:`. Nothing is built until you confirm |
+| Close | You explain the two biggest decisions in your own words |
+
+With learning mode on, Claude teaches only the concept you are missing and asks you to apply it before it says more.
 
 ## Example
 
 ```
 You:    grill me: our nightly export job sometimes sends the same report twice.
-Claude: [Round 0] Approach? -> you: "Don't know yet"
-Claude: This is a retry-without-idempotency problem. [Concept ...] How would you apply it here?
-You:    store a sent-marker per report and day, check it before sending.
-Claude: [Round 1] Key: Report id + date (Recommended) / Report id only
-                  Order: Mark before / Mark after sending (Recommended)
+Claude: [1] Done when: each report goes out once per day, even after a retry.
+Claude: [2] Your rough idea? -> you: "remember what was sent"
+Claude: [3] Facts: the job retries on timeout (scheduler config). Approach: a sent-marker
+            per report and day, checked before sending. Same as your idea, made exact.
+Claude: [4] Key: Report id + date (Recommended) / Report id only
+            Order: Mark before / Mark after sending (Recommended)
+Claude: [5] Good looks like: the outbox pattern (link), one row per message sent.
 ```
 
 ## Files
@@ -64,7 +68,7 @@ Plugin install: see the [root README](../../README.md#install). For learning mod
 
 ## Built from
 
-- The grilling itself from Matt Pocock's [skills](https://github.com/mattpocock/skills)
+- The grilling with a recommendation on every question from Matt Pocock's [skills](https://github.com/mattpocock/skills)
 - Learning mode from [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise)
 
 The full rules are in [SKILL.md](SKILL.md). [All skills](../../README.md)

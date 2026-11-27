@@ -4,6 +4,8 @@
 
 # bobo-cooking-stack
 
+**The only way to use agents.**
+
 Three Claude Code skills for building real software with AI agents.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](.claude-plugin/plugin.json)
@@ -23,7 +25,7 @@ Three Claude Code skills for building real software with AI agents.
 <td width="33%" align="center" valign="top">
 <img src="assets/grilling.svg" width="64" alt=""><br>
 <h3><a href="skills/grilling/README.md">grilling</a></h3>
-Asks you about a plan one round at a time, until every decision is settled and nothing gets built by guess.<br><br>
+<b>Nothing gets built by guess.</b> Outcome first, Claude researches and proposes, then grills you on every decision and ends with what good looks like.<br><br>
 <code>/grilling</code>
 </td>
 <td width="33%" align="center" valign="top">
