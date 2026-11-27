@@ -29,6 +29,8 @@ Commits are instant. At the push, a background job reviews the change against wh
 </tr>
 </table>
 
+Both inspired by poteto's [pstack](https://github.com/cursor/plugins/tree/main/pstack): skills that make an agent work like a careful engineer, so you can run several at once.
+
 ## Full or Yolo
 
 glendonize asks first which one you want.
