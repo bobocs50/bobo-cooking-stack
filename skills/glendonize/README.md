@@ -23,7 +23,7 @@ Agents write the code. You check the proof: the test that pins a change, the rev
 | Layer | What glendonize puts there |
 |---|---|
 | **Codebase** | One entry function per step file, clear boundaries between modules |
-| **Static analysis** | A drill (a small free test) for every function, and new code cannot land without one. Lint, types, boundary checks that read the source, and a CI gate of free commands only |
+| **Static analysis** | A drill (a small free test) for every function, TDD for bugs, and new code cannot land without one. Lint, types, boundary checks that read the source, and a CI gate of free commands only |
 | **Verification** | A push pipeline: a reviewer checks the change against what you asked for, a verifier confirms or refutes each finding, a fixer repairs small ones. Tests run again with the change reverted, to prove they would catch it. Playwright tests the UI on invented data. Where agents share state, a TLA+ model checks it |
 | **Prose** | `AGENTS.md` rules for every agent, a numbered log where every decision is written down with its reason, open questions, vendor facts marked checked or not, and notes with one owner each |
 | **Human** | You. You get before and after screenshots of every UI change, the numbers of a run, and the test that pins the fix. You rule on values, prompts and money |
