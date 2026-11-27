@@ -1,20 +1,22 @@
 <div align="center">
 
+<img src="../../assets/whiteboard.svg" width="80" alt="">
+
 # whiteboard
 
-*Opens a Mermaid flowchart as a hand-drawn board in your browser; Claude reads what you draw.*
+**Draw it instead of typing it.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
+A Mermaid flowchart opens as a hand-drawn board in your browser. You move boxes, rename them and write on it; Claude reads it back.
 
-[All skills](../../README.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE) [![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-orange.svg)](SKILL.md)
 
 </div>
 
-A structure decision is easier to think through by drawing than by typing boxes and arrows into
-a chat. You move boxes, rename them and write answers on the board. Run it with `/whiteboard`
-or `/whiteboard the upload pipeline`.
+<br>
 
----
+<p align="center"><img src="../../assets/whiteboard-flow.svg" width="760" alt=""></p>
+
+<p align="center"><sub>The Mermaid file stays the record. The board is where you think.</sub></p>
 
 ## How it works
 
@@ -50,8 +52,6 @@ Claude adds `fraud[Fraud check]` to the Mermaid and asks about the threshold.
 | [board.html](board.html) | The page: Excalidraw, the Mermaid conversion, the three buttons |
 | [example.mmd](example.mmd) | A five-box sample; try it with `python serve.py example.mmd` |
 
----
-
 ## Install
 
 ```sh
@@ -64,9 +64,10 @@ By hand (macOS / Linux):
 mkdir -p ~/.claude/skills/whiteboard && for f in SKILL.md serve.py board.html example.mmd; do curl -fsSL https://raw.githubusercontent.com/bobocs50/bobo-cooking-stack/main/skills/whiteboard/$f -o ~/.claude/skills/whiteboard/$f; done
 ```
 
-Plugin install: see the [root README](../../README.md#install). Used by
-[grilling](../grilling/README.md) at structure decisions.
+Plugin install: see the [root README](../../README.md#install).
 
-## License
+## Works with
 
-MIT. See [LICENSE](../../LICENSE).
+[grilling](../grilling/README.md) opens it at every structure decision, so you sketch before Claude proposes.
+
+The full rules are in [SKILL.md](SKILL.md). [All skills](../../README.md)
