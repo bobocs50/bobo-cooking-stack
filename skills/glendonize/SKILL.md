@@ -1131,7 +1131,7 @@ other people or cloud sessions must get them too.
 | Implementer subagent (briefed, worktree, stops on ambiguity) | `claude/agents/implementer.md` | user | already global; copy to `.claude/agents/` only for other people |
 | Trust pyramid (L.20) | Shapes K, first section of `docs/WORKFLOW.md` | repo | always |
 | Prompt rules of thumb (L.25) | Shapes K, "Writing the ask" in `docs/WORKFLOW.md` | repo | always |
-| Working agreement for Claude only: swarm by default, the agent review rule, approval before acting, failures get a permanent fix, definition of done for issues, paid-run estimate, code-question rotation, compact instructions (L.18) | `claude/CLAUDE.example.md` (sections "Working agreement", "Paid runs & budget", "Compact Instructions") | repo | always; each rule only once its mechanism is installed |
+| Working agreement for Claude only: swarm by default, the agent review rule, approval before acting, failures get a permanent fix, definition of done for issues, paid-run estimate, compact instructions (L.18) | `claude/CLAUDE.example.md` (sections "Working agreement", "Paid runs & budget", "Compact Instructions") | repo | always; each rule only once its mechanism is installed |
 | Rules for every agent | `claude/AGENTS.example.md` (Shapes A shows the shape) | repo | always |
 | Coordination log | Shapes J | repo, gitignored | parallel sessions |
 | Harness matrix in the root README | Shapes N | repo | always; rebuilt on every run |
