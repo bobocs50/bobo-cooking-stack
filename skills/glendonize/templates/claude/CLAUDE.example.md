@@ -39,28 +39,10 @@ limit shows; I should not have to ask for parallelism (D-090).
 Every swarm starts right away; no guess is asked first. When the findings come back, show
 them with your verdict (D-108).
 
-My code reading has two triggers, both yours to raise, about one question a day at most
-(D-085, D-089, D-092):
-1. A commit touches the always-list: the schema, grounding, in-dossier / set-aside, merge
-   rules, flags, null handling, an error path that swallows a failure, a cache key, a
-   catalog row, or a drill that is deleted or weakened. Right after the commit, first run a
-   reviewer subagent that sees only the diff and reports gaps, then show me the hunk (at
-   most ~40 lines, with one sentence on what it decides) and ask one question.
-2. Before a paid run: the hunk the run will test (a prompt rule, a page-selection rule or
-   constant), if not already asked under 1. My answer is the prediction the run's numbers
-   then check.
-Never for imports, renames, comments, formatting, the frontend, eval scripts. The question
-is one of four kinds, rotated (D-109): the code question (what comes out for a given input;
-find the defect or say none, one in three; which caller still assumes the old shape, with
-the call sites shown; why this and not null; which drill line would still pass if the fix
-were wrong); "name the mechanism" (I give the textbook term for what the function
-implements); the failure question (what reaches the reviewer when a call fails or a file is
-half-written); the trade-off question (why this design and not the other; what breaks the
-other way). Each starts with its marker line ("Code question:", "Mechanism question:",
-"Failure question:", "Trade-off question:") and ends with "Rating (sure|unsure|not said): …".
-Never yes/no, never answerable from the commit message, never style. I say sure or unsure
-and answer in 2–3 sentences; you correct in one line that names the line and the
-consequence. Prompt diffs are still shown before the run (D-085).
+After a commit to the risky code (the schema, grounding, merge rules, flags, null handling,
+a swallowed error, a cache key, a catalog row, a weakened drill) tell me in plain words what
+the reviewer found and which drill pins the change. Prompt diffs are still shown before the
+run (D-085).
 
 ### Agent review of code commits
 
@@ -72,7 +54,7 @@ Stage in one call, commit in the next: never `git add ... && git commit`, never 
 on code, because the hook reviews the staged diff. Fix a confirmed finding, or answer it with a
 `review: <finding id> - not a defect because ...` line; never bypass, `PROJECT_REVIEW_SKIP=1` only on my
 word. The `Agent-Review` trailer it adds is checked by `tests/drill_review_stamp.py`.
-It does not replace my code question or my prompt-diff read (D-085, D-109). Re-check 2026-11-02.
+It does not replace my prompt-diff read (D-085).
 
 ### Approval before acting
 
@@ -113,16 +95,6 @@ eval run and quote the numbers. If no fresh run exists, say so (D-074).
 Explain in plain language first (2–5 short bullets, no jargon), then give details
 only if I ask. When explaining metrics, define each one in one sentence with the
 actual numbers (D-074).
-
-System design is learned while building, never as a lesson: use the standard
-system-design terms whenever you explore, propose or explain, so I pick them up in
-use; when I describe something with a wrong or vague term, correct it in passing
-with the right word and one example; when we build architecture or I grill you,
-give tips and better proposals with the System Design Primer
-(https://github.com/donnemartin/system-design-primer) as the reference. The terms
-are standard CS words only, each listed with its <project> place in my private learning
-file (not in the repo); the mechanism question of D-109 draws on that list. No
-vocabulary sessions, no term quizzes (D-098).
 
 ## Project status
 

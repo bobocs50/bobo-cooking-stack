@@ -1037,7 +1037,7 @@ other people or cloud sessions must get them too.
 | Rules for every agent | `claude/AGENTS.example.md` (Shapes A shows the shape) | repo | always |
 | Coordination log | Shapes J | repo, gitignored | parallel sessions |
 | Harness matrix in the root README | Shapes N | repo | always; rebuilt on every run |
-| Weekly learning hook (`SessionStart`), humanizer and pyright plugins | `~/.claude/settings.json` | user | already global; never copied, it is personal |
+| Humanizer and pyright plugins | `~/.claude/settings.json` | user | already global; never copied, it is personal |
 
 The two `*.example.md` files are reference, not templates: take a section's shape, never its
 D-ids, paths or domain words.

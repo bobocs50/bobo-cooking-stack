@@ -9,7 +9,7 @@
 
 </div>
 
-Agents invent reasons for rules, build the wrong thing, and write code you never learn from.
+Agents invent reasons for rules and build the wrong thing.
 These skills fix one problem each. They are small, plain Markdown, and meant to be edited.
 
 ---
@@ -19,7 +19,6 @@ These skills fix one problem each. They are small, plain Markdown, and meant to 
 | Topic | Description |
 |---|---|
 | [Install](#install) | As a Claude Code plugin or as editable files for any agent; pick one way, not both |
-| [Learning setup](learning-by-building/README.md#install) | Templates in `~/.claude/learning/` and the question rules for `CLAUDE.md` |
 
 ## Skills
 
@@ -29,12 +28,6 @@ These skills fix one problem each. They are small, plain Markdown, and meant to 
 | [grilling](skills/grilling/README.md) | Interviews you a round at a time until every decision in a plan is settled |
 | [whiteboard](skills/whiteboard/README.md) | Opens a Mermaid chart as a hand-drawn board; Claude reads what you draw |
 
-## Learning
-
-| Topic | Description |
-|---|---|
-| [learning-by-building](learning-by-building/README.md) | One question about a risky change when it lands, at most about once a day |
-
 ## Harness
 
 | Topic | Description |
@@ -42,13 +35,12 @@ These skills fix one problem each. They are small, plain Markdown, and meant to 
 | [glendonize/SKILL.md](skills/glendonize/SKILL.md) | The glendonize instructions |
 | [glendonize/templates/](skills/glendonize/templates/) | Working copies of the hooks, drills, CI gate and rule files the skill installs, with project details replaced by placeholders |
 | [grilling/SKILL.md](skills/grilling/SKILL.md) | The grilling instructions, with the learning mode |
+| [grilling/templates/](skills/grilling/templates/) | Empty `profile.md`, `progress.md` and `agentic-coding.md` for the learning mode, copied to `~/.claude/learning/` |
 | [grilling/agents/openai.yaml](skills/grilling/agents/openai.yaml) | Display name and short description for other agent tools |
 | [whiteboard/SKILL.md](skills/whiteboard/SKILL.md) | The whiteboard instructions |
 | [whiteboard/serve.py](skills/whiteboard/serve.py) | Local server that saves the drawing and tells Claude |
 | [whiteboard/board.html](skills/whiteboard/board.html) | The Excalidraw board page |
 | [whiteboard/example.mmd](skills/whiteboard/example.mmd) | A sample chart to try the board on |
-| [CLAUDE.snippet.md](learning-by-building/CLAUDE.snippet.md) | The question rules to paste into a project's `CLAUDE.md` |
-| [templates/](learning-by-building/templates/) | Empty `profile.md`, `progress.md` and `agentic-coding.md` |
 
 ## Why
 
@@ -56,7 +48,6 @@ These skills fix one problem each. They are small, plain Markdown, and meant to 
 |---|---|---|
 | The agent made up a rule | "Don't ever take down a fence until you know the reason it was put up." (Chesterton's fence) | [glendonize](skills/glendonize/README.md): written rules, a decision register the code cites, a gate of free commands |
 | The agent built the wrong thing | "No one knows exactly what they want." (Thomas & Hunt, *The Pragmatic Programmer*) | [grilling](skills/grilling/README.md) settles every decision; [whiteboard](skills/whiteboard/README.md) for structure |
-| I shipped code I don't understand | "What I cannot create, I do not understand." (Richard Feynman) | [learning-by-building](learning-by-building/README.md) asks one question per risky change |
 
 ---
 

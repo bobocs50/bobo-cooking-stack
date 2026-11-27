@@ -59,8 +59,8 @@ By hand, user-level on macOS / Linux:
 mkdir -p ~/.claude/skills/grilling && curl -fsSL https://raw.githubusercontent.com/bobocs50/bobo-cooking-stack/main/skills/grilling/SKILL.md -o ~/.claude/skills/grilling/SKILL.md
 ```
 
-Plugin install: see the [root README](../../README.md#install). For learning mode, set up
-[learning-by-building](../../learning-by-building/README.md#install).
+Plugin install: see the [root README](../../README.md#install). For learning mode, copy
+[templates/](templates/) to `~/.claude/learning/` (`cp -n templates/*.md ~/.claude/learning/`) and fill in `profile.md`.
 
 ## License
 
