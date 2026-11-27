@@ -17,7 +17,7 @@ Three Claude Code skills for building real software with AI agents.
 <td width="33%" align="center" valign="top">
 <img src="assets/glendonize.svg" width="64" alt=""><br>
 <h3><a href="skills/glendonize/README.md">glendonize</a></h3>
-Builds a harness for your repo: glendonC's many-minions structure plus Kun Chen's no-mistakes push pipeline, inspired by poteto's pstack.<br><br>
+Builds a harness for your repo: <a href="https://github.com/glendonC/1321">glendonC</a> plus Kun Chen's no-mistakes push pipeline, inspired by poteto's pstack.<br><br>
 <code>/glendonize</code>
 </td>
 <td width="33%" align="center" valign="top">

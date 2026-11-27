@@ -18,7 +18,7 @@ The harness is two proven setups put together:
 <tr>
 <td width="50%" valign="top">
 <h3>The structure</h3>
-From glendonC's many-minions and <a href="https://github.com/glendonC/1321">1321</a>.<br><br>
+From <a href="https://github.com/glendonC/1321">glendonC</a>.<br><br>
 Written rules for agents, a numbered log of decisions that the code cites, notes with one owner each, and free checks that run before every commit.
 </td>
 <td width="50%" valign="top">
