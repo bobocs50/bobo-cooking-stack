@@ -6,15 +6,55 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_paid_run.py\"",
+            "command": "python \"$(git rev-parse --show-toplevel)/.claude/hooks/guard_paid_run.py\"",
             "timeout": 10,
             "statusMessage": "Checking for a paid run"
-          },
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/review_diff.py\"",
-            "timeout": 900,
-            "statusMessage": "Agent review of the staged diff (D-123)"
+            "command": "python \"$(git rev-parse --show-toplevel)/.claude/hooks/guard_private_paths.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking for private content"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-toplevel)/.claude/hooks/housekeeping.py\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-toplevel)/.claude/hooks/ship.py\" --status",
+            "timeout": 20,
+            "statusMessage": "Open push pipeline runs"
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-toplevel)/.claude/hooks/after_compact.py\"",
+            "timeout": 20,
+            "statusMessage": "Re-reading COORDINATION.md and git after the compaction"
           }
         ]
       }

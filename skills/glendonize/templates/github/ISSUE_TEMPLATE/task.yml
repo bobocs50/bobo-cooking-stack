@@ -1,0 +1,22 @@
+name: Task
+description: A change with a target metric and the proof that it is done
+body:
+  - type: textarea
+    id: context
+    attributes: { label: Context, description: "What is wrong or missing, and why it matters" }
+    validations: { required: true }
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: "The target metric and its threshold, e.g. hit rate on the latest run vs the target in the register"
+    validations: { required: true }
+  - type: textarea
+    id: proof
+    attributes:
+      label: Proof
+      description: |
+        Filled when the work lands, and again in the closing comment. Run tag with the numbers quoted,
+        files changed, the test or drill that pins the change, a screenshot where one fits.
+        Closing comment shape: "On main now: <sha>. Run <tag>: <numbers vs target>. Files: <list>. Pinned by: <test>. Screenshot: <if any>."
+    validations: { required: true }

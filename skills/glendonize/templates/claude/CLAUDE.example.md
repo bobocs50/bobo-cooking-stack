@@ -44,17 +44,19 @@ a swallowed error, a cache key, a catalog row, a weakened drill) tell me in plai
 the reviewer found and which drill pins the change. Prompt diffs are still shown before the
 run (D-085).
 
-### Agent review of code commits
+### Agent review at the push
 
-Every commit that touches `main/ eval/ tests/ frontend/ .github/ .claude/hooks/` is reviewed by
-agents before it lands, blocking only on a confirmed defect (D-123). Tiered by risk (D-125):
-`main/` and `.claude/hooks/` get three finders and one verifier per defect on opus; `eval/ tests/
-frontend/ .github/` alone get one finder and a verifier on sonnet; notes get none.
-Stage in one call, commit in the next: never `git add ... && git commit`, never `-a`, never `--amend`
-on code, because the hook reviews the staged diff. Fix a confirmed finding, or answer it with a
-`review: <finding id> - not a defect because ...` line; never bypass, `PROJECT_REVIEW_SKIP=1` only on my
-word. The `Agent-Review` trailer it adds is checked by `tests/drill_review_stamp.py`.
-It does not replace my prompt-diff read (D-085).
+A commit is instant; the review runs at the push. Push only with
+`python .claude/hooks/ship.py --intent "<my ask and your Scope: line>"` as a background job; the
+guard denies a plain `git push`. In a throwaway worktree it runs intent, rebase, one reviewer,
+the verifier, the targeted tests (and the revert-and-rerun for the trunk, `main/`), document, lint,
+push and CI. Leaf findings: verifier, then fixer, 3 tries, else the change is dropped; a leaf
+"not a defect" drops it. A trunk finding stops the run and comes to me with the verifier's advice:
+one per message, in a briefing, and the run continues with `--resume <id> --answer "<id>: ..."` on
+my ruling. You never answer a confirmed finding yourself. It does not replace my prompt-diff read (D-085).
+Commit one behaviour at a time; never `--no-verify`. `--status` lists runs cut off by a session's
+end; restart them by hand. New issues use the templates in `.github/ISSUE_TEMPLATE` with their
+Proof section.
 
 ### Approval before acting
 
@@ -77,6 +79,8 @@ hook, a gate step or a rule, never only the one instance (D-124).
 An issue is NOT done just because it is closed on GitHub. Before saying an issue is
 fixed, check its target metric (e.g. hit rate vs D-101's 85–95% target) against the latest
 eval run and quote the numbers. If no fresh run exists, say so (D-074).
+The target is met only with the set-aside rows (parked edge cases, known gold mistakes) scored
+too; quote both numbers side by side.
 
 ### Paid runs & budget
 
@@ -89,6 +93,19 @@ eval run and quote the numbers. If no fresh run exists, say so (D-074).
 - Use generous timeouts for long runs. Never stop a run early because it looks slow;
   report progress instead.
 - Commit after each meaningful step, not at the end (D-026).
+
+### Compact Instructions
+
+A compaction summary keeps, in this order: the task in hand with its "done when" line
+and proving command; every decision waiting on my go or my ruling, with its briefing;
+every swarm or background agent in flight (brief path, what it holds, what came back);
+the commits of this session by hash and whether each is pushed; the gate state (which
+checks ran on which tree, red findings and their answers); the estimate, go and spend of
+any paid run; files changed but uncommitted. It drops tool output, check output text and
+sensitive content (R4). The window compacts at <N>k tokens (user settings), so a summary is
+made from a short transcript; after it, `.claude/hooks/after_compact.py` re-reads
+COORDINATION.md, the last commits and the git status from disk, and those win over the
+summary (D-140, D-048).
 
 ### Explanations
 

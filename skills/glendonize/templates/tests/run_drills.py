@@ -3,12 +3,14 @@
     python tests/run_drills.py
 
 Free and offline. The key names are read from .env.example and set to "" in the
-child's environment, so a drill that reaches for a credential sees none (R3, R4).
+child's environment, so a drill that reaches for a credential sees none.
 Every drill runs even after one fails, so all failures show; the exit code is
 non-zero if any did (AGENTS.md "Gates").
 
-The drills run in parallel, min(8, CPU count) at a time; PROJECT_DRILL_WORKERS=1
-runs them one by one for debugging. Results are collected and printed in sorted
+The drills run in parallel, min(8, CPU count) at a time, except the ones named in ALONE
+(an end-to-end drill with a start window that a busy machine would starve), which start one
+after the other once the pool has finished; PROJECT_DRILL_WORKERS=1 runs them one by one
+for debugging. Results are collected and printed in sorted
 name order afterwards, so the output does not depend on which drill finished
 first. Each drill keeps its files in its own temp directory, so they do not share
 state.
@@ -22,10 +24,13 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
+ALONE = ()
 
 
 def credential_names():
     names = []
+    if not (ROOT / ".env.example").is_file():
+        return names
     for line in (ROOT / ".env.example").read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if line.startswith("#") or "=" not in line:
@@ -65,12 +70,18 @@ def main(directory=HERE):
         print("FAILED: no drill_*.py found in " + str(directory) + ", nothing was checked")
         raise SystemExit(1)
     with ThreadPoolExecutor(max_workers=worker_count()) as pool:
-        futures = []
-        for drill in drills:
-            futures.append(pool.submit(run_drill, drill, env))
-        results = []
-        for future in futures:
-            results.append(future.result())
+        futures = {}
+        for index in range(len(drills)):
+            if drills[index].name not in ALONE:
+                futures[index] = pool.submit(run_drill, drills[index], env)
+        for index in futures:
+            futures[index] = futures[index].result()
+    results = []
+    for index in range(len(drills)):
+        if index in futures:
+            results.append(futures[index])
+        else:
+            results.append(run_drill(drills[index], env))
 
     failed = []
     for index in range(len(drills)):

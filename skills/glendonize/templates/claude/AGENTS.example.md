@@ -8,6 +8,7 @@ Running the wrong script spends real money (see "Gates"). `main/parsed_output.cs
 
 - Do not guess when a missing decision would materially change an extracted value, a prompt sentence, or a grounding rule. State what is known, identify the missing decision, and stop that branch until it is resolved.
 - Do not agree or oppose reflexively. Base recommendations on the user's current instruction, the constraints in `notes/`, the current implementation, and observable evidence — a drill run, a `grep -c` against the parsed corpus, a scored report.
+- Do not agree with the user's hypothesis until evidence tests that exact claim. Split it into its claims and mark each proven (with the number), contradicted or untested; for an untested one, name the free check that would settle it. A number that fits part of a claim does not prove its cause (D-142).
 - When a new instruction conflicts with an earlier constraint, name the conflict and treat the user's latest explicit instruction as the override.
 - Never substitute invented filenames, placeholder page numbers, improvised quotes, or fabricated field values. A null with a reason is correct; a plausible value is a defect — a silent wrong value in an certification record.
 - Before a consequential judgment call the brief does not settle, present the exact decision needed; continue only with work that does not depend on it.
@@ -24,7 +25,7 @@ A comment says why, never what. A comment is a pointer, not evidence: read the c
 
 # Reviewing a diff
 
-Defects first, style last: a plausible value where a null with a reason belonged; a fallback that fills a field without saying so; a grounding result read as correctness (notes/OVERVIEW.md 6); a check reported as run that was skipped; a note that contradicts its owner in `notes/README.md`; a cited id that does not resolve; a comment that restates the code or asserts untested behaviour (D-050). Name file and line, defect or question. If nothing survives, say what remains untested rather than "looks good".
+Defects first, style last: a plausible value where a null with a reason belonged; a fallback that fills a field without saying so; a grounding result read as correctness (notes/OVERVIEW.md 6); a check reported as run that was skipped; a note that contradicts its owner in `notes/README.md`; a cited id that does not resolve; a comment that restates the code or asserts untested behaviour (D-050). A drill that still passes with the change reverted pins nothing (D-131). Name file and line, defect or question. If nothing survives, say what remains untested rather than "looks good".
 
 # Parking
 
@@ -32,7 +33,7 @@ When a missing decision or an unverifiable fact would change the result: stop th
 
 # Gates
 
-Before any commit, in order: `python tests/run_drills.py` (every drill, `.env.example` credentials blanked, exits non-zero if any failed), then `npm run lint`, `npm run build` and `npm run test:ui` in `frontend/` (Playwright on an invented fixture — plumbing, never whether a value is right). All of it is free and needs no credentials.
+Before a commit: the minimum check below. The push (`ship.py`) runs the targeted drills, Ruff and Pyright; CI runs every drill (`python tests/run_drills.py`, `.env.example` credentials blanked) and `npm run lint`, `build`, `test:ui` in `frontend/` (Playwright on an invented fixture: plumbing, never whether a value is right) (D-143). All of it is free and needs no credentials.
 
 A red test written before its fix lives in `tests/tdd/`, outside the gate; the commit that greens it renames it into `tests/drill_*.py`, or moves it to `eval/` if it needs gitignored data (D-049, D-100, `tests/tdd/README.md`).
 
@@ -47,7 +48,7 @@ Every paid run is booked in `notes/BUDGET.md`, where the balances live:
 
 Every `eval/` file states `Cost: free - ...` or `Cost: PAID - ...` in its docstring; `tests/drill_boundaries.py` fails without it.
 
-Minimum check while working (the full gate still runs before the commit):
+Minimum check while working (CI runs the full gate after the push):
 
 | Change | Minimum check |
 |---|---|
@@ -68,6 +69,6 @@ An implementer's "verified" means the row for its change was run, and the report
 - A subagent's report, and its numbers, are claims: read the diff, run the drills, recompute one number before a decision rests on it.
 - Every report states, in order: outcome, files changed, exact checks run, what was skipped, what was not touched.
 
-Commit after every logical change and push right after it; the user never runs git by hand (D-026, D-058). The change and its checks in one commit, the gate green first, only that change's files staged (never `git add -A`), subject one sentence in this repo's style. No "WIP", no `--no-verify`, no unrelated batching; work is not finished while uncommitted.
+Commit after every logical change and push right after it with `ship.py` in the background, never a plain `git push` (D-143); the user never runs git by hand (D-026, D-058). The change and its checks in one commit, its minimum check green first, only that change's files staged (never `git add -A`), subject one sentence in this repo's style. No "WIP", no `--no-verify`, no unrelated batching; work is not finished while uncommitted.
 
 Every commit touching `main/*.py` carries the drill line that fails if it is reverted, or says `no drill:` and why in the subject; a drill never loses an `expect(` call unless the subject says `drop drill:` and why (`PROJECT_DRILL_DROP_OK=1` for the local run first). `tests/drill_boundaries.py` and CI enforce both (D-094).
