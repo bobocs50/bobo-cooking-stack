@@ -1,90 +1,60 @@
 <div align="center">
 
+<img src="assets/logo.svg" width="96" alt="">
+
 # bobo-cooking-stack
 
-*Claude Code skills for building real software with AI agents, and still understanding what got built.*
+Three Claude Code skills for building real software with AI agents.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](.claude-plugin/plugin.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](.claude-plugin/plugin.json)
 
 </div>
 
-Agents invent reasons for rules and build the wrong thing.
-These skills fix one problem each. They are small, plain Markdown, and meant to be edited.
+<br>
 
----
-
-## Getting Started
-
-| Topic | Description |
-|---|---|
-| [Install](#install) | As a Claude Code plugin or as editable files for any agent; pick one way, not both |
-
-## Skills
-
-| Topic | Description |
-|---|---|
-| [glendonize](skills/glendonize/README.md) | Makes a repo agent-ready in gated phases; the first pass writes nothing |
-| [grilling](skills/grilling/README.md) | Interviews you a round at a time until every decision in a plan is settled |
-| [whiteboard](skills/whiteboard/README.md) | Opens a Mermaid chart as a hand-drawn board; Claude reads what you draw |
-
-## Harness
-
-| Topic | Description |
-|---|---|
-| [glendonize/SKILL.md](skills/glendonize/SKILL.md) | The glendonize instructions |
-| [glendonize/templates/](skills/glendonize/templates/) | Working copies of the hooks, drills, CI gate and rule files the skill installs, with project details replaced by placeholders |
-| [grilling/SKILL.md](skills/grilling/SKILL.md) | The grilling instructions, with the learning mode |
-| [grilling/templates/](skills/grilling/templates/) | Empty `profile.md`, `progress.md` and `agentic-coding.md` for the learning mode, copied to `~/.claude/learning/` |
-| [grilling/agents/openai.yaml](skills/grilling/agents/openai.yaml) | Display name and short description for other agent tools |
-| [whiteboard/SKILL.md](skills/whiteboard/SKILL.md) | The whiteboard instructions |
-| [whiteboard/serve.py](skills/whiteboard/serve.py) | Local server that saves the drawing and tells Claude |
-| [whiteboard/board.html](skills/whiteboard/board.html) | The Excalidraw board page |
-| [whiteboard/example.mmd](skills/whiteboard/example.mmd) | A sample chart to try the board on |
-
-## Why
-
-| Problem | Quote | Fix |
-|---|---|---|
-| The agent made up a rule | "Don't ever take down a fence until you know the reason it was put up." (Chesterton's fence) | [glendonize](skills/glendonize/README.md): written rules, a decision register the code cites, a gate of free commands |
-| The agent built the wrong thing | "No one knows exactly what they want." (Thomas & Hunt, *The Pragmatic Programmer*) | [grilling](skills/grilling/README.md) settles every decision; [whiteboard](skills/whiteboard/README.md) for structure |
-
----
+<table>
+<tr>
+<td width="33%" align="center" valign="top">
+<img src="assets/glendonize.svg" width="64" alt=""><br>
+<h3><a href="skills/glendonize/README.md">glendonize</a></h3>
+Makes a repo safe for agents: written rules, a decision log the code cites, and free checks on every change.<br><br>
+<code>/glendonize</code>
+</td>
+<td width="33%" align="center" valign="top">
+<img src="assets/grilling.svg" width="64" alt=""><br>
+<h3><a href="skills/grilling/README.md">grilling</a></h3>
+Asks you about a plan one round at a time, until every decision is settled and nothing gets built by guess.<br><br>
+<code>/grilling</code>
+</td>
+<td width="33%" align="center" valign="top">
+<img src="assets/whiteboard.svg" width="64" alt=""><br>
+<h3><a href="skills/whiteboard/README.md">whiteboard</a></h3>
+Opens a hand-drawn board in your browser. You draw the structure, Claude reads it back.<br><br>
+<code>/whiteboard</code>
+</td>
+</tr>
+</table>
 
 ## Install
 
-<details>
-<summary><strong>Claude Code plugin</strong></summary>
+As a Claude Code plugin:
 
 ```
 /plugin marketplace add bobocs50/bobo-cooking-stack
 /plugin install bobo-cooking-stack@bobo-cooking-stack
 ```
 
-</details>
-
-<details>
-<summary><strong>Any agent, as editable files</strong></summary>
+Or as editable files, for any agent:
 
 ```bash
-npx skills@latest add bobocs50/bobo-cooking-stack                   # all
-npx skills@latest add bobocs50/bobo-cooking-stack --skill grilling  # one
+npx skills@latest add bobocs50/bobo-cooking-stack                   # all three
+npx skills@latest add bobocs50/bobo-cooking-stack --skill grilling  # just one
 ```
 
-`npx skills@latest update` pulls changes.
+Pick one way, not both. Each skill's own page has the details.
 
-</details>
+## Credits
 
-## Contribute
+[glendonC/1321](https://github.com/glendonC/1321) for glendonize, Matt Pocock's [skills](https://github.com/mattpocock/skills) for grilling, [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise) for grilling's learning mode.
 
-Open an issue or a pull request. Keep a skill small and its README short.
-
-## About
-
-Credits: [glendonC/1321](https://github.com/glendonC/1321) for glendonize, Matt Pocock's
-[skills](https://github.com/mattpocock/skills) (MIT) for grilling, [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise)
-for the learning mode, [nexu-io/harness-engineering-guide](https://github.com/nexu-io/harness-engineering-guide) for this README's shape.
-
-## License
-
-MIT. See [LICENSE](LICENSE).
+MIT licensed. Issues and pull requests welcome.
