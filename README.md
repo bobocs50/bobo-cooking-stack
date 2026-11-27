@@ -17,7 +17,7 @@ Three Claude Code skills for building real software with AI agents.
 <td width="33%" align="center" valign="top">
 <img src="assets/glendonize.svg" width="64" alt=""><br>
 <h3><a href="skills/glendonize/README.md">glendonize</a></h3>
-Makes a repo safe for agents: written rules, a decision log the code cites, and free checks on every change.<br><br>
+Builds a harness for your repo: glendonC's many-minions structure plus Kun Chen's no-mistakes push pipeline.<br><br>
 <code>/glendonize</code>
 </td>
 <td width="33%" align="center" valign="top">
@@ -55,6 +55,6 @@ Pick one way, not both. Each skill's own page has the details.
 
 ## Credits
 
-[glendonC/1321](https://github.com/glendonC/1321) for glendonize, Matt Pocock's [skills](https://github.com/mattpocock/skills) for grilling, [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise) for grilling's learning mode.
+[glendonC/1321](https://github.com/glendonC/1321) and Kun Chen's [no-mistakes](https://github.com/kunchenguid/no-mistakes) for glendonize, Matt Pocock's [skills](https://github.com/mattpocock/skills) for grilling, [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise) for grilling's learning mode.
 
 MIT licensed. Issues and pull requests welcome.

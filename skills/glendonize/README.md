@@ -1,55 +1,57 @@
 <div align="center">
 
+<img src="../../assets/glendonize.svg" width="80" alt="">
+
 # glendonize
 
-*Make a repo safe for several AI coding agents at once, one gated phase at a time.*
+Builds a harness for your repo, so AI agents can work in it without making things up.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
-[![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-orange.svg)](SKILL.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE) [![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-orange.svg)](SKILL.md)
 
 </div>
 
-A Claude Code skill that installs a working agreement, a numbered register of requirements,
-decisions and open questions that code cites, checks that read source as text, and a gate made
-only of free commands. It writes nothing it cannot trace to a line in your repo, and it lists
-the whole result as a Harness table in your README. Modelled on glendonC's many-minions and
-[1321](https://github.com/glendonC/1321). [All skills](../../README.md).
+<br>
 
----
+The harness is two proven setups put together:
 
-## Files
+<table>
+<tr>
+<td width="50%" valign="top">
+<h3>The structure</h3>
+From glendonC's many-minions and <a href="https://github.com/glendonC/1321">1321</a>.<br><br>
+Written rules for agents, a numbered log of decisions that the code cites, notes with one owner each, and free checks that run before every commit.
+</td>
+<td width="50%" valign="top">
+<h3>The push pipeline</h3>
+From Kun Chen's <a href="https://github.com/kunchenguid/no-mistakes">no-mistakes</a>.<br><br>
+Commits are instant. At the push, a background job reviews the change against what you asked for, verifies each finding, runs the tests, fixes small issues and only then pushes.
+</td>
+</tr>
+</table>
 
-| Topic | Description |
-|---|---|
-| [SKILL.md](SKILL.md) | The full rules, phases and the shape of every file it writes |
-| [README.md](README.md) | This page |
+## Full or Yolo
 
-## Phases
+glendonize asks first which one you want.
 
-| Topic | Description |
-|---|---|
-| [0 Survey](SKILL.md#phase-0--survey-writes-only-agent_readymd) | Writes only `AGENT_READY.md`: stack, free vs paid steps, candidates, conflicts |
-| [1 Unblock](SKILL.md#phase-1--unblock) | Ignores agent worktrees and reduces `CLAUDE.md` to an import of `AGENTS.md` |
-| [2 Register](SKILL.md#phase-2--register) | Requirements and decisions from confirmed candidates only |
-| [3 Working agreement](SKILL.md#phase-3--working-agreement) | `AGENTS.md` under 8 KiB: your text first, then the shared sections |
-| [4 Parking and constraints](SKILL.md#phase-4--parking-and-constraints) | Open questions, and vendor facts marked checked or not checked |
-| [5 Boundary checks](SKILL.md#phase-5--boundary-checks) | One check per boundary, plus citations, file size and the test ratchets |
-| [6 Gate](SKILL.md#phase-6--gate) | The free commands as a CI workflow or a local script, plus the hooks |
-| [7 Docs](SKILL.md#phase-7--docs) | The docs index, the numbered docs, and the Harness table in your README |
-| [8 Close](SKILL.md#phase-8--close) | Rebuilds the Harness table, writes a summary, deletes `AGENT_READY.md` |
+| | Full | Yolo |
+|---|---|---|
+| Rules, decision log, notes | yes | yes |
+| Free checks before each commit | yes | yes |
+| Push pipeline | yes | plain `git push` |
+| Guards against paid scripts and private folders | yes | no |
+| Good for | long projects, real data | hackathons, prototypes |
+
+A Yolo repo can be upgraded to Full later by running it again.
 
 ## What it stops
 
-| Topic | Description |
+| Problem | What glendonize does |
 |---|---|
-| Invented reasons | A decision with no recorded reason says so instead of getting one made up |
-| Surprise bills | Scripts that cost money are listed and kept out of the gate and CI |
-| Broken citations | A check fails when code cites a rule that does not exist |
-| Guessed values | A missing decision becomes an open question; that branch stops, the rest goes on |
-| Untested code | A new module cannot land without a test, and tests cannot quietly lose checks |
-| Unread commits | For Claude Code repos, agents read every code commit before it lands |
-
----
+| The agent makes up a reason | A decision with no recorded reason says so |
+| A surprise bill | Paid scripts are listed and kept out of the checks |
+| A guessed value | A missing decision becomes an open question; that branch stops |
+| Untested code | New code cannot land without a test, and tests cannot quietly lose checks |
+| An unreviewed push | In Full, every push is reviewed and tested first |
 
 ## Install
 
@@ -57,12 +59,6 @@ the whole result as a Harness table in your README. Modelled on glendonC's many-
 npx skills@latest add bobocs50/bobo-cooking-stack --skill glendonize
 ```
 
-By hand, user-level on macOS / Linux:
+Then run `/glendonize` in a git repo. It works in gated phases and writes nothing on the first pass. Run it again later and it picks up where it stopped.
 
-```sh
-mkdir -p ~/.claude/skills/glendonize && curl -fsSL https://raw.githubusercontent.com/bobocs50/bobo-cooking-stack/main/skills/glendonize/SKILL.md -o ~/.claude/skills/glendonize/SKILL.md
-```
-
-Then run `/glendonize` (or `/glendonize path/to/repo`) in a git repo. Run it again later and it
-resumes at the first unfinished phase and rebuilds the Harness table; your rulings are never
-asked twice. Related: [grilling](../grilling/README.md), [whiteboard](../whiteboard/README.md).
+The full rules are in [SKILL.md](SKILL.md). [All skills](../../README.md)
