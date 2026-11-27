@@ -17,7 +17,7 @@ Three Claude Code skills for building real software with AI agents.
 <td width="33%" align="center" valign="top">
 <img src="assets/glendonize.svg" width="64" alt=""><br>
 <h3><a href="skills/glendonize/README.md">glendonize</a></h3>
-Builds a harness for your repo: <a href="https://github.com/glendonC/1321">glendonC</a> plus Kun Chen's no-mistakes push pipeline, inspired by poteto's pstack.<br><br>
+<b>The only harness you need.</b> Drills for every function, a push pipeline that verifies, screenshot proof, and every decision remembered. You check proof, not code.<br><br>
 <code>/glendonize</code>
 </td>
 <td width="33%" align="center" valign="top">
@@ -55,6 +55,6 @@ Pick one way, not both. Each skill's own page has the details.
 
 ## Credits
 
-[glendonC/1321](https://github.com/glendonC/1321) and Kun Chen's [no-mistakes](https://github.com/kunchenguid/no-mistakes) and poteto's [pstack](https://github.com/cursor/plugins/tree/main/pstack) for glendonize, Matt Pocock's [skills](https://github.com/mattpocock/skills) for grilling, [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise) for grilling's learning mode.
+[glendonC/1321](https://github.com/glendonC/1321), Kun Chen's [no-mistakes](https://github.com/kunchenguid/no-mistakes) and poteto's [pstack](https://github.com/cursor/plugins/tree/main/pstack) for glendonize, Matt Pocock's [skills](https://github.com/mattpocock/skills) for grilling, [nykooi1/vibe-wise](https://github.com/nykooi1/vibe-wise) for grilling's learning mode.
 
 MIT licensed. Issues and pull requests welcome.

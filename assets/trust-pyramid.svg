@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="450" viewBox="0 0 900 450" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<text x="450" y="24" text-anchor="middle" font-size="15" fill="#6B7280">cheapest and most automatic at the top</text>
+<polygon points="40.0,40 860.0,40 795.0,106 105.0,106" fill="#2563EB"/>
+<text x="450" y="68" text-anchor="middle" font-size="19" font-weight="700" fill="#FFFFFF">Codebase</text>
+<text x="450" y="90" text-anchor="middle" font-size="13" fill="#FFFFFF" opacity="0.92">one entry function per step, clear module boundaries</text>
+<polygon points="105.0,112 795.0,112 730.0,178 170.0,178" fill="#4F46E5"/>
+<text x="450" y="140" text-anchor="middle" font-size="19" font-weight="700" fill="#FFFFFF">Static analysis</text>
+<text x="450" y="162" text-anchor="middle" font-size="13" fill="#FFFFFF" opacity="0.92">a drill for every function, lint, types, boundary checks, CI</text>
+<polygon points="170.0,184 730.0,184 665.0,250 235.0,250" fill="#7C3AED"/>
+<text x="450" y="212" text-anchor="middle" font-size="19" font-weight="700" fill="#FFFFFF">Verification</text>
+<text x="450" y="234" text-anchor="middle" font-size="13" fill="#FFFFFF" opacity="0.92">push-pipeline verifier, revert-and-rerun, Playwright, TLA+</text>
+<polygon points="235.0,256 665.0,256 600.0,322 300.0,322" fill="#C026D3"/>
+<text x="450" y="284" text-anchor="middle" font-size="19" font-weight="700" fill="#FFFFFF">Prose</text>
+<text x="450" y="306" text-anchor="middle" font-size="13" fill="#FFFFFF" opacity="0.92">AGENTS.md, every decision logged, notes</text>
+<polygon points="300.0,328 600.0,328 535.0,394 365.0,394" fill="#EA580C"/>
+<text x="450" y="356" text-anchor="middle" font-size="19" font-weight="700" fill="#FFFFFF">Human</text>
+<text x="450" y="378" text-anchor="middle" font-size="13" fill="#FFFFFF" opacity="0.92">judges proof you can see</text>
+<text x="450" y="428" text-anchor="middle" font-size="15" fill="#6B7280">most expensive at the bottom: human time</text>
+</svg>

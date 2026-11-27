@@ -1114,7 +1114,7 @@ other people or cloud sessions must get them too.
 | Protected folders denied to the file tools, repo-bounded (L.26) (Full only) | `hooks/guard_private_paths.py`, `tests/drill_guard_private_paths.py` | repo | private content must stay out of the session (reports, customer data, caches) |
 | Worktree setup: link gitignored caches, copy `.env` (L.27) | `hooks/worktree_setup.py`, `tests/drill_worktree_setup.py` | repo | agents run in worktrees and a run needs gitignored caches or `.env` |
 | Per-commit test rule over a pushed range (L.28) | `tests/commit_range.py`, `tests/drill_commit_range.py` | repo | CI and the boundary checks share it; the spine-needs-a-test rule |
-| Before/after screenshots of a UI change (L.8) | user skill `~/.claude/skills/ui-compare`, a `.ui-compare.json` in the repo | user | the repo has a UI; optional |
+| Before/after screenshots of a UI change (L.8) | `ui-compare/{SKILL.md,ui_compare.py,test_ui_compare.py}` copied to `~/.claude/skills/ui-compare` when missing; a `.ui-compare.json` and a screenshot spec on invented data in the repo | user + repo | the repo has a UI |
 | Push pipeline: reviewer, verifier, fixer, document pass, trunk report (L.8) (Full only) | `hooks/ship.py`, `hooks/ship_briefs/{review,verify,fix,document}.md`, `tests/drill_ship.py`, `THIRD_PARTY_NOTICES.md` | repo | code pushed by agents |
 | Revert-and-rerun check (L.13) (Full only) | `hooks/mutation_check.py`, `tests/drill_mutation_check.py` | repo | the pipeline is carried and its tests run in a second worktree |
 | Issue proof template (L.14) | `github/ISSUE_TEMPLATE/task.yml`, `config.yml` | repo | GitHub remote and the repo tracks issues |
@@ -1210,9 +1210,11 @@ gates them, and on the spine it never filters, since a wrong refutation would hi
 
 The pipeline does not replace the human's reading of the spine diff; it is a second reader.
 
-For a repo with a UI the optional before/after step is the user-level skill `ui-compare`
-(`~/.claude/skills/ui-compare`, needs a `.ui-compare.json` in the repo): it shows the person
-before and after screenshots of a UI change in the browser. The push pipeline calls it on a UI
+For a repo with a UI, glendonize installs `ui-compare` from `templates/ui-compare/` into
+`~/.claude/skills/ui-compare` (only when it is missing; run `python test_ui_compare.py` there once)
+and writes the repo's `.ui-compare.json` plus a screenshot spec that runs on invented data only. It
+shows the person before and after screenshots of a UI change in the browser, so they judge the
+change by what they see instead of by reading the code. The push pipeline calls it on a UI
 change; it is a look for the human, not a gate, and a repo without a UI skips it.
 
 **Trunk report: removed 2026-10-21.** The annotated-diff report after the push, and a verifier on
