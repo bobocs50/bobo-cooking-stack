@@ -1,6 +1,6 @@
 ---
 name: ui-compare
-description: Show the user before/after screenshots of a UI change in the browser. Use after any change to frontend/UI code (components, styles, layout) and when the user types /ui-compare or asks "show me what changed" on screen. Needs a .ui-compare.json in the repo.
+description: Show the user before/after screenshots of a UI change in the browser. Use after a UI change that matters (a new screen, layout or flow), not for small tweaks, and when the user types /ui-compare or asks "show me what changed" on screen. Needs a .ui-compare.json in the repo.
 ---
 
 # ui-compare

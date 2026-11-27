@@ -1214,8 +1214,10 @@ For a repo with a UI, glendonize installs `ui-compare` from `templates/ui-compar
 `~/.claude/skills/ui-compare` (only when it is missing; run `python test_ui_compare.py` there once)
 and writes the repo's `.ui-compare.json` plus a screenshot spec that runs on invented data only. It
 shows the person before and after screenshots of a UI change in the browser, so they judge the
-change by what they see instead of by reading the code. The push pipeline calls it on a UI
-change; it is a look for the human, not a gate, and a repo without a UI skips it.
+change by what they see instead of by reading the code. Only for a UI change that matters (a new
+screen, layout or flow) or when the person asks; a small tweak gets none, since a picture nobody
+needs costs their attention. The push pipeline calls it on such a change; it is a look for the
+human, not a gate, and a repo without a UI skips it.
 
 **Trunk report: removed 2026-10-21.** The annotated-diff report after the push, and a verifier on
 every fixer edit of a test in the test and CI steps, were both chosen and then dropped the same
